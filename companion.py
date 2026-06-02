@@ -60,8 +60,19 @@ def build_countdown_post(target_date: date | None = None) -> dict | None:
 
     Single-slide hero: huge day count, "DAYS TO GO", kickoff date.
     Returns None outside the J-10 .. J-0 window (no countdown posts otherwise).
+
+    The env var WCBOT_SIMULATE_DATE (YYYY-MM-DD) overrides "today" — handy
+    when running the workflow on past/future days for testing.
     """
-    target_date = target_date or date.today()
+    if target_date is None:
+        import os
+        sim = os.getenv("WCBOT_SIMULATE_DATE")
+        if sim:
+            try:
+                target_date = date.fromisoformat(sim)
+            except ValueError:
+                pass
+        target_date = target_date or date.today()
     days_left = (WC_OPENER_DATE - target_date).days
     if days_left < 0 or days_left > 10:
         return None

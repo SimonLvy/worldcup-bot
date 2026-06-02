@@ -1,0 +1,62 @@
+name: Daily countdown post
+
+# Runs every day at 00:00 UTC. The companion module only emits a post when
+# we're within the J-10 .. J-0 window (otherwise the job exits cleanly with
+# "nothing to do"), so this is safe to leave on all year.
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      simulate_date:
+        description: "Optional: YYYY-MM-DD to simulate (for testing past/future days)."
+        required: false
+        type: string
+
+jobs:
+  countdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    env:
+      DATA_MODE: live
+      FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run countdown bot
+        run: |
+          if [ -n "${{ inputs.simulate_date }}" ]; then
+            # Simulate a different date by faking the system clock for Python.
+            # We just override date.today() via a small env-driven shim.
+            export WCBOT_SIMULATE_DATE="${{ inputs.simulate_date }}"
+          fi
+          python main.py --countdown
+
+      - name: Upload generated slide as artifact (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: countdown-${{ github.run_number }}
+          path: output/
+          retention-days: 7
+          if-no-files-found: ignore

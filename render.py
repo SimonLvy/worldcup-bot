@@ -20,23 +20,35 @@ import render_slides  # noqa: E402  (path inserted above)
 
 
 def render(match: dict) -> dict:
-    """Render all configured slides for one match.
+    """Render all configured slides for one match. Wrapper around render_post."""
+    return render_post(match)
+
+
+def render_post(post: dict) -> dict:
+    """Render every slide of a post.
+
+    Dispatches on `post.post_type`:
+      - "match"   (or absent): the 7-slide WC match series
+      - "countdown": the single-slide daily countdown
 
     Returns {"source_dir": Path, "upload_paths": [Path, ...]}.
     """
-    match_id = match.get("match_id", "match")
-    source_dir = config.OUTPUT_DIR / match_id
+    post_type = post.get("post_type", "match")
+    if post_type == "countdown":
+        post_id = post.get("post_id", "countdown")
+        renderer = render_slides.render_countdown
+    else:
+        post_id = post.get("match_id", "match")
+        renderer = render_slides.render_match
+
+    source_dir = config.OUTPUT_DIR / post_id
 
     # Clean slate — drop any stale slides from a prior render.
     if source_dir.exists():
         shutil.rmtree(source_dir)
     source_dir.mkdir(parents=True, exist_ok=True)
 
-    render_slides.render_match(
-        match,
-        out_root=config.OUTPUT_DIR,
-        scale=config.RENDER_SCALE,
-    )
+    renderer(post, out_root=config.OUTPUT_DIR, scale=config.RENDER_SCALE)
 
     source_paths = sorted(source_dir.glob("slide_*.png"))
     upload_paths = source_paths

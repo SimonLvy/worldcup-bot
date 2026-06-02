@@ -6,9 +6,10 @@ Modes:
   python main.py <fixture_id>          # one specific live match
   python main.py --tomorrow            # auto-pick every match of tomorrow
   python main.py --date 2026-06-12     # all matches on that date
+  python main.py --countdown           # today's J-X countdown post (companion)
 
-Designed to run daily at 08:00 via GitHub Actions cron. Handles
-"no matches today" by exiting cleanly.
+Designed to run daily via GitHub Actions cron. Handles "no matches today"
+by exiting cleanly.
 
 Approval flow:
   - If TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID are set → Telegram (mobile).
@@ -27,9 +28,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
 
+import companion
 import config
 import fetch_match as fm
-from render import render
+from render import render_post
 from publish import build_caption, publish
 
 
@@ -54,20 +56,23 @@ def ask_approval(match: dict, slide_paths: list) -> bool:
 # ---------------------------------------------------------------------------
 # Match selection
 # ---------------------------------------------------------------------------
-def select_match_refs(argv: list[str]) -> list[str | None]:
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--tomorrow", action="store_true")
+    parser.add_argument("--date", type=str, default=None)
+    parser.add_argument("--countdown", action="store_true",
+                        help="Generate today's J-X countdown companion post.")
+    parser.add_argument("positional", nargs="?", default=None)
+    return parser.parse_args(argv)
+
+
+def select_match_refs(args: argparse.Namespace) -> list[str | None]:
     """Return a list of match references to process (one per match).
 
     Empty list → exit 0 with "nothing to do".
     [None] → mock mode (handled by fetch_match).
     [str, ...] → live mode, one or more fixture ids.
     """
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--tomorrow", action="store_true")
-    parser.add_argument("--date", type=str, default=None)
-    parser.add_argument("positional", nargs="?", default=None)
-    args = parser.parse_args(argv)
-
-    # Day batch (auto-J-1 or explicit date)
     target_date: date | None = None
     if args.tomorrow:
         target_date = date.today() + timedelta(days=1)
@@ -80,7 +85,6 @@ def select_match_refs(argv: list[str]) -> list[str | None]:
         print(f"[info] {len(raws)} match(es) on {target_date.isoformat()}")
         return [str(r["id"]) for r in raws]
 
-    # Single mock or live ref
     return [args.positional]
 
 
@@ -98,7 +102,7 @@ def process_match(match_ref: str | None) -> int:
           f"({match.get('kickoff_local_label', '?')}, {match['stage']})")
 
     print("[2/4] Rendering slides…")
-    result = render(match)
+    result = render_post(match)
     slides = result["upload_paths"]
     if not slides:
         print("No slides rendered.")
@@ -131,10 +135,53 @@ def process_match(match_ref: str | None) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Pipeline for one companion post (countdown, nation, stadium, group)
+# ---------------------------------------------------------------------------
+def process_countdown() -> int:
+    print(f"\n{'='*60}")
+    print("[1/4] Building today's countdown post…")
+    post = companion.build_countdown_post()
+    if post is None:
+        print("Outside the countdown window (J-10 to J-0). Nothing to do.")
+        return 0
+    print(f"      → {post['post_id']} — {post['days_label']}")
+
+    print("[2/4] Rendering slide…")
+    result = render_post(post)
+    slides = result["upload_paths"]
+    if not slides:
+        print("No slides rendered.")
+        return 1
+    print(f"      → {len(slides)} slide(s) in {result['source_dir']}")
+
+    post_json = result["source_dir"] / "post.json"
+    post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print("[3/4] Review")
+    for p in slides:
+        print(f"      {p}")
+
+    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
+        print("Publishing cancelled. PNGs remain in output/.")
+        return 0
+
+    print("[4/4] Publishing…")
+    # For companion posts the publish layer is not wired yet — they get manually
+    # posted from the artifact for now. Exit cleanly.
+    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Entry
 # ---------------------------------------------------------------------------
 def main() -> int:
-    refs = select_match_refs(sys.argv[1:])
+    args = parse_args(sys.argv[1:])
+
+    if args.countdown:
+        return process_countdown()
+
+    refs = select_match_refs(args)
     if not refs:
         print("Nothing scheduled. See you tomorrow.")
         return 0
