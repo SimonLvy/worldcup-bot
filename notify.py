@@ -33,6 +33,31 @@ DEFAULT_TIMEOUT_MIN = 60
 # ---------------------------------------------------------------------------
 # Public entry point — called by main.py
 # ---------------------------------------------------------------------------
+def send_preview(post: dict, slide_paths: list[Path]) -> None:
+    """Send slides + editorial pack as a PREVIEW (no buttons, no approval).
+
+    Used by /preview command: the user just wants to see tomorrow's content
+    early, not validate publication. The normal cron handles publishing.
+    """
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        raise RuntimeError("Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID in .env")
+
+    # Prefix the status caption with a clear "PREVIEW" tag so it's distinguishable
+    # from the real approval notifications.
+    base = _caption(post)
+    status = "👀 PREVIEW\n" + base
+    _send_media_group(token, chat_id, slide_paths, status)
+
+    try:
+        import captions
+        editorial = captions.build_caption(post)
+        _send_editorial_pack(token, chat_id, editorial)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[telegram] editorial pack skipped: {exc!r}")
+
+
 def send_slides_with_approval(
     post: dict,
     slide_paths: list[Path],

@@ -184,6 +184,40 @@ VENUES: dict[str, dict] = {
                             "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Toronto_BMO_Field_in_2024.jpg/1920px-Toronto_BMO_Field_in_2024.jpg"},
 }
 
+
+# ---------------------------------------------------------------------------
+# Host-city brand emblems (16 official FIFA host city logos for WC 2026).
+# Keyed by stadium name (the same key used in VENUES) so a stadium post can
+# look both up in one shot.
+#
+# To fill: copy the logo image from https://www.fifa.com/en/tournaments/mens/
+# worldcup/canadamexicousa2026/host-cities into series/assets/city_logos/
+# (PNG with transparent background). Then paste the official FIFA motif
+# description into `motif` below. Empty entries render a graceful placeholder.
+# ---------------------------------------------------------------------------
+CITY_BRANDS: dict[str, dict] = {
+    "Estadio Azteca":          {"logo_path": "assets/city_logos/mexico_city.png",    "motif": ""},
+    "Estadio Akron":           {"logo_path": "assets/city_logos/guadalajara.png",    "motif": ""},
+    "Estadio BBVA":            {"logo_path": "assets/city_logos/monterrey.png",      "motif": ""},
+    "MetLife Stadium":         {"logo_path": "assets/city_logos/new_york_nj.png",    "motif": ""},
+    "SoFi Stadium":            {"logo_path": "assets/city_logos/los_angeles.png",    "motif": ""},
+    "AT&T Stadium":            {"logo_path": "assets/city_logos/dallas.png",         "motif": ""},
+    "Mercedes-Benz Stadium":   {"logo_path": "assets/city_logos/atlanta.png",        "motif": ""},
+    "NRG Stadium":             {"logo_path": "assets/city_logos/houston.png",        "motif": ""},
+    "Arrowhead Stadium":       {"logo_path": "assets/city_logos/kansas_city.png",    "motif": ""},
+    "Lincoln Financial Field": {"logo_path": "assets/city_logos/philadelphia.png",   "motif": ""},
+    "Levi's Stadium":          {"logo_path": "assets/city_logos/bay_area.png",       "motif": ""},
+    "Lumen Field":             {"logo_path": "assets/city_logos/seattle.png",        "motif": ""},
+    "Gillette Stadium":        {"logo_path": "assets/city_logos/boston.png",         "motif": ""},
+    "Hard Rock Stadium":       {"logo_path": "assets/city_logos/miami.png",          "motif": ""},
+    "BC Place":                {"logo_path": "assets/city_logos/vancouver.png",      "motif": ""},
+    "BMO Field":               {"logo_path": "assets/city_logos/toronto.png",        "motif": ""},
+}
+
+
+def city_brand(stadium: str) -> dict | None:
+    return CITY_BRANDS.get(stadium)
+
 # Local timezone per venue for summer 2026 (UTC offset hours, short label).
 # Mexico abolished DST in 2023 → CST = UTC-6 year-round. US/Canada are on DST
 # in June-July: Eastern -4 (EDT), Central -5 (CDT), Pacific -7 (PDT).

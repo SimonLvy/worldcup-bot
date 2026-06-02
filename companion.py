@@ -140,21 +140,61 @@ TLA_DISPLAY: dict[str, str] = {
 # STADIUM
 # ===========================================================================
 def build_stadium_post(name: str) -> dict | None:
-    """Showcase payload for one venue. None if the stadium isn't in VENUES."""
+    """Showcase payload for one venue (3 slides).
+
+    Returns None if the stadium isn't in VENUES. The 3-slide concept:
+      v1 — hero photo + city + capacity
+      v2 — host-city emblem + motif explanation
+      v3 — schedule of matches at this venue + map locator
+    """
     v = wc_data.venue(name)
     if not v:
         return None
+    brand = wc_data.city_brand(name) or {}
     return {
-        "post_id": f"WC2026-S-{name.replace(' ', '_')}",
+        "post_id": f"WC2026-S-{name.replace(' ', '').replace(chr(39),'')}",
         "post_type": "stadium",
         "stadium": name,
         "city": v["city"],
         "country": v["country"],
         "capacity": v["capacity"],
         "image_url": v.get("img"),
+        "map_url": _stadium_map_relative(name),
         "lat": v["lat"],
         "lon": v["lon"],
+        "city_logo": brand.get("logo_path"),
+        "city_motif": brand.get("motif", ""),
+        "matches": _matches_at_venue(name),
     }
+
+
+def _stadium_map_relative(stadium: str) -> str:
+    """Return the relative path Playwright can use to load the locator map."""
+    safe = stadium.replace(" ", "_").replace("'", "").replace("&", "and")
+    return f"assets/maps/{safe}.png"
+
+
+def _matches_at_venue(stadium: str) -> list[dict]:
+    """All WC 2026 fixtures known to host at this stadium (from GROUP_VENUES).
+
+    Knockout slots are intentionally light here because their teams are TBD
+    until the tournament progresses; we just list dates from VENUE_BY_MATCH
+    in fetch_match.
+    """
+    matches = []
+    # Group-stage matches: paired teams known
+    for pair, venue_name in wc_data.GROUP_VENUES.items():
+        if venue_name != stadium:
+            continue
+        teams = sorted(pair)
+        matches.append({
+            "stage": "group",
+            "teams": [
+                {"tla": t, "code": wc_data.alpha2(t), "name": TLA_DISPLAY.get(t, t.title()), "short": t}
+                for t in teams
+            ],
+        })
+    return matches
 
 
 # ===========================================================================

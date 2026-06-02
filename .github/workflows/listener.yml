@@ -1,0 +1,91 @@
+name: Telegram command listener
+
+# Polls Telegram every 15 minutes for /preview commands.
+# When a command is found, renders tomorrow's posts and sends them to
+# Telegram as a preview (no buttons, no publish).
+#
+# Most invocations exit fast (no command found, ~15-20s including setup),
+# staying well under the GitHub Actions 2000 min/month free tier.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read  # we use cache, not git, for state persistence
+
+jobs:
+  listen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      DATA_MODE: live
+      FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Restore bot state cache
+        id: state-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: bot_state.json
+          key: bot-state-${{ github.run_id }}
+          restore-keys: |
+            bot-state-
+
+      - name: Lightweight install (just for the poll)
+        run: pip install requests python-dotenv
+
+      - name: Poll Telegram for commands
+        id: poll
+        run: python bot_listener.py
+
+      - name: Save bot state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: bot_state.json
+          key: bot-state-${{ github.run_id }}
+
+      # ---- Heavy steps only when a command is detected ----
+
+      - name: Install full deps (only on command)
+        if: steps.poll.outputs.has_command == 'true'
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Playwright (only on command)
+        if: steps.poll.outputs.has_command == 'true'
+        run: python -m playwright install --with-deps chromium
+
+      - name: Render countdown preview
+        if: steps.poll.outputs.has_command == 'true'
+        env:
+          WCBOT_SIMULATE_DATE: ${{ steps.poll.outputs.target_date }}
+        run: python main.py --countdown --preview
+
+      - name: Render matchday preview
+        if: steps.poll.outputs.has_command == 'true'
+        run: python main.py --preview --date "${{ steps.poll.outputs.target_date }}"
+
+      - name: Upload preview artifacts
+        if: steps.poll.outputs.has_command == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-${{ steps.poll.outputs.target_date }}-${{ github.run_number }}
+          path: output/
+          retention-days: 3
+          if-no-files-found: ignore

@@ -69,6 +69,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--date", type=str, default=None)
     parser.add_argument("--countdown", action="store_true",
                         help="Generate today's J-X countdown companion post.")
+    parser.add_argument("--preview", action="store_true",
+                        help="Preview mode: send slides to Telegram without "
+                             "approval buttons, never publish.")
     parser.add_argument("positional", nargs="?", default=None)
     return parser.parse_args(argv)
 
@@ -96,9 +99,25 @@ def select_match_refs(args: argparse.Namespace) -> list[str | None]:
 
 
 # ---------------------------------------------------------------------------
+# Preview branch — shared by match + countdown
+# ---------------------------------------------------------------------------
+def _send_preview_to_telegram(post: dict, slide_paths: list) -> None:
+    """Send post slides as a preview (no buttons). Silent failure on Telegram."""
+    if not _telegram_available():
+        print("[preview] no Telegram configured — slides remain in output/.")
+        return
+    try:
+        import notify
+        notify.send_preview(post, slide_paths)
+        print("[preview] sent to Telegram.")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[preview] Telegram send failed: {exc!r}")
+
+
+# ---------------------------------------------------------------------------
 # Pipeline for one match
 # ---------------------------------------------------------------------------
-def process_match(match_ref: str | None) -> int:
+def process_match(match_ref: str | None, *, preview: bool = False) -> int:
     print(f"\n{'='*60}")
     print(f"[1/4] Fetching match data… (ref={match_ref!r})")
     match = fm.fetch_match(match_ref)
@@ -118,6 +137,11 @@ def process_match(match_ref: str | None) -> int:
 
     match_json = result["source_dir"] / "match.json"
     match_json.write_text(json.dumps(match, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # Preview mode: send slides to Telegram, no approval, no publish.
+    if preview:
+        _send_preview_to_telegram(match, slides)
+        return 0
 
     print("[3/4] Review")
     for p in slides:
@@ -144,7 +168,7 @@ def process_match(match_ref: str | None) -> int:
 # ---------------------------------------------------------------------------
 # Pipeline for one companion post (countdown, nation, stadium, group)
 # ---------------------------------------------------------------------------
-def process_countdown() -> int:
+def process_countdown(*, preview: bool = False) -> int:
     print(f"\n{'='*60}")
     print("[1/4] Building today's countdown post…")
     post = companion.build_countdown_post()
@@ -163,6 +187,11 @@ def process_countdown() -> int:
 
     post_json = result["source_dir"] / "post.json"
     post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # Preview mode: send to Telegram, no approval, no publish.
+    if preview:
+        _send_preview_to_telegram(post, slides)
+        return 0
 
     print("[3/4] Review")
     for p in slides:
@@ -186,7 +215,7 @@ def main() -> int:
     args = parse_args(sys.argv[1:])
 
     if args.countdown:
-        return process_countdown()
+        return process_countdown(preview=args.preview)
 
     refs = select_match_refs(args)
     if not refs:
@@ -195,7 +224,7 @@ def main() -> int:
 
     for ref in refs:
         try:
-            rc = process_match(ref)
+            rc = process_match(ref, preview=args.preview)
             if rc != 0:
                 print(f"[warn] match {ref} returned {rc}, continuing…")
         except Exception as exc:  # noqa: BLE001 — one bad match must not kill the batch
