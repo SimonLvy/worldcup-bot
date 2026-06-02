@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Optional: YYYY-MM-DD to fetch matches for that date (default = tomorrow)"
+        required: false
+        type: string
 
 jobs:
   matchday:
@@ -39,8 +44,13 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Run matchday bot for tomorrow's fixtures
-        run: python main.py --tomorrow
+      - name: Run matchday bot
+        run: |
+          if [ -n "${{ inputs.target_date }}" ]; then
+            python main.py --date "${{ inputs.target_date }}"
+          else
+            python main.py --tomorrow
+          fi
 
       - name: Upload generated slides as artifacts (debug)
         if: always()
