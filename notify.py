@@ -105,10 +105,28 @@ def _caption_match(match: dict) -> str:
 
 
 def _send_media_group(token: str, chat_id: str, paths: list[Path], caption: str) -> None:
-    """Send up to 10 photos in one Telegram album."""
+    """Send up to 10 photos to the chat.
+
+    Telegram's sendMediaGroup endpoint requires 2-10 items, so for singletons
+    (e.g. countdown posts) we use sendPhoto instead.
+    """
     paths = list(paths)[:10]
     if not paths:
         return
+
+    if len(paths) == 1:
+        with open(paths[0], "rb") as f:
+            r = requests.post(
+                BASE.format(token=token, method="sendPhoto"),
+                data={"chat_id": chat_id, "caption": caption},
+                files={"photo": f},
+                timeout=60,
+            )
+            if not r.ok:
+                print(f"[telegram] sendPhoto error {r.status_code}: {r.text[:200]}")
+            r.raise_for_status()
+        return
+
     media = []
     files = {}
     for i, p in enumerate(paths):
@@ -126,6 +144,8 @@ def _send_media_group(token: str, chat_id: str, paths: list[Path], caption: str)
             files=files,
             timeout=120,
         )
+        if not r.ok:
+            print(f"[telegram] sendMediaGroup error {r.status_code}: {r.text[:200]}")
         r.raise_for_status()
     finally:
         for f in files.values():
