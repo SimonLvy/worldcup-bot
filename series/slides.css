@@ -36,6 +36,8 @@
 #s2 .wx .deg{ font-family:var(--display); font-size:68px; color:var(--gold); line-height:.9; }
 #s2 .wx .degf{ margin-top:6px; font-size:26px; font-weight:700; color:var(--muted-2); letter-spacing:.02em; }
 #s2 .wx .wxr .l{ margin:0; } #s2 .wx .wxr .d{ margin-top:6px; font-size:26px; font-weight:600; color:var(--muted); }
+#s2 .wxr .kt{ margin-top:10px; font-size:21px; font-weight:600; letter-spacing:.02em; color:var(--muted-2); }
+#s2 .wxr .kt b{ color:var(--gold); font-weight:800; }
 #s2 .wx-ico{ width:66px; height:66px; flex:none; }
 #s2 .wx-ico.sun, #s2 .wx-ico.partly{ color:var(--gold); }
 #s2 .wx-ico.cloud, #s2 .wx-ico.rain{ color:#c7d4e8; }

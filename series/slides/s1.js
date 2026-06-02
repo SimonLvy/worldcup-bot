@@ -22,8 +22,7 @@ window.WCSlides.s1 = {
         </div>
         <div class="meta">
           <div class="lbl">KICKOFF · STADIUM</div>
-          <div class="big">${m.kickoff_local_label}${m.kickoff_utc_label ? ` <b>· ${m.kickoff_utc_label}</b>` : ''}</div>
-          <div class="big venue-line"><b>·</b>&nbsp;&nbsp;${m.venue.stadium}</div>
+          <div class="big"><b>${m.kickoff_utc_label || m.kickoff_local_label}</b>&nbsp;&nbsp;<b>·</b>&nbsp;&nbsp;${m.venue.stadium}</div>
           <div class="sub">${m.venue.city}, ${m.venue.country}</div>
         </div>
       </div>

@@ -26,7 +26,10 @@ window.WCSlides.s2 = {
       <div class="panel cell wide">
         <div>
           <div class="l">FORECAST · ${fmtDateShort(m.kickoff_local)}</div>
-          <div class="wxr"><div class="d">${w.summary || '—'}${w.wind_kph != null ? ' · wind ' + w.wind_kph + ' kph' : ''}</div></div>
+          <div class="wxr">
+            <div class="d">${w.summary || '—'}${w.wind_kph != null ? ' · wind ' + w.wind_kph + ' kph' : ''}</div>
+            ${m.kickoff_local_label ? `<div class="kt">Kickoff · <b>${m.kickoff_local_label}</b> local</div>` : ''}
+          </div>
         </div>
         <div class="wx">${wxIcon(w.icon)}${tempBlock}</div>
       </div>
