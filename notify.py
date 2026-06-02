@@ -38,18 +38,28 @@ def send_slides_with_approval(
     slide_paths: list[Path],
     timeout_minutes: int = DEFAULT_TIMEOUT_MIN,
 ) -> bool:
-    """Send slides + approval buttons, wait for a click. Return True if approved.
+    """Send slides + editorial pack + approval buttons. Returns True if approved.
 
-    Handles all post types (match, countdown, nation, stadium, group) — the
-    caption builder dispatches on `post.post_type`.
+    Telegram sequence:
+      1. Photo album (or single photo) with a short status caption
+      2. Editorial pack message: ready-to-copy caption, hashtags, first comment
+      3. Inline keyboard message with ✅ Publish / ❌ Cancel
     """
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
         raise RuntimeError("Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID in .env")
 
-    caption = _caption(post)
-    _send_media_group(token, chat_id, slide_paths, caption)
+    status_caption = _caption(post)
+    _send_media_group(token, chat_id, slide_paths, status_caption)
+
+    # Editorial pack — separate message so each block can be copied independently.
+    try:
+        import captions
+        editorial = captions.build_caption(post)
+        _send_editorial_pack(token, chat_id, editorial)
+    except Exception as exc:  # noqa: BLE001 — never block on editorial glitch
+        print(f"[telegram] editorial pack skipped: {exc!r}")
 
     # Unique callback tag per post → so leftover callbacks from prior runs
     # don't accidentally approve a different post.
@@ -60,6 +70,35 @@ def send_slides_with_approval(
     decision = _wait_for_decision(token, tag, timeout_minutes)
     _acknowledge(token, chat_id, msg_id, decision)
     return decision is True
+
+
+def _send_editorial_pack(token: str, chat_id: str, editorial: dict) -> None:
+    """Send the caption / hashtags / first-comment as ready-to-copy blocks.
+
+    Telegram renders <pre>…</pre> as a copyable code block on mobile — perfect
+    for tapping once to copy each piece into IG / TikTok.
+    """
+    def esc(s: str) -> str:
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    caption = esc(editorial.get("caption", ""))
+    hashtags = esc(" ".join(editorial.get("hashtags", [])))
+    first_comment = esc(editorial.get("first_comment", ""))
+
+    text = (
+        "📋 <b>Editorial pack — tap to copy</b>\n\n"
+        "<b>Caption:</b>\n"
+        f"<pre>{caption}</pre>\n"
+        "<b>Hashtags:</b>\n"
+        f"<pre>{hashtags}</pre>\n"
+        "<b>First comment:</b>\n"
+        f"<pre>{first_comment}</pre>"
+    )
+    requests.post(
+        BASE.format(token=token, method="sendMessage"),
+        data={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+        timeout=30,
+    )
 
 
 # ---------------------------------------------------------------------------
