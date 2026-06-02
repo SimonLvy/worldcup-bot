@@ -49,6 +49,13 @@ def ask_approval(match: dict, slide_paths: list) -> bool:
             return notify.send_slides_with_approval(match, slide_paths)
         except Exception as exc:  # noqa: BLE001 — never block on notif glitch
             print(f"[warn] Telegram approval failed ({exc!r}), falling back to terminal")
+
+    # If there's no interactive TTY (CI / GitHub Actions / cron), default to
+    # NO so we never silently publish — slides stay in the artifact.
+    if not sys.stdin.isatty():
+        print("[info] no interactive terminal — defaulting to 'do not publish'.")
+        return False
+
     answer = input("\nPublish these slides? [o/n] ").strip().lower()
     return answer in ("o", "oui", "y", "yes")
 

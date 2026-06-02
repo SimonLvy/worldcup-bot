@@ -34,22 +34,26 @@ DEFAULT_TIMEOUT_MIN = 60
 # Public entry point — called by main.py
 # ---------------------------------------------------------------------------
 def send_slides_with_approval(
-    match: dict,
+    post: dict,
     slide_paths: list[Path],
     timeout_minutes: int = DEFAULT_TIMEOUT_MIN,
 ) -> bool:
-    """Send slides + approval buttons, wait for a click. Return True if approved."""
+    """Send slides + approval buttons, wait for a click. Return True if approved.
+
+    Handles all post types (match, countdown, nation, stadium, group) — the
+    caption builder dispatches on `post.post_type`.
+    """
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
         raise RuntimeError("Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID in .env")
 
-    caption = _caption(match)
+    caption = _caption(post)
     _send_media_group(token, chat_id, slide_paths, caption)
 
-    # Unique callback tag per match → so leftover callbacks from prior runs
-    # don't accidentally approve a different match.
-    tag = match.get("match_id", "match")
+    # Unique callback tag per post → so leftover callbacks from prior runs
+    # don't accidentally approve a different post.
+    tag = post.get("match_id") or post.get("post_id", "post")
     msg_id = _send_approval_buttons(token, chat_id, tag)
     print(f"[telegram] approval buttons sent (message {msg_id})")
 
@@ -61,7 +65,25 @@ def send_slides_with_approval(
 # ---------------------------------------------------------------------------
 # Sending
 # ---------------------------------------------------------------------------
-def _caption(match: dict) -> str:
+def _caption(post: dict) -> str:
+    """Build a human-readable caption per post type."""
+    post_type = post.get("post_type", "match")
+    if post_type == "countdown":
+        return _caption_countdown(post)
+    return _caption_match(post)
+
+
+def _caption_countdown(post: dict) -> str:
+    parts = [
+        f"⏳ {post.get('days_label', 'COUNTDOWN')}",
+        f"🗓 Kickoff: {post.get('kickoff_date_label', '?')}",
+        "",
+        "Validate to publish, or cancel.",
+    ]
+    return "\n".join(p for p in parts if p)
+
+
+def _caption_match(match: dict) -> str:
     home, away = match["home"]["name"], match["away"]["name"]
     kickoff_local = match.get("kickoff_local_label", "")
     kickoff_utc = match.get("kickoff_utc_label", "")
