@@ -24,28 +24,28 @@ from playwright.sync_api import sync_playwright
 
 HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE / "template.html"
+TEMPLATE_COUNTDOWN = HERE / "template_countdown.html"
 
 
-def render_match(match: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
-    """Render every slide for one match. `scale=2` → crisp 2160×2700 (downscale for IG)."""
-    out_dir = pathlib.Path(out_root) / match.get("match_id", "match")
+def _render(data: dict, template: pathlib.Path, out_dir: pathlib.Path, scale: int) -> pathlib.Path:
+    """Open the given template with `data` injected as window.__match and
+    screenshot every `.post` section the engine produced."""
     out_dir.mkdir(parents=True, exist_ok=True)
-
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(
             viewport={"width": 1120, "height": 1400},
             device_scale_factor=scale,
         )
-        # Inject the data BEFORE any page script runs, so the engine auto-renders it.
-        page.add_init_script(f"window.__match = {json.dumps(match, ensure_ascii=False)};")
-        page.goto(f"{TEMPLATE.as_uri()}?mode=capture")
+        # All templates read window.__match — the data shape varies but the entry
+        # point is uniform. The countdown slide module just receives the dict and
+        # ignores match-only fields.
+        page.add_init_script(f"window.__match = {json.dumps(data, ensure_ascii=False)};")
+        page.goto(f"{template.as_uri()}?mode=capture")
 
-        # Wait until the engine reports everything (incl. images) is ready.
         page.wait_for_function("window.WC && window.WC.ready === true", timeout=20000)
-        page.wait_for_timeout(250)  # final paint settle (radar / fonts)
+        page.wait_for_timeout(250)
 
-        # Slide ids come from config.js (via the engine) — add/remove slides without touching Python.
         slide_ids = page.evaluate("window.WC.slideIds")
         for i, sid in enumerate(slide_ids, start=1):
             el = page.query_selector(f"#{sid}")
@@ -55,6 +55,18 @@ def render_match(match: dict, out_root: str | pathlib.Path = "output", scale: in
 
         browser.close()
     return out_dir
+
+
+def render_match(match: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
+    """Render every slide for one match. `scale=2` → crisp 2160×2700 (downscale for IG)."""
+    out_dir = pathlib.Path(out_root) / match.get("match_id", "match")
+    return _render(match, TEMPLATE, out_dir, scale)
+
+
+def render_countdown(post: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
+    """Render the single countdown slide for a J-X post."""
+    out_dir = pathlib.Path(out_root) / post.get("post_id", "countdown")
+    return _render(post, TEMPLATE_COUNTDOWN, out_dir, scale)
 
 
 if __name__ == "__main__":

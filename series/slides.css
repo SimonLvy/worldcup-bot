@@ -188,3 +188,67 @@
   display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:46px;
   background:var(--panel); }
 #s8 .cta .sub{ margin-top:20px; font-size:24px; font-weight:600; color:var(--muted); }
+
+/* ===== COUNTDOWN — single hero slide (c1) ===== */
+/* per-day gradient background (set inline from m.bg_color_top/bottom) */
+#c1 .cd-bg{ position:absolute; inset:0; z-index:0; }
+/* depth overlay that works on top of ANY day colour: top sheen + bottom vignette */
+#c1 .cd-bg-fx{ background:
+   radial-gradient(120% 70% at 50% -18%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 55%),
+   radial-gradient(120% 80% at 50% 118%, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 55%); }
+#c1 .ghost-mark{ z-index:1; opacity:.05; height:1240px; }
+
+#c1 .cd-wrap{ position:absolute; inset:0; z-index:2; padding:118px 84px 78px;
+  display:flex; flex-direction:column; align-items:center; text-align:center; }
+
+#c1 .cd-eyebrow{ display:flex; align-items:center; gap:16px; white-space:nowrap;
+  font-size:27px; font-weight:800; letter-spacing:.34em; color:var(--gold); }
+#c1 .cd-dot{ width:12px; height:12px; border-radius:50%; background:var(--gold);
+  box-shadow:0 0 0 6px rgba(231,181,73,.16); }
+
+/* hero number — fills the middle, the focal point of the slide */
+#c1 .cd-hero{ flex:1; display:flex; align-items:center; justify-content:center; width:100%;
+  margin-top:-8px; }
+#c1 .cd-num{ font-family:var(--display); font-weight:400; color:#fff;
+  font-size:780px; line-height:.74; letter-spacing:-.01em;
+  text-shadow:0 36px 80px rgba(0,0,0,.4); }
+#c1 .cd-num.two{ font-size:620px; letter-spacing:-.03em; }
+#c1 .cd-num.word{ font-size:236px; line-height:.92; letter-spacing:.01em; }
+
+#c1 .cd-foot{ display:flex; flex-direction:column; align-items:center; }
+#c1 .cd-brand{ margin-top:46px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+#c1 .cd-brand .wc-logo{ height:62px; width:auto; filter:brightness(0) invert(1); opacity:.95; }
+#c1 .cd-cap{ font-size:18px; font-weight:700; letter-spacing:.3em; color:rgba(255,255,255,.55); }
+#c1 .cd-label{ font-size:62px; font-weight:900; letter-spacing:.04em; line-height:1;
+  color:var(--gold); }
+#c1 .cd-date{ margin-top:20px; font-size:30px; font-weight:700; letter-spacing:.16em;
+  color:rgba(255,255,255,.82); }
+
+/* J-0 — kickoff day: premium gold glow */
+#c1 .cd-wrap.kick .cd-num{ color:var(--gold-soft);
+  text-shadow:0 0 70px rgba(231,181,73,.55), 0 0 150px rgba(231,181,73,.32),
+              0 30px 70px rgba(0,0,0,.4); }
+#c1 .cd-wrap.kick .cd-label{ color:#fff; }
+#c1 .cd-wrap.kick .cd-eyebrow,
+#c1 .cd-wrap.kick .cd-dot{ color:var(--gold-soft); }
+#c1 .cd-wrap.kick .cd-dot{ background:var(--gold-soft); box-shadow:0 0 0 6px rgba(242,208,137,.18); }
+
+/* entrance (preview only — base state stays visible so capture/print is correct) */
+@media (prefers-reduced-motion: no-preference){
+  #c1.active .cd-eyebrow{ animation:cdRise .55s cubic-bezier(.2,.7,.2,1) both; }
+  #c1.active .cd-num{ animation:cdPop .6s cubic-bezier(.2,.8,.2,1) .06s both; }
+  #c1.active .cd-foot{ animation:cdRise .55s cubic-bezier(.2,.7,.2,1) .14s both; }
+}
+@keyframes cdRise{ from{ opacity:0; transform:translateY(26px); } to{ opacity:1; transform:none; } }
+@keyframes cdPop{ from{ opacity:0; transform:translateY(34px) scale(.94); } to{ opacity:1; transform:none; } }
+
+/* preview-only day switcher (hidden in capture mode via core.css .capture rules) */
+.cd-switch{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:60;
+  display:flex; gap:6px; padding:7px; border-radius:999px; flex-wrap:wrap; justify-content:center;
+  max-width:92vw; background:rgba(8,14,26,.78); border:1px solid var(--line-2); backdrop-filter:blur(8px); }
+.cd-switch button{ min-width:46px; height:34px; padding:0 12px; border-radius:999px; cursor:pointer;
+  border:1px solid transparent; background:transparent; color:var(--muted);
+  font-family:var(--sans); font-size:14px; font-weight:800; letter-spacing:.04em; }
+.cd-switch button:hover{ color:#fff; background:rgba(255,255,255,.06); }
+.cd-switch button.on{ color:#06121f; background:var(--gold); border-color:var(--gold); }
+body.capture .cd-switch{ display:none !important; }

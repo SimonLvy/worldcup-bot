@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Cup 2026 — Countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Anton&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="core.css" />
+<link rel="stylesheet" href="slides.css" />
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck"></div>
+</div>
+
+<button class="nav-btn nav-prev" id="prev" aria-label="Previous">‹</button>
+<button class="nav-btn nav-next" id="next" aria-label="Next">›</button>
+<div class="counter">
+  <span class="lbl" id="cnum">01 / 01</span>
+  <span class="dots" id="dots"></span>
+</div>
+
+<!-- data helpers + countdown slide module -->
+<script src="data.js"></script>
+<script src="slides_countdown/c1.js"></script>
+<!-- inline config: single countdown slide -->
+<script>window.WC_CONFIG = { slides: ['c1'] };</script>
+<script src="render.js"></script>
+</body>
+</html>
