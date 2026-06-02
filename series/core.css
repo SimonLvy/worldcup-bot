@@ -1,0 +1,103 @@
+/* ============================================================
+   WORLD CUP 2026 — INSTAGRAM SERIES · CHARTER (Direction A)
+   Core tokens, viewer shell, shared components
+   ============================================================ */
+:root{
+  /* palette */
+  --gold:#e7b549; --gold-soft:#f2d089;
+  --ink:#ffffff; --muted:#9fb1ce; --muted-2:#7e93b6; --faint:#5d7099;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.18);
+  --panel:rgba(255,255,255,.045); --panel-2:rgba(255,255,255,.075);
+  --panel-line:rgba(255,255,255,.09);
+  --fr:#3a6fe0; --ar:#79b0e6;
+  --win:#43cf91; --draw:#8ea3c4; --loss:#e8646c;
+  --bg:radial-gradient(125% 85% at 50% -12%, #17345f 0%, #0e2346 42%, #08152a 100%);
+  --sans:'Archivo', system-ui, -apple-system, sans-serif;
+  --display:'Anton', sans-serif;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; height:100%; }
+body{ background:#05080f; font-family:var(--sans); color:var(--ink); overflow:hidden; }
+
+/* ---------- viewer shell ---------- */
+.stage{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.deck{ width:1080px; height:1350px; position:relative; transform-origin:center center; }
+.post{ position:absolute; inset:0; width:1080px; height:1350px; background:var(--bg);
+  overflow:hidden; opacity:0; pointer-events:none; transition:opacity .35s ease; }
+.post.active{ opacity:1; pointer-events:auto; }
+
+/* nav chrome (outside the scaled deck) */
+.nav-btn{ position:fixed; top:50%; transform:translateY(-50%); z-index:50;
+  width:56px; height:56px; border-radius:50%; border:1px solid var(--line-2);
+  background:rgba(10,18,34,.7); color:#fff; font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px);
+  transition:background .2s, transform .1s; }
+.nav-btn:hover{ background:rgba(231,181,73,.18); border-color:var(--gold); }
+.nav-btn:active{ transform:translateY(-50%) scale(.94); }
+.nav-prev{ left:24px; } .nav-next{ right:24px; }
+.counter{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:50;
+  display:flex; align-items:center; gap:14px; font-weight:700; font-size:14px;
+  letter-spacing:.16em; color:#7e93b6; }
+.counter .dots{ display:flex; gap:7px; }
+.counter .dot{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.22); cursor:pointer; transition:.2s; }
+.counter .dot.on{ background:var(--gold); transform:scale(1.25); }
+.counter .lbl{ font-variant-numeric:tabular-nums; }
+
+/* ---------- shared: background ghost watermark ---------- */
+.ghost-mark{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  height:1180px; width:auto; opacity:.038; filter:brightness(0) invert(1);
+  pointer-events:none; user-select:none; }
+
+/* ---------- shared: header (slides 2–8) ---------- */
+.s-head{ position:absolute; top:78px; left:88px; right:88px; z-index:3; }
+.s-head .eyebrow{ display:flex; align-items:center; gap:16px; white-space:nowrap;
+  font-size:21px; font-weight:800; letter-spacing:.2em; color:var(--gold); }
+.s-head .eyebrow .mf{ display:flex; align-items:center; gap:9px; color:var(--muted); }
+.s-head .title{ margin-top:18px; font-size:66px; font-weight:900; line-height:.98; letter-spacing:-.015em; }
+.s-head .title em{ font-style:normal; color:var(--gold); }
+.s-head .lede{ margin-top:16px; font-size:25px; font-weight:500; color:var(--muted); max-width:760px; text-wrap:pretty; }
+
+/* ---------- shared: footer ---------- */
+.footer{ position:absolute; left:0; right:0; bottom:58px; z-index:3;
+  display:flex; flex-direction:column; align-items:center; gap:16px; }
+.footer .wc-logo{ height:78px; width:auto; filter:brightness(0) invert(1); opacity:.95; }
+.footer .rule{ width:58px; height:4px; background:var(--gold); border-radius:2px; }
+.footer .cap{ font-size:18px; font-weight:700; letter-spacing:.3em; color:var(--faint); }
+
+/* ---------- flags (real images via flagcdn) ---------- */
+.flag{ display:block; object-fit:cover; border-radius:16px; flex:none; background:#0c1c38;
+  box-shadow:0 28px 56px -22px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); }
+.flag.mini{ width:42px; height:28px; border-radius:5px; object-fit:cover;
+  box-shadow:0 0 0 1px rgba(255,255,255,.16); }
+
+/* ---------- generic reusable bits ---------- */
+.panel{ background:var(--panel); border:1px solid var(--panel-line); border-radius:22px; }
+.tag{ display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:999px;
+  font-size:19px; font-weight:800; letter-spacing:.08em; white-space:nowrap; }
+.tag.gold{ background:rgba(231,181,73,.16); color:var(--gold); border:1px solid rgba(231,181,73,.4); }
+.tag.ghost{ border:1px solid var(--line-2); color:var(--muted); }
+/* form pips (W/D/L) */
+.pips{ display:flex; gap:9px; }
+.pip{ width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:19px; color:#06121f; }
+.pip.w{ background:var(--win); } .pip.d{ background:var(--draw); } .pip.l{ background:var(--loss); color:#fff; }
+
+/* image placeholder */
+.ph{ position:relative; overflow:hidden; background:
+   repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 14px, rgba(255,255,255,.02) 14px 28px), #0c1c38;
+   border:1px solid var(--panel-line); display:flex; align-items:center; justify-content:center; }
+.ph .ph-lbl{ font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:18px; letter-spacing:.04em;
+  color:#6f86ab; text-transform:uppercase; padding:8px 14px; border:1px dashed rgba(255,255,255,.18); border-radius:8px; }
+
+/* ---------- footer variants ---------- */
+.footer.compact{ bottom:40px; gap:0; }
+.footer.compact .wc-logo{ height:54px; opacity:.9; }
+
+/* ---------- capture mode (Playwright screenshots) ---------- */
+body.capture{ overflow:auto; }
+body.capture .stage{ position:static; display:block; padding:0; }
+body.capture .deck{ width:1080px; height:auto; transform:none !important; }
+body.capture .post{ position:relative; inset:auto; display:block; opacity:1 !important;
+  pointer-events:auto; margin:0 auto 28px; }
+body.capture .nav-btn, body.capture .counter{ display:none !important; }

@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+output/
+.venv/
+venv/
+series/output/
+data/tm_squad_values.json
+data/tm_harvest.json

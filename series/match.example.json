@@ -1,0 +1,85 @@
+{
+  "match_id": "WC2026-G2-M03",
+  "competition": "FIFA World Cup 2026",
+  "stage": "group",
+  "group": "B",
+  "match_number_in_group": 3,
+  "kickoff_utc": "2026-06-18T20:00:00Z",
+  "kickoff_local": "2026-06-18T13:00:00-07:00",
+  "kickoff_local_label": "13:00 PT",
+  "venue": {
+    "stadium": "SoFi Stadium",
+    "city": "Los Angeles",
+    "country": "USA",
+    "capacity": 70240,
+    "image_url": null
+  },
+  "weather": { "summary": "Sunny", "temp_c": 26, "wind_kph": 12, "icon": "sun" },
+  "home": {
+    "name": "France",
+    "code": "fr",
+    "fifa_rank": 2,
+    "group_points": 3,
+    "last5": ["W", "W", "D", "L", "W"],
+    "avg_age": 26.4,
+    "squad_value_eur_m": 1080,
+    "players_top5_leagues": 21,
+    "ratings": { "attack": 94, "midfield": 88, "value": 96, "experience": 80, "defense": 86 },
+    "key_players": [
+      { "name": "Kylian Mbappé", "club": "Real Madrid", "stat": "44 goals for France", "photo_url": null },
+      { "name": "Aurélien Tchouaméni", "club": "Real Madrid", "stat": "94% pass accuracy", "photo_url": null },
+      { "name": "Mike Maignan", "club": "AC Milan", "stat": "7 clean sheets in 2025", "photo_url": null }
+    ]
+  },
+  "away": {
+    "name": "Argentina",
+    "code": "ar",
+    "fifa_rank": 1,
+    "group_points": 3,
+    "last5": ["W", "W", "W", "D", "W"],
+    "avg_age": 28.1,
+    "squad_value_eur_m": 540,
+    "players_top5_leagues": 14,
+    "ratings": { "attack": 90, "midfield": 91, "value": 82, "experience": 93, "defense": 84 },
+    "key_players": [
+      { "name": "Lionel Messi", "club": "Inter Miami", "stat": "112 goals for Argentina", "photo_url": null },
+      { "name": "Lautaro Martínez", "club": "Inter Milan", "stat": "Serie A top scorer 24/25", "photo_url": null },
+      { "name": "Enzo Fernández", "club": "Chelsea", "stat": "Best Young Player, WC 2022", "photo_url": null }
+    ]
+  },
+  "head_to_head": {
+    "total": { "home_wins": 3, "draws": 2, "away_wins": 6 },
+    "last3": [
+      { "date": "2022-12-18", "competition": "World Cup Final", "score": "3-3 (2-4 pens)", "winner": "away" },
+      { "date": "2018-06-30", "competition": "World Cup R16", "score": "4-3", "winner": "home" },
+      { "date": "2009-02-11", "competition": "Friendly", "score": "2-0", "winner": "away" }
+    ]
+  },
+  "stakes": {
+    "home_needs": "A win sends France through to the Round of 16.",
+    "away_needs": "A draw is enough for Argentina to top the group.",
+    "scenarios": [
+      "France win — they finish 1st in Group B.",
+      "Draw — Argentina top the group, France finish 2nd.",
+      "Argentina win — France risk elimination."
+    ]
+  },
+  "standings": [
+    { "pos": 1, "code": "ar", "name": "Argentina", "played": 2, "won": 1, "drawn": 1, "lost": 0, "gd": 3, "points": 4 },
+    { "pos": 2, "code": "fr", "name": "France", "played": 2, "won": 1, "drawn": 0, "lost": 1, "gd": 1, "points": 3 },
+    { "pos": 3, "code": "mx", "name": "Mexico", "played": 2, "won": 1, "drawn": 0, "lost": 1, "gd": 0, "points": 3 },
+    { "pos": 4, "code": "no", "name": "Norway", "played": 2, "won": 0, "drawn": 1, "lost": 1, "gd": -4, "points": 1 }
+  ],
+  "fun_stats": [
+    { "value": "112", "label": "goals for Argentina by Messi — an all-time national record." },
+    { "value": "0", "label": "group-stage defeats for France since 2010." },
+    { "value": "26", "label": "years since these two last met at a World Cup before 2022." }
+  ],
+  "did_you_know": "No reigning world champion has won its opening group in the last four editions.",
+  "odds": { "home_win": 2.40, "draw": 3.20, "away_win": 2.85, "source": "Pinnacle" },
+  "prediction": {
+    "home_score": 2,
+    "away_score": 1,
+    "reasoning": "France's pace in transition should punish a higher Argentine line, but expect Messi to keep it level deep into the second half."
+  }
+}
