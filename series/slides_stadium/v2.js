@@ -20,8 +20,10 @@ window.WCSlides.v2 = (function () {
       const { up, esc } = window.WCF;
       const ini = initials(m.city);
 
-      // placeholder sits BEHIND the logo; onload hides it (logo PNGs are
-      // transparent, so the placeholder must not bleed through the margins).
+      // The placeholder sits BEHIND the logo (city logos are transparent PNGs).
+      // render.js's waitImages() reassigns img.onload/onerror to its own
+      // promise resolver, so inline handlers don't fire — slides.css uses
+      // :has(img.v2-logo) to hide the placeholder instead.
       const ph = `<div class="ph v2-emblem-ph">
             <span class="v2-mono">${esc(ini)}</span>
             <span class="ph-lbl">brand emblem coming soon</span>
@@ -29,9 +31,7 @@ window.WCSlides.v2 = (function () {
       const emblem = m.city_logo
         ? `<div class="v2-emblem">
             ${ph}
-            <img class="v2-logo" src="${esc(m.city_logo)}" alt=""
-                 onload="this.previousElementSibling.style.display='none'"
-                 onerror="this.style.display='none'" />
+            <img class="v2-logo" src="${esc(m.city_logo)}" alt="" />
           </div>`
         : `<div class="v2-emblem">${ph}</div>`;
 

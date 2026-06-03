@@ -261,6 +261,14 @@ body.capture .cd-switch{ display:none !important; }
 .v-dot{ width:11px; height:11px; border-radius:50%; background:var(--gold);
   box-shadow:0 0 0 6px rgba(231,181,73,.15); flex:none; }
 
+/* Hide the labelled placeholder once its companion <img> exists in the DOM.
+   We can't rely on inline onload — render.js's waitImages() reassigns
+   img.onload/onerror to its own promise resolver. CSS :has() (Chromium-supported)
+   covers it without any JS hook. The slide modules omit the <img> entirely when
+   the asset path is missing, so the placeholder stays visible in that case. */
+#v2 .v2-emblem:has(img.v2-logo) .v2-emblem-ph{ display:none; }
+#v3 .v3-map-wrap:has(img.v3-map) .v3-map-ph{ display:none; }
+
 /* ===== v1 — HERO STADIUM (full-bleed photo) ===== */
 #v1{ background:#05080f; }
 #v1 .v1-photo{ position:absolute; inset:0; z-index:0; }

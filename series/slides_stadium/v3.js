@@ -43,13 +43,14 @@ window.WCSlides.v3 = (function () {
       const { up, esc } = window.WCF;
       const matches = Array.isArray(m.matches) ? m.matches : [];
 
-      // map: placeholder behind, transparent PNG on top (hide ph on load)
+      // map: placeholder sits BEHIND the (transparent) map PNG. render.js's
+      // waitImages() reassigns img.onload/onerror to its own resolver, so inline
+      // handlers don't fire — slides.css uses :has(img.v3-map) to hide the
+      // placeholder instead.
       const map = m.map_url
         ? `<div class="v3-map-wrap">
              <div class="ph v3-map-ph"><span class="ph-lbl">venue map</span></div>
-             <img class="v3-map" src="${esc(m.map_url)}" alt=""
-                  onload="this.previousElementSibling.style.display='none'"
-                  onerror="this.style.display='none'" />
+             <img class="v3-map" src="${esc(m.map_url)}" alt="" />
            </div>`
         : `<div class="v3-map-wrap"><div class="ph v3-map-ph"><span class="ph-lbl">venue map</span></div></div>`;
 
