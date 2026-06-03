@@ -25,22 +25,26 @@ from playwright.sync_api import sync_playwright
 HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE / "template.html"
 TEMPLATE_COUNTDOWN = HERE / "template_countdown.html"
+TEMPLATE_STADIUM = HERE / "template_stadium.html"
 
 
 def _render(data: dict, template: pathlib.Path, out_dir: pathlib.Path, scale: int) -> pathlib.Path:
-    """Open the given template with `data` injected as window.__match and
-    screenshot every `.post` section the engine produced."""
+    """Open the given template with `data` injected and screenshot every
+    `.post` section the engine produced.
+
+    We inject BOTH window.__match (legacy / match + countdown templates) and
+    window.__post (stadium template aliases this to __match). One injection
+    that satisfies every template, present or future.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(data, ensure_ascii=False)
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(
             viewport={"width": 1120, "height": 1400},
             device_scale_factor=scale,
         )
-        # All templates read window.__match — the data shape varies but the entry
-        # point is uniform. The countdown slide module just receives the dict and
-        # ignores match-only fields.
-        page.add_init_script(f"window.__match = {json.dumps(data, ensure_ascii=False)};")
+        page.add_init_script(f"window.__match = {payload}; window.__post = {payload};")
         page.goto(f"{template.as_uri()}?mode=capture")
 
         page.wait_for_function("window.WC && window.WC.ready === true", timeout=20000)
@@ -67,6 +71,12 @@ def render_countdown(post: dict, out_root: str | pathlib.Path = "output", scale:
     """Render the single countdown slide for a J-X post."""
     out_dir = pathlib.Path(out_root) / post.get("post_id", "countdown")
     return _render(post, TEMPLATE_COUNTDOWN, out_dir, scale)
+
+
+def render_stadium(post: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
+    """Render the 3-slide host-stadium carousel."""
+    out_dir = pathlib.Path(out_root) / post.get("post_id", "stadium")
+    return _render(post, TEMPLATE_STADIUM, out_dir, scale)
 
 
 if __name__ == "__main__":

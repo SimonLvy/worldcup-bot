@@ -37,6 +37,9 @@ def render_post(post: dict) -> dict:
     if post_type == "countdown":
         post_id = post.get("post_id", "countdown")
         renderer = render_slides.render_countdown
+    elif post_type == "stadium":
+        post_id = post.get("post_id", "stadium")
+        renderer = render_slides.render_stadium
     else:
         post_id = post.get("match_id", "match")
         renderer = render_slides.render_match

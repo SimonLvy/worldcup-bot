@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Cup 2026 — Stadium Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Anton&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="core.css" />
+<link rel="stylesheet" href="slides.css" />
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck"></div>
+</div>
+
+<!-- nav + counter (3-slide carousel) -->
+<button class="nav-btn nav-prev" id="prev" aria-label="Previous">‹</button>
+<button class="nav-btn nav-next" id="next" aria-label="Next">›</button>
+<div class="counter">
+  <span class="lbl" id="cnum">01 / 03</span>
+  <span class="dots" id="dots"></span>
+</div>
+
+<!-- data helpers + the three stadium slide modules -->
+<script src="data.js"></script>
+<script src="slides_stadium/v1.js"></script>
+<script src="slides_stadium/v2.js"></script>
+<script src="slides_stadium/v3.js"></script>
+
+<!-- bootstrap: stadium reads window.__post (Python injects it, like __match on the
+     match template). Alias it to __match so the shared engine renders it as `m`.
+     The inline example keeps the live browser preview working with no data.
+     Note: map_url / city_logo point at pipeline assets that don't exist in the
+     bare preview — so they intentionally fall back to clean placeholders here. -->
+<script>
+  window.WC_CONFIG = { slides: ['v1', 'v2', 'v3'] };
+  // Live-preview default. In production Python injects window.__post with the real
+  // map_url / city_logo (e.g. 'assets/maps/MetLife_Stadium.png',
+  // 'assets/city_logos/new_york_nj.png'). Those files don't exist in the bare
+  // preview, so this default leaves them null to showcase the clean placeholder
+  // fall-backs (and keep the console error-free). image_url + matches populate.
+  window.__match = window.__post || {
+    post_id: 'WC2026-S-MetLifeStadium',
+    post_type: 'stadium',
+    stadium: 'MetLife Stadium',
+    city: 'New York/NJ',
+    country: 'USA',
+    capacity: 82500,
+    image_url: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Metlife_stadium_%28Aerial_view%29.jpg',
+    map_url: null,
+    city_logo: null,
+    city_motif: "Inspired by the Statue of Liberty's torch and the Manhattan skyline — a beacon for the city that never sleeps.",
+    matches: [
+      { stage: 'group', teams: [
+        { tla: 'BRA', code: 'br', name: 'Brazil', short: 'BRA' },
+        { tla: 'MAR', code: 'ma', name: 'Morocco', short: 'MAR' } ] },
+      { stage: 'group', teams: [
+        { tla: 'ARG', code: 'ar', name: 'Argentina', short: 'ARG' },
+        { tla: 'GER', code: 'de', name: 'Germany', short: 'GER' } ] },
+      { stage: 'round_of_32', teams: [
+        { code: '', short: 'TBD' }, { code: '', short: 'TBD' } ] },
+      { stage: 'round_of_16', teams: [
+        { code: '', short: 'TBD' }, { code: '', short: 'TBD' } ] },
+      { stage: 'quarter', teams: [
+        { code: '', short: 'TBD' }, { code: '', short: 'TBD' } ] },
+      { stage: 'final', teams: [
+        { code: '', short: 'TBD' }, { code: '', short: 'TBD' } ] }
+    ]
+  };
+</script>
+
+<!-- shared engine (unchanged) -->
+<script src="render.js"></script>
+</body>
+</html>

@@ -111,7 +111,8 @@ window.WCF = (function () {
   }
   function themeFor(m) {
     let idx;
-    if (m.stage && m.stage !== 'group') idx = hashStr(m.match_id || m.knockout && m.knockout.round || '') % THEMES.length;
+    if (m.post_type === 'stadium') idx = hashStr(m.stadium || m.city || '') % THEMES.length;
+    else if (m.stage && m.stage !== 'group') idx = hashStr(m.match_id || m.knockout && m.knockout.round || '') % THEMES.length;
     else idx = ((m.group ? m.group.toUpperCase().charCodeAt(0) - 65 : 0) % THEMES.length + THEMES.length) % THEMES.length;
     const t = THEMES[idx] || THEMES[0];
     return `radial-gradient(125% 85% at 50% -12%, ${t[0]} 0%, ${t[1]} 42%, ${t[2]} 100%)`;
