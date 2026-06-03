@@ -41,7 +41,11 @@ _TAGS_NICHE = [
 # Public API
 # ===========================================================================
 def build_caption(post: dict) -> dict:
-    """Return {"caption": str, "hashtags": list[str], "first_comment": str}."""
+    """Return {"caption": str, "hashtags": list[str], "first_comment": str}.
+
+    `hashtags` is the full pool — platform-specific splits live in
+    `for_telegram(post)` which is what callers should prefer.
+    """
     post_type = post.get("post_type", "match")
     if post_type == "countdown":
         return _countdown(post)
@@ -55,6 +59,37 @@ def build_caption(post: dict) -> dict:
         return _group(post)
     # Sensible fallback
     return {"caption": "World Cup 2026 update.", "hashtags": _TAGS_CORE, "first_comment": ""}
+
+
+def for_telegram(post: dict) -> dict:
+    """Return ready-to-paste blocks split per platform.
+
+      tiktok_text       : caption + 5 hashtags inline (short, algo-friendly)
+      instagram_text    : caption + 12 hashtags inline (rich for IG feed)
+      ig_first_comment  : extra 8 hashtags for the pinned reply (IG only)
+
+    Each block is a single string ready to dump into a <pre> Telegram
+    code block so the user can tap-to-copy without ever touching labels.
+    """
+    pack = build_caption(post)
+    caption = pack["caption"]
+    hashtags = pack["hashtags"]
+    first_comment_raw = pack["first_comment"]
+
+    # TikTok: lean on 5 hashtags
+    tt_tags = hashtags[:5]
+    tiktok_text = f"{caption}\n\n{' '.join(tt_tags)}"
+
+    # Instagram: 12 hashtags inline
+    ig_tags = hashtags[:12]
+    instagram_text = f"{caption}\n\n{' '.join(ig_tags)}"
+
+    # IG first comment: keep whatever the post-type builder produced
+    return {
+        "tiktok_text": tiktok_text,
+        "instagram_text": instagram_text,
+        "ig_first_comment": first_comment_raw,
+    }
 
 
 def _rng_for(post: dict) -> random.Random:

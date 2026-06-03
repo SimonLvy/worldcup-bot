@@ -17,7 +17,7 @@ on:
 jobs:
   matchday:
     runs-on: ubuntu-latest
-    timeout-minutes: 90  # one approval can sit for up to 60 min
+    timeout-minutes: 270  # approval poll up to 240 min + setup buffer
 
     env:
       DATA_MODE: live

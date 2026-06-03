@@ -27,7 +27,9 @@ load_dotenv()
 
 BASE = "https://api.telegram.org/bot{token}/{method}"
 POLL_INTERVAL_S = 3
-DEFAULT_TIMEOUT_MIN = 60
+# Approval is fully manual — keep the runner alive long enough that the user
+# can take their time. GitHub Actions free-tier jobs cap at 6h anyway.
+DEFAULT_TIMEOUT_MIN = 240  # 4 hours
 
 
 # ---------------------------------------------------------------------------
@@ -51,9 +53,7 @@ def send_preview(post: dict, slide_paths: list[Path]) -> None:
     _send_media_group(token, chat_id, slide_paths, status)
 
     try:
-        import captions
-        editorial = captions.build_caption(post)
-        _send_editorial_pack(token, chat_id, editorial)
+        _send_editorial_pack(token, chat_id, post)
     except Exception as exc:  # noqa: BLE001
         print(f"[telegram] editorial pack skipped: {exc!r}")
 
@@ -78,11 +78,10 @@ def send_slides_with_approval(
     status_caption = _caption(post)
     _send_media_group(token, chat_id, slide_paths, status_caption)
 
-    # Editorial pack — separate message so each block can be copied independently.
+    # Editorial pack — separate messages per platform so each block can be
+    # tap-copied independently into IG / TikTok.
     try:
-        import captions
-        editorial = captions.build_caption(post)
-        _send_editorial_pack(token, chat_id, editorial)
+        _send_editorial_pack(token, chat_id, post)
     except Exception as exc:  # noqa: BLE001 — never block on editorial glitch
         print(f"[telegram] editorial pack skipped: {exc!r}")
 
@@ -97,33 +96,33 @@ def send_slides_with_approval(
     return decision is True
 
 
-def _send_editorial_pack(token: str, chat_id: str, editorial: dict) -> None:
-    """Send the caption / hashtags / first-comment as ready-to-copy blocks.
+def _send_editorial_pack(token: str, chat_id: str, post: dict) -> None:
+    """Send 3 ready-to-paste messages: TikTok, Instagram, IG first comment.
 
-    Telegram renders <pre>…</pre> as a copyable code block on mobile — perfect
-    for tapping once to copy each piece into IG / TikTok.
+    Each message has a tiny emoji header OUTSIDE the <pre> block and the
+    paste-ready content INSIDE. On mobile, tap-and-hold the code block to
+    copy ONLY the content — the header stays behind.
     """
+    import captions
+
     def esc(s: str) -> str:
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    caption = esc(editorial.get("caption", ""))
-    hashtags = esc(" ".join(editorial.get("hashtags", [])))
-    first_comment = esc(editorial.get("first_comment", ""))
-
-    text = (
-        "📋 <b>Editorial pack — tap to copy</b>\n\n"
-        "<b>Caption:</b>\n"
-        f"<pre>{caption}</pre>\n"
-        "<b>Hashtags:</b>\n"
-        f"<pre>{hashtags}</pre>\n"
-        "<b>First comment:</b>\n"
-        f"<pre>{first_comment}</pre>"
-    )
-    requests.post(
-        BASE.format(token=token, method="sendMessage"),
-        data={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
-        timeout=30,
-    )
+    pack = captions.for_telegram(post)
+    blocks = [
+        ("📱 TikTok", pack["tiktok_text"]),
+        ("📷 Instagram", pack["instagram_text"]),
+        ("💬 IG first comment", pack["ig_first_comment"]),
+    ]
+    for header, body in blocks:
+        if not body:
+            continue
+        text = f"{header}\n<pre>{esc(body)}</pre>"
+        requests.post(
+            BASE.format(token=token, method="sendMessage"),
+            data={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+            timeout=30,
+        )
 
 
 # ---------------------------------------------------------------------------

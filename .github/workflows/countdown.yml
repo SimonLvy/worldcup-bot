@@ -16,7 +16,7 @@ on:
 jobs:
   countdown:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 270  # approval poll up to 240 min + setup buffer
 
     env:
       DATA_MODE: live
