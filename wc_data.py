@@ -196,22 +196,70 @@ VENUES: dict[str, dict] = {
 # description into `motif` below. Empty entries render a graceful placeholder.
 # ---------------------------------------------------------------------------
 CITY_BRANDS: dict[str, dict] = {
-    "Estadio Azteca":          {"logo_path": "assets/city_logos/mexico_city.svg",    "motif": ""},
-    "Estadio Akron":           {"logo_path": "assets/city_logos/guadalajara.webp",   "motif": ""},
-    "Estadio BBVA":            {"logo_path": "assets/city_logos/monterrey.webp",     "motif": ""},
-    "MetLife Stadium":         {"logo_path": "assets/city_logos/new_york_nj.svg",    "motif": ""},
-    "SoFi Stadium":            {"logo_path": "assets/city_logos/los_angeles.svg",    "motif": ""},
-    "AT&T Stadium":            {"logo_path": "assets/city_logos/dallas.svg",         "motif": ""},
-    "Mercedes-Benz Stadium":   {"logo_path": "assets/city_logos/atlanta.webp",       "motif": ""},
-    "NRG Stadium":             {"logo_path": "assets/city_logos/houston.svg",        "motif": ""},
-    "Arrowhead Stadium":       {"logo_path": "assets/city_logos/kansas_city.svg",    "motif": ""},
-    "Lincoln Financial Field": {"logo_path": "assets/city_logos/philadelphia.svg",   "motif": ""},
-    "Levi's Stadium":          {"logo_path": "assets/city_logos/bay_area.svg",       "motif": ""},
-    "Lumen Field":             {"logo_path": "assets/city_logos/seattle.svg",        "motif": ""},
-    "Gillette Stadium":        {"logo_path": "assets/city_logos/boston.svg",         "motif": ""},
-    "Hard Rock Stadium":       {"logo_path": "assets/city_logos/miami.svg",          "motif": ""},
-    "BC Place":                {"logo_path": "assets/city_logos/vancouver.webp",     "motif": ""},
-    "BMO Field":               {"logo_path": "assets/city_logos/toronto.svg",        "motif": ""},
+    "Estadio Azteca":          {
+        "logo_path": "assets/city_logos/mexico_city.svg",
+        "motif": "Estadio Azteca becomes the first venue ever to host three World Cup opening matches. CDMX brings 150+ museums and world-renowned cuisine to the world stage.",
+    },
+    "Estadio Akron":           {
+        "logo_path": "assets/city_logos/guadalajara.webp",
+        "motif": "Capital of tequila and mariachi. Four matches in a city where Pelé once shined — and where the famous stadium 'Wave' was born in 1986.",
+    },
+    "Estadio BBVA":            {
+        "logo_path": "assets/city_logos/monterrey.webp",
+        "motif": "Mexico's industrial capital where mountains meet skyscrapers. Four matches at one of Latin America's most modern venues, continuing the 1986 World Cup tradition.",
+    },
+    "MetLife Stadium":         {
+        "logo_path": "assets/city_logos/new_york_nj.svg",
+        "motif": "Eight matches including the Final. From the Manhattan skyline to the Jersey Shore, the soccer-passionate region with 120 miles of coastline welcomes the world.",
+    },
+    "SoFi Stadium":            {
+        "logo_path": "assets/city_logos/los_angeles.svg",
+        "motif": "Eight matches including the USMNT opener. A global capital for sport and culture, returning to the legacy of the FIFA World Cup USA 1994 Final.",
+    },
+    "AT&T Stadium":            {
+        "logo_path": "assets/city_logos/dallas.svg",
+        "motif": "Nine matches including five group stage games and the July 14 semi-final. Fun fact: the entire Statue of Liberty fits inside Dallas Stadium with the roof closed.",
+    },
+    "Mercedes-Benz Stadium":   {
+        "logo_path": "assets/city_logos/atlanta.webp",
+        "motif": "Eight matches including a semi-final in the 'City in the Forest', where green neighborhoods meet a fast-growing skyline.",
+    },
+    "NRG Stadium":             {
+        "logo_path": "assets/city_logos/houston.svg",
+        "motif": "A city built for the world stage. Houston brings its global spirit and unmatched hospitality to the world's game.",
+    },
+    "Arrowhead Stadium":       {
+        "logo_path": "assets/city_logos/kansas_city.svg",
+        "motif": "The Soccer Capital of America®. Two states united by an unmatched passion for the game, where progress meets promise.",
+    },
+    "Lincoln Financial Field": {
+        "logo_path": "assets/city_logos/philadelphia.svg",
+        "motif": "Birthplace of American democracy. Six matches including a historic July 4 showdown, coinciding with the United States' 250th anniversary.",
+    },
+    "Levi's Stadium":          {
+        "logo_path": "assets/city_logos/bay_area.svg",
+        "motif": "Six matches in a region defined by coastlines, culture and innovation. The Bay Area returns to the 1994 World Cup stage.",
+    },
+    "Lumen Field":             {
+        "logo_path": "assets/city_logos/seattle.svg",
+        "motif": "Where the Salish Sea meets the Cascades. Seattle Stadium is famous for record-breaking noise and the raucous Sounders atmosphere.",
+    },
+    "Gillette Stadium":        {
+        "logo_path": "assets/city_logos/boston.svg",
+        "motif": "Birthplace of the American Revolution, founded in 1630. Seven matches building on Boston's FIFA World Cup USA 1994 legacy.",
+    },
+    "Hard Rock Stadium":       {
+        "logo_path": "assets/city_logos/miami.svg",
+        "motif": "Where Latin America, the Caribbean and Europe meet between the Atlantic Ocean and Biscayne Bay. Diverse, dynamic, ready for the world.",
+    },
+    "BC Place":                {
+        "logo_path": "assets/city_logos/vancouver.webp",
+        "motif": "Seven matches at one of the few World Cup stadiums in a downtown core. A 10,000-seat open-air FIFA Fan Festival amphitheatre awaits at Hastings Park.",
+    },
+    "BMO Field":               {
+        "logo_path": "assets/city_logos/toronto.svg",
+        "motif": "Canada's largest city and home of its first soccer-specific stadium. Six matches across 150+ vibrant neighborhoods.",
+    },
 }
 
 
