@@ -196,22 +196,22 @@ VENUES: dict[str, dict] = {
 # description into `motif` below. Empty entries render a graceful placeholder.
 # ---------------------------------------------------------------------------
 CITY_BRANDS: dict[str, dict] = {
-    "Estadio Azteca":          {"logo_path": "assets/city_logos/mexico_city.png",    "motif": ""},
-    "Estadio Akron":           {"logo_path": "assets/city_logos/guadalajara.png",    "motif": ""},
-    "Estadio BBVA":            {"logo_path": "assets/city_logos/monterrey.png",      "motif": ""},
-    "MetLife Stadium":         {"logo_path": "assets/city_logos/new_york_nj.png",    "motif": ""},
-    "SoFi Stadium":            {"logo_path": "assets/city_logos/los_angeles.png",    "motif": ""},
-    "AT&T Stadium":            {"logo_path": "assets/city_logos/dallas.png",         "motif": ""},
-    "Mercedes-Benz Stadium":   {"logo_path": "assets/city_logos/atlanta.png",        "motif": ""},
-    "NRG Stadium":             {"logo_path": "assets/city_logos/houston.png",        "motif": ""},
-    "Arrowhead Stadium":       {"logo_path": "assets/city_logos/kansas_city.png",    "motif": ""},
-    "Lincoln Financial Field": {"logo_path": "assets/city_logos/philadelphia.png",   "motif": ""},
-    "Levi's Stadium":          {"logo_path": "assets/city_logos/bay_area.png",       "motif": ""},
-    "Lumen Field":             {"logo_path": "assets/city_logos/seattle.png",        "motif": ""},
-    "Gillette Stadium":        {"logo_path": "assets/city_logos/boston.png",         "motif": ""},
-    "Hard Rock Stadium":       {"logo_path": "assets/city_logos/miami.png",          "motif": ""},
-    "BC Place":                {"logo_path": "assets/city_logos/vancouver.png",      "motif": ""},
-    "BMO Field":               {"logo_path": "assets/city_logos/toronto.png",        "motif": ""},
+    "Estadio Azteca":          {"logo_path": "assets/city_logos/mexico_city.svg",    "motif": ""},
+    "Estadio Akron":           {"logo_path": "assets/city_logos/guadalajara.webp",   "motif": ""},
+    "Estadio BBVA":            {"logo_path": "assets/city_logos/monterrey.webp",     "motif": ""},
+    "MetLife Stadium":         {"logo_path": "assets/city_logos/new_york_nj.svg",    "motif": ""},
+    "SoFi Stadium":            {"logo_path": "assets/city_logos/los_angeles.svg",    "motif": ""},
+    "AT&T Stadium":            {"logo_path": "assets/city_logos/dallas.svg",         "motif": ""},
+    "Mercedes-Benz Stadium":   {"logo_path": "assets/city_logos/atlanta.webp",       "motif": ""},
+    "NRG Stadium":             {"logo_path": "assets/city_logos/houston.svg",        "motif": ""},
+    "Arrowhead Stadium":       {"logo_path": "assets/city_logos/kansas_city.svg",    "motif": ""},
+    "Lincoln Financial Field": {"logo_path": "assets/city_logos/philadelphia.svg",   "motif": ""},
+    "Levi's Stadium":          {"logo_path": "assets/city_logos/bay_area.svg",       "motif": ""},
+    "Lumen Field":             {"logo_path": "assets/city_logos/seattle.svg",        "motif": ""},
+    "Gillette Stadium":        {"logo_path": "assets/city_logos/boston.svg",         "motif": ""},
+    "Hard Rock Stadium":       {"logo_path": "assets/city_logos/miami.svg",          "motif": ""},
+    "BC Place":                {"logo_path": "assets/city_logos/vancouver.webp",     "motif": ""},
+    "BMO Field":               {"logo_path": "assets/city_logos/toronto.svg",        "motif": ""},
 }
 
 

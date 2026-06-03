@@ -97,11 +97,10 @@ def send_slides_with_approval(
 
 
 def _send_editorial_pack(token: str, chat_id: str, post: dict) -> None:
-    """Send 3 ready-to-paste messages: TikTok, Instagram, IG first comment.
+    """Send 3 paste-ready messages: TikTok caption, IG caption, IG first comment.
 
-    Each message has a tiny emoji header OUTSIDE the <pre> block and the
-    paste-ready content INSIDE. On mobile, tap-and-hold the code block to
-    copy ONLY the content — the header stays behind.
+    No headers, no labels — each message is a single <pre> block ready to
+    copy whole. Order is always: TikTok → Instagram → IG first comment.
     """
     import captions
 
@@ -109,18 +108,16 @@ def _send_editorial_pack(token: str, chat_id: str, post: dict) -> None:
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     pack = captions.for_telegram(post)
-    blocks = [
-        ("📱 TikTok", pack["tiktok_text"]),
-        ("📷 Instagram", pack["instagram_text"]),
-        ("💬 IG first comment", pack["ig_first_comment"]),
-    ]
-    for header, body in blocks:
+    for body in (pack["tiktok_text"], pack["instagram_text"], pack["ig_first_comment"]):
         if not body:
             continue
-        text = f"{header}\n<pre>{esc(body)}</pre>"
         requests.post(
             BASE.format(token=token, method="sendMessage"),
-            data={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+            data={
+                "chat_id": chat_id,
+                "text": f"<pre>{esc(body)}</pre>",
+                "parse_mode": "HTML",
+            },
             timeout=30,
         )
 
