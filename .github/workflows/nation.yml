@@ -1,7 +1,7 @@
 name: Nation showcase drip
 
 # Pre-tournament campaign: 48 nations, one post every 6h (4/day), starting
-# 2026-06-05 18:00 UTC, finishing ~17 Jun (around the end of matchday 1).
+# 2026-06-06 00:00 UTC, finishing ~18 Jun (around the end of matchday 1).
 # The script picks the next nation deterministically from elapsed time since
 # the campaign start, so a missed/delayed fire just skips a slot.
 on:

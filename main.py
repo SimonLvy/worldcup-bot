@@ -342,9 +342,12 @@ def main() -> int:
     if args.nation_cron:
         from datetime import datetime, timezone
         from wc_data import NATION_PUBLISH_ORDER
-        # 48 nations × 6h slots = 12 days. Starting 2026-06-05 18:00 UTC, the
-        # last profile lands ~17 Jun — around the end of matchday 1.
-        START = datetime(2026, 6, 5, 18, 0, tzinfo=timezone.utc)
+        # 48 nations × 6h slots = 12 days. Starting 2026-06-06 00:00 UTC, the
+        # last profile lands ~18 Jun — around the end of matchday 1. Midnight-UTC
+        # start gives a merge buffer: the deterministic slot picker skips slots
+        # whose time has already passed, so starting at the next 00:00 boundary
+        # means no nation is dropped as long as the merge lands tonight.
+        START = datetime(2026, 6, 6, 0, 0, tzinfo=timezone.utc)
         SLOT_HOURS = 6
         now = datetime.now(timezone.utc)
         delta_h = (now - START).total_seconds() / 3600
