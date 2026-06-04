@@ -163,6 +163,7 @@ def build_stadium_post(name: str) -> dict | None:
         "lat": v["lat"],
         "lon": v["lon"],
         "city_logo": brand.get("logo_path"),
+        "logo_scale": brand.get("logo_scale"),
         "city_motif": brand.get("motif", ""),
         "matches": _matches_at_venue(name),
     }
@@ -175,25 +176,52 @@ def _stadium_map_relative(stadium: str) -> str:
 
 
 def _matches_at_venue(stadium: str) -> list[dict]:
-    """All WC 2026 fixtures known to host at this stadium (from GROUP_VENUES).
+    """All WC 2026 fixtures hosted at this venue, sorted chronologically.
 
-    Knockout slots are intentionally light here because their teams are TBD
-    until the tournament progresses; we just list dates from VENUE_BY_MATCH
-    in fetch_match.
+    Group matches have resolved team pairs. Knockout matches stay TBD on the
+    team side but ship with their kickoff date+time so the v3 schedule slide
+    still tells the full venue story (e.g. Azteca hosts R32 + R16).
     """
+    from fetch_match import VENUE_BY_MATCH
+
     matches = []
-    # Group-stage matches: paired teams known
+
+    # Group-stage: pair → venue is the source of truth; pair → fd_id lets us
+    # join with the auto-generated kickoff table.
     for pair, venue_name in wc_data.GROUP_VENUES.items():
         if venue_name != stadium:
             continue
+        fd_id = wc_data.GROUP_PAIR_ID.get(pair)
+        kickoff = wc_data.MATCH_KICKOFF_UTC.get(fd_id) if fd_id else None
         teams = sorted(pair)
         matches.append({
             "stage": "group",
+            "kickoff_utc": kickoff,
             "teams": [
-                {"tla": t, "code": wc_data.alpha2(t), "name": TLA_DISPLAY.get(t, t.title()), "short": t}
+                {"tla": t, "code": wc_data.alpha2(t),
+                 "name": TLA_DISPLAY.get(t, t.title()), "short": t}
                 for t in teams
             ],
         })
+
+    # Knockout fixtures: teams are unknown until the bracket fills in, but the
+    # date+venue is fixed. We show them as TBD rows with a stage badge so the
+    # schedule slide reflects the venue's full footprint.
+    for fd_id, venue_name in VENUE_BY_MATCH.items():
+        if venue_name != stadium:
+            continue
+        kickoff = wc_data.MATCH_KICKOFF_UTC.get(fd_id)
+        stage = wc_data.MATCH_STAGE.get(fd_id, "ko")
+        matches.append({
+            "stage": stage,
+            "kickoff_utc": kickoff,
+            "teams": [
+                {"tla": "TBD", "name": "TBD", "short": "TBD"},
+                {"tla": "TBD", "name": "TBD", "short": "TBD"},
+            ],
+        })
+
+    matches.sort(key=lambda m: m.get("kickoff_utc") or "9999")
     return matches
 
 

@@ -130,7 +130,21 @@ def _caption(post: dict) -> str:
     post_type = post.get("post_type", "match")
     if post_type == "countdown":
         return _caption_countdown(post)
+    if post_type == "stadium":
+        return _caption_stadium(post)
     return _caption_match(post)
+
+
+def _caption_stadium(post: dict) -> str:
+    parts = [
+        f"🏟 {post.get('stadium', '?')}",
+        f"📍 {post.get('city', '?')}, {post.get('country', '?')}",
+        f"👥 Capacity: {post.get('capacity', '?'):,}" if post.get('capacity') else "",
+        f"⚽️ {len(post.get('matches') or [])} match(es) scheduled",
+        "",
+        "Validate to publish, or cancel.",
+    ]
+    return "\n".join(p for p in parts if p)
 
 
 def _caption_countdown(post: dict) -> str:

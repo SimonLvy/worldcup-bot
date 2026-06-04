@@ -10,7 +10,7 @@
 window.WCSlides = window.WCSlides || {};
 
 window.WCSlides.v3 = (function () {
-  const isCode = c => /^[a-z]{2}$/i.test((c || '').trim());
+  const isCode = c => /^[a-z]{2}(-[a-z]{3})?$/i.test((c || '').trim());
 
   function stageLabel(s) {
     const k = (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -22,6 +22,20 @@ window.WCSlides.v3 = (function () {
     if (k.includes('32') || k === 'r32') return 'R32';
     if (k.includes('group') || k === 'g') return 'GROUP';
     return s ? String(s).toUpperCase().slice(0, 5) : 'TBD';
+  }
+
+  // ISO UTC ("2026-06-11T19:00:00Z") -> { date:"11 JUN", time:"19:00 UTC" }.
+  // Returns null if missing/unparseable so the row falls back to the stage tag.
+  function whenLabels(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const mm = MONTHS[d.getUTCMonth()];
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const mi = String(d.getUTCMinutes()).padStart(2, '0');
+    return { date: `${dd} ${mm}`, time: `${hh}:${mi} UTC` };
   }
 
   function teamHTML(t, side) {
@@ -66,8 +80,15 @@ window.WCSlides.v3 = (function () {
           const teams = Array.isArray(mt.teams) ? mt.teams : [];
           const lab = stageLabel(mt.stage);
           const stCls = lab === 'FINAL' ? 'gold' : 'ghost';
+          const w = whenLabels(mt.kickoff_utc);
+          const meta = w
+            ? `<div class="v3-meta">
+                 <span class="v3-stage ${stCls}">${esc(lab)}</span>
+                 <span class="v3-when">${esc(w.date)} · ${esc(w.time)}</span>
+               </div>`
+            : `<span class="v3-stage ${stCls}">${esc(lab)}</span>`;
           return `<div class="v3-match">
-              <span class="v3-stage ${stCls}">${esc(lab)}</span>
+              ${meta}
               ${teamHTML(teams[0], 'l')}
               <span class="v3-vs">VS</span>
               ${teamHTML(teams[1], 'r')}

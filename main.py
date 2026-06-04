@@ -69,6 +69,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--date", type=str, default=None)
     parser.add_argument("--countdown", action="store_true",
                         help="Generate today's J-X countdown companion post.")
+    parser.add_argument("--stadium", type=str, default=None,
+                        help="Generate a stadium showcase post for the given venue name "
+                             "(e.g. \"Estadio Azteca\").")
+    parser.add_argument("--stadium-all", action="store_true",
+                        help="Generate stadium showcase posts for all 16 venues.")
+    parser.add_argument("--stadium-cron", action="store_true",
+                        help="Pick the next stadium based on the publish schedule "
+                             "(8h slots starting STADIUM_CAMPAIGN_START_UTC). "
+                             "Designed for the GitHub Actions cron.")
     parser.add_argument("--preview", action="store_true",
                         help="Preview mode: send slides to Telegram without "
                              "approval buttons, never publish.")
@@ -208,6 +217,43 @@ def process_countdown(*, preview: bool = False) -> int:
     return 0
 
 
+def process_stadium(name: str, *, preview: bool = False) -> int:
+    print(f"\n{'='*60}")
+    print(f"[1/4] Building stadium post for {name!r}…")
+    post = companion.build_stadium_post(name)
+    if post is None:
+        print(f"Unknown venue {name!r}. Nothing to do.")
+        return 1
+    print(f"      → {post['post_id']} — {post.get('city', '')}")
+
+    print("[2/4] Rendering slides…")
+    result = render_post(post)
+    slides = result["upload_paths"]
+    if not slides:
+        print("No slides rendered.")
+        return 1
+    print(f"      → {len(slides)} slide(s) in {result['source_dir']}")
+
+    post_json = result["source_dir"] / "post.json"
+    post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if preview:
+        _send_preview_to_telegram(post, slides)
+        return 0
+
+    print("[3/4] Review")
+    for p in slides:
+        print(f"      {p}")
+
+    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
+        print("Publishing cancelled. PNGs remain in output/.")
+        return 0
+
+    print("[4/4] Publishing…")
+    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # Entry
 # ---------------------------------------------------------------------------
@@ -216,6 +262,39 @@ def main() -> int:
 
     if args.countdown:
         return process_countdown(preview=args.preview)
+
+    if args.stadium_all:
+        from wc_data import VENUES
+        rc = 0
+        for name in VENUES.keys():
+            try:
+                rc |= process_stadium(name, preview=args.preview)
+            except Exception as exc:  # noqa: BLE001
+                print(f"[error] stadium {name!r} failed: {exc!r}")
+        return rc
+
+    if args.stadium_cron:
+        from datetime import datetime, timezone
+        from wc_data import STADIUM_PUBLISH_ORDER
+        # 16 venues × 8h slots = 128h ≈ 5.3 days. Starting today (2026-06-04)
+        # at 22:00 UTC, the last post lands ~37h before the opening match.
+        START = datetime(2026, 6, 4, 22, 0, tzinfo=timezone.utc)
+        SLOT_HOURS = 8
+        now = datetime.now(timezone.utc)
+        delta_h = (now - START).total_seconds() / 3600
+        if delta_h < 0:
+            print(f"[stadium-cron] campaign starts {START.isoformat()} — too early ({delta_h:.1f}h).")
+            return 0
+        slot = int(delta_h // SLOT_HOURS)
+        if slot >= len(STADIUM_PUBLISH_ORDER):
+            print(f"[stadium-cron] campaign over (slot {slot} ≥ {len(STADIUM_PUBLISH_ORDER)}).")
+            return 0
+        name = STADIUM_PUBLISH_ORDER[slot]
+        print(f"[stadium-cron] slot {slot+1}/{len(STADIUM_PUBLISH_ORDER)} — {name}")
+        return process_stadium(name, preview=args.preview)
+
+    if args.stadium:
+        return process_stadium(args.stadium, preview=args.preview)
 
     refs = select_match_refs(args)
     if not refs:
