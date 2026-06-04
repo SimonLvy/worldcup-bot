@@ -82,6 +82,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                         help="Generate a nation showcase post for the given TLA "
                              "(e.g. \"FRA\", \"BRA\"). Renders 3 slides with the "
                              "per-nation palette.")
+    parser.add_argument("--nation-cron", action="store_true",
+                        help="Pick the next nation by the publish schedule "
+                             "(6h slots, 4/day, starting the nation campaign). "
+                             "Designed for the GitHub Actions cron.")
     parser.add_argument("--preview", action="store_true",
                         help="Preview mode: send slides to Telegram without "
                              "approval buttons, never publish.")
@@ -334,6 +338,26 @@ def main() -> int:
 
     if args.stadium:
         return process_stadium(args.stadium, preview=args.preview)
+
+    if args.nation_cron:
+        from datetime import datetime, timezone
+        from wc_data import NATION_PUBLISH_ORDER
+        # 48 nations × 6h slots = 12 days. Starting 2026-06-05 18:00 UTC, the
+        # last profile lands ~17 Jun — around the end of matchday 1.
+        START = datetime(2026, 6, 5, 18, 0, tzinfo=timezone.utc)
+        SLOT_HOURS = 6
+        now = datetime.now(timezone.utc)
+        delta_h = (now - START).total_seconds() / 3600
+        if delta_h < 0:
+            print(f"[nation-cron] campaign starts {START.isoformat()} — too early ({delta_h:.1f}h).")
+            return 0
+        slot = int(delta_h // SLOT_HOURS)
+        if slot >= len(NATION_PUBLISH_ORDER):
+            print(f"[nation-cron] campaign over (slot {slot} ≥ {len(NATION_PUBLISH_ORDER)}).")
+            return 0
+        tla = NATION_PUBLISH_ORDER[slot]
+        print(f"[nation-cron] slot {slot+1}/{len(NATION_PUBLISH_ORDER)} — {tla}")
+        return process_nation(tla, preview=args.preview)
 
     if args.nation:
         return process_nation(args.nation, preview=args.preview)

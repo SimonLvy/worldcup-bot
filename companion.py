@@ -126,12 +126,13 @@ def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
     hist = nation_history.history_for(tla)
 
     # Honours line: WC titles are derived (always accurate); continental cups
-    # (Euro/Copa/AFCON…) stay curated in NATION_PROFILES. Strip any stale WC
-    # entry from the curated list so the derived count is the single source.
+    # (Euro/Copa/AFCON…) stay curated — marquees in NATION_PROFILES, tier-2 in
+    # CONTINENTAL_HONOURS. Strip any stale WC entry so the derived count wins.
     honours = []
     if hist["titles"]:
         honours.append({"label": "WC", "count": hist["titles"]})
-    honours += [h for h in (profile.get("honours") or []) if h.get("label") != "WC"]
+    curated = (profile.get("honours") or []) + wc_data.continental_honours_for(tla)
+    honours += [h for h in curated if h.get("label") != "WC"]
 
     # Predictor signals — keyed by the post date so any J1 result already on the
     # books shifts the strength score appropriately.
@@ -161,7 +162,7 @@ def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
         "avg_age": ref.get("age"),
         "star_player": {**star, "photo_url": None} if star else None,
         "players_to_watch": wc_data.players_to_watch_for(tla),
-        "coach": profile.get("coach"),
+        "coach": wc_data.coach_for(tla),
         # ---- WC history (derived from dataset + curated podiums) ----
         "wc_appearances": hist["appearances"],
         "wc_best_finish": hist["best_finish"],

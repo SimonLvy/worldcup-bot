@@ -320,6 +320,88 @@ NATION_PROFILES: dict[str, dict] = {
 
 
 # ---------------------------------------------------------------------------
+# Head coaches — single reviewable block for all 48. Hand-maintained (no free
+# live source). nationality_code is the a2 for the inline flag. Verify before
+# the tournament; managers do change. Confidence noted where lower.
+# ---------------------------------------------------------------------------
+COACHES: dict[str, dict] = {
+    # --- top 16 (cross-checked vs the user's examples) ---
+    "ARG": {"name": "Lionel Scaloni", "nationality_code": "ar"},
+    "FRA": {"name": "Didier Deschamps", "nationality_code": "fr"},
+    "ESP": {"name": "Luis de la Fuente", "nationality_code": "es"},
+    "ENG": {"name": "Thomas Tuchel", "nationality_code": "de"},
+    "BRA": {"name": "Carlo Ancelotti", "nationality_code": "it"},
+    "POR": {"name": "Roberto Martínez", "nationality_code": "es"},
+    "NED": {"name": "Ronald Koeman", "nationality_code": "nl"},
+    "BEL": {"name": "Rudi Garcia", "nationality_code": "fr"},
+    "GER": {"name": "Julian Nagelsmann", "nationality_code": "de"},
+    "CRO": {"name": "Zlatko Dalić", "nationality_code": "hr"},
+    "URY": {"name": "Marcelo Bielsa", "nationality_code": "ar"},
+    "COL": {"name": "Néstor Lorenzo", "nationality_code": "ar"},
+    "MAR": {"name": "Walid Regragui", "nationality_code": "ma"},
+    "USA": {"name": "Mauricio Pochettino", "nationality_code": "ar"},
+    "SUI": {"name": "Murat Yakin", "nationality_code": "ch"},
+    "JPN": {"name": "Hajime Moriyasu", "nationality_code": "jp"},
+    # --- tier 2 ---
+    "SEN": {"name": "Pape Thiaw", "nationality_code": "sn"},
+    "KOR": {"name": "Hong Myung-bo", "nationality_code": "kr"},
+    "MEX": {"name": "Javier Aguirre", "nationality_code": "mx"},
+    "ECU": {"name": "Sebastián Beccacece", "nationality_code": "ar"},
+    "AUT": {"name": "Ralf Rangnick", "nationality_code": "de"},
+    "SWE": {"name": "Jon Dahl Tomasson", "nationality_code": "dk"},
+    "TUR": {"name": "Vincenzo Montella", "nationality_code": "it"},
+    "AUS": {"name": "Tony Popovic", "nationality_code": "au"},
+    "CIV": {"name": "Emerse Faé", "nationality_code": "ci"},
+    "EGY": {"name": "Hossam Hassan", "nationality_code": "eg"},
+    "NOR": {"name": "Ståle Solbakken", "nationality_code": "no"},
+    "CAN": {"name": "Jesse Marsch", "nationality_code": "us"},
+    "PAR": {"name": "Gustavo Alfaro", "nationality_code": "ar"},
+    "TUN": {"name": "Sami Trabelsi", "nationality_code": "tn"},      # lower confidence
+    "CZE": {"name": "Ivan Hašek", "nationality_code": "cz"},
+    "ALG": {"name": "Vladimir Petković", "nationality_code": "ch"},
+    "PAN": {"name": "Thomas Christiansen", "nationality_code": "dk"},
+    "GHA": {"name": "Otto Addo", "nationality_code": "gh"},
+    "COD": {"name": "Sébastien Desabre", "nationality_code": "fr"},
+    "IRN": {"name": "Amir Ghalenoei", "nationality_code": "ir"},
+    "KSA": {"name": "Hervé Renard", "nationality_code": "fr"},       # lower confidence
+    "QAT": {"name": "Luís Castro", "nationality_code": "pt"},        # lower confidence
+    "JOR": {"name": "Jamal Sellami", "nationality_code": "ma"},      # lower confidence
+    "IRQ": {"name": "Graham Arnold", "nationality_code": "au"},
+    "UZB": {"name": "Timur Kapadze", "nationality_code": "uz"},      # lower confidence
+    "RSA": {"name": "Hugo Broos", "nationality_code": "be"},
+    "BIH": {"name": "Sergej Barbarez", "nationality_code": "ba"},
+    "CPV": {"name": "Pedro Brito \"Bubista\"", "nationality_code": "cv"},
+    "HAI": {"name": "Sébastien Migné", "nationality_code": "fr"},
+    "NZL": {"name": "Darren Bazeley", "nationality_code": "gb-eng"},
+    "CUW": {"name": "Dick Advocaat", "nationality_code": "nl"},
+    "SCO": {"name": "Steve Clarke", "nationality_code": "gb-sct"},
+}
+
+
+# Continental honours for tier-2 nations (marquees carry theirs in
+# NATION_PROFILES). WC titles are derived separately, never listed here.
+CONTINENTAL_HONOURS: dict[str, list[dict]] = {
+    "SEN": [{"label": "AFCON", "count": 1}],
+    "EGY": [{"label": "AFCON", "count": 7}],
+    "MEX": [{"label": "Gold Cup", "count": 9}],
+    "KOR": [{"label": "Asian Cup", "count": 2}],
+    "IRN": [{"label": "Asian Cup", "count": 3}],
+    "KSA": [{"label": "Asian Cup", "count": 3}],
+    "CIV": [{"label": "AFCON", "count": 3}],
+    "ALG": [{"label": "AFCON", "count": 2}],
+    "GHA": [{"label": "AFCON", "count": 4}],
+    "TUN": [{"label": "AFCON", "count": 1}],
+    "RSA": [{"label": "AFCON", "count": 1}],
+    "COD": [{"label": "AFCON", "count": 2}],
+    "CAN": [{"label": "Gold Cup", "count": 1}],
+    "PAR": [{"label": "Copa", "count": 2}],
+    "JOR": [],
+    "QAT": [{"label": "Asian Cup", "count": 2}],
+    "AUS": [{"label": "Asian Cup", "count": 1}],
+}
+
+
+# ---------------------------------------------------------------------------
 # Federation crests — the real association emblems (FFF cockerel, FA three
 # lions, CBF…), NOT flags. Sourced once from TheSportsDB (free, crowd-sourced
 # team badges), all 512×512 PNGs on a stable CDN. 48/48. The nation showcase
@@ -401,6 +483,39 @@ PLAYERS_TO_WATCH: dict[str, list[str]] = {
     "USA": ["Yunus Musah", "Folarin Balogun"],
     "SUI": ["Manuel Akanji", "Breel Embolo"],
     "JPN": ["Takefusa Kubo", "Kaoru Mitoma"],
+    # --- tier 2 ---
+    "SEN": ["Nicolas Jackson", "Pape Matar Sarr"],
+    "KOR": ["Lee Kang-in", "Kim Min-jae"],
+    "MEX": ["Edson Álvarez", "Gilberto Mora"],
+    "ECU": ["Kendry Páez", "Piero Hincapié"],
+    "AUT": ["Konrad Laimer", "Marcel Sabitzer"],
+    "SWE": ["Viktor Gyökeres", "Dejan Kulusevski"],
+    "TUR": ["Kenan Yıldız", "Hakan Çalhanoğlu"],
+    "AUS": ["Nestory Irankunda", "Garang Kuol"],
+    "CIV": ["Amad Diallo", "Simon Adingra"],
+    "EGY": ["Omar Marmoush", "Mostafa Mohamed"],
+    "NOR": ["Martin Ødegaard", "Antonio Nusa"],
+    "CAN": ["Jonathan David", "Tani Oluwaseyi"],
+    "PAR": ["Julio Enciso", "Diego Gómez"],
+    "TUN": ["Elyes Skhiri", "Montassar Talbi"],
+    "CZE": ["Adam Hložek", "Tomáš Souček"],
+    "ALG": ["Houssem Aouar", "Ismaël Bennacer"],
+    "PAN": ["Ismael Díaz", "Michael Murillo"],
+    "GHA": ["Antoine Semenyo", "Thomas Partey"],
+    "COD": ["Silas Katompa", "Chancel Mbemba"],
+    "IRN": ["Sardar Azmoun", "Mehdi Ghayedi"],
+    "KSA": ["Firas Al-Buraikan", "Saud Abdulhamid"],
+    "QAT": ["Almoez Ali", "Hassan Al-Haydos"],
+    "JOR": ["Yazan Al-Naimat", "Nizar Al-Rashdan"],
+    "UZB": ["Abbosbek Fayzullaev", "Khusayin Norchaev"],
+    "RSA": ["Percy Tau", "Relebohile Mofokeng"],
+    "BIH": ["Amar Dedić", "Benjamin Šeško"],
+    "CPV": ["Jovane Cabral", "Gilson Tavares"],
+    "HAI": ["Danley Jean Jacques", "Duckens Nazon"],
+    "NZL": ["Marko Stamenić", "Liberato Cacace"],
+    "CUW": ["Juninho Bacuna", "Jürgen Locadia"],
+    "SCO": ["Billy Gilmour", "Andrew Robertson"],
+    "IRQ": ["Zidane Iqbal", "Ali Jasim"],
 }
 
 
@@ -493,6 +608,39 @@ STARS: dict[str, list[dict]] = {
         {"name": "Manuel Akanji", "club": "Man City", "stat": "Defensive rock"},
         {"name": "Breel Embolo", "club": "Monaco", "stat": "Focal-point striker"},
     ],
+    # --- tier 2 (marquee star only; the slide shows the first) ---
+    "SEN": [{"name": "Sadio Mané", "club": "Al-Nassr", "stat": "Talisman & all-time top scorer"}],
+    "KOR": [{"name": "Son Heung-min", "club": "LAFC", "stat": "Captain & icon"}],
+    "MEX": [{"name": "Santiago Giménez", "club": "AC Milan", "stat": "Lead striker"}],
+    "ECU": [{"name": "Moisés Caicedo", "club": "Chelsea", "stat": "Midfield engine"}],
+    "AUT": [{"name": "David Alaba", "club": "Real Madrid", "stat": "Veteran leader"}],
+    "SWE": [{"name": "Alexander Isak", "club": "Liverpool", "stat": "Elite finisher"}],
+    "TUR": [{"name": "Arda Güler", "club": "Real Madrid", "stat": "Generational playmaker"}],
+    "AUS": [{"name": "Mathew Ryan", "club": "Roma", "stat": "Captain & keeper"}],
+    "CIV": [{"name": "Franck Kessié", "club": "Al-Ahli", "stat": "Midfield powerhouse"}],
+    "EGY": [{"name": "Mohamed Salah", "club": "Liverpool", "stat": "Egypt's all-time great"}],
+    "NOR": [{"name": "Erling Haaland", "club": "Man City", "stat": "Goal machine"}],
+    "CAN": [{"name": "Alphonso Davies", "club": "Bayern Munich", "stat": "Flying full-back"}],
+    "PAR": [{"name": "Miguel Almirón", "club": "Atlanta United", "stat": "Pace & energy"}],
+    "TUN": [{"name": "Hannibal Mejbri", "club": "Burnley", "stat": "Midfield spark"}],
+    "CZE": [{"name": "Patrik Schick", "club": "Bayer Leverkusen", "stat": "Clinical striker"}],
+    "ALG": [{"name": "Riyad Mahrez", "club": "Al-Ahli", "stat": "Magic left foot"}],
+    "PAN": [{"name": "Adalberto Carrasquilla", "club": "Pumas", "stat": "Midfield metronome"}],
+    "GHA": [{"name": "Mohammed Kudus", "club": "Tottenham", "stat": "Explosive attacker"}],
+    "COD": [{"name": "Yoane Wissa", "club": "Newcastle", "stat": "Versatile forward"}],
+    "IRN": [{"name": "Mehdi Taremi", "club": "Inter", "stat": "Lethal centre-forward"}],
+    "KSA": [{"name": "Salem Al-Dawsari", "club": "Al-Hilal", "stat": "Match-winner"}],
+    "QAT": [{"name": "Akram Afif", "club": "Al-Sadd", "stat": "Asian Cup star"}],
+    "JOR": [{"name": "Mousa Al-Tamari", "club": "Montpellier", "stat": "Dynamic winger"}],
+    "UZB": [{"name": "Eldor Shomurodov", "club": "Roma", "stat": "Focal striker"}],
+    "RSA": [{"name": "Lyle Foster", "club": "Burnley", "stat": "Lead striker"}],
+    "BIH": [{"name": "Edin Džeko", "club": "Fenerbahçe", "stat": "Record goalscorer"}],
+    "CPV": [{"name": "Ryan Mendes", "club": "Al-Wakrah", "stat": "Captain & creator"}],
+    "HAI": [{"name": "Frantzdy Pierrot", "club": "Gaziantep", "stat": "Target man"}],
+    "NZL": [{"name": "Chris Wood", "club": "Nottingham Forest", "stat": "Premier League striker"}],
+    "CUW": [{"name": "Leandro Bacuna", "club": "free agent", "stat": "Experienced leader"}],
+    "SCO": [{"name": "Scott McTominay", "club": "Napoli", "stat": "Serie A champion"}],
+    "IRQ": [{"name": "Aymen Hussein", "club": "Al-Qadsiah", "stat": "Lead striker"}],
 }
 
 # ---------------------------------------------------------------------------
@@ -653,6 +801,19 @@ STADIUM_PUBLISH_ORDER: list[str] = [
     "Lumen Field",             # 15 Jun
     "Hard Rock Stadium",       # 15 Jun
     "Arrowhead Stadium",       # 17 Jun
+]
+
+
+# Pre-tournament nation showcase campaign: 48 posts, one per nation, dripped
+# 4×/day (every 6h). Order is "earliest first group match first" so each
+# nation's profile lands ahead of (or around) its opening fixture.
+NATION_PUBLISH_ORDER: list[str] = [
+    "MEX", "RSA", "CZE", "KOR", "BIH", "CAN", "PAR", "USA",   # 11–12 Jun openers
+    "QAT", "SUI", "BRA", "MAR", "HAI", "SCO", "AUS", "TUR",   # 13–14 Jun
+    "CUW", "GER", "JPN", "NED", "CIV", "ECU", "SWE", "TUN",   # 14–15 Jun
+    "CPV", "ESP", "BEL", "EGY", "KSA", "URY", "IRN", "NZL",   # 15–16 Jun
+    "FRA", "SEN", "IRQ", "NOR", "ALG", "ARG", "AUT", "JOR",   # 16–17 Jun
+    "COD", "POR", "CRO", "ENG", "GHA", "PAN", "COL", "UZB",   # 17–18 Jun
 ]
 
 # Local timezone per venue for summer 2026 (UTC offset hours, short label).
@@ -857,8 +1018,19 @@ def profile_for(tla: str) -> dict | None:
 
 
 def crest_for(tla: str) -> str | None:
-    """Federation crest URL (football-data). None if unknown."""
+    """Federation crest URL (TheSportsDB). None if unknown."""
     return NATION_CREST.get((tla or "").upper())
+
+
+def coach_for(tla: str) -> dict | None:
+    """Head coach {name, nationality_code}. None if not on file."""
+    return COACHES.get((tla or "").upper())
+
+
+def continental_honours_for(tla: str) -> list[dict]:
+    """Curated continental honours (Euro/Copa/AFCON…) for tier-2 nations.
+    Marquees carry theirs in NATION_PROFILES; this fills the rest."""
+    return CONTINENTAL_HONOURS.get((tla or "").upper(), [])
 
 
 def players_to_watch_for(tla: str) -> list[str]:
