@@ -236,10 +236,48 @@ def _match(post: dict) -> dict:
 def _nation(post: dict) -> dict:
     rng = _rng_for(post)
     name = post.get("name", "Team")
-    caption = f"🇺🇳 Meet {name}.\n\nWC 2026 profile — squad, stars, story.\n\nFavourite to surprise? 👇"
+    nickname = post.get("nickname")
+    conf = post.get("confederation", "")
+    grp = post.get("group_letter", "?")
+    rank = post.get("fifa_rank")
+    star = (post.get("star_player") or {}).get("name")
+    quali = post.get("quali_pct")
+    verdict = post.get("predicted_round")
+    titles = post.get("wc_titles") or 0
+    first_wc = post.get("is_first_wc")
+
+    # Lead block — mirrors the Telegram preview header so social viewers get
+    # the identity at a glance before the editorial hook.
+    header = [f"🏳 {name}" + (f" · {nickname}" if nickname else "")]
+    header.append(f"🌍 {conf} · Group {grp}" + (f" · FIFA #{rank}" if rank else ""))
+    if first_wc:
+        header.append("✨ First-ever World Cup")
+    elif titles:
+        header.append(f"🏆 World Champions ×{titles}")
+    if star:
+        header.append(f"⭐ {star}")
+    header_block = "\n".join(header)
+
+    # Hook leans on the predictor verdict — the bot's hot take drives replies.
+    if first_wc:
+        hooks = [
+            f"{name} land on the biggest stage for the very first time. Dark horse or out early? 👇",
+            f"A debut on the world stage for {name}. How far do they go? 👇",
+        ]
+    else:
+        hooks = [
+            f"The bot's call: {name} reach the {verdict}. Agree or madness? 👇",
+            f"Pre-tournament verdict — {name} to the {verdict}, {quali}% out of the group. Your take? 👇",
+            f"{quali}% to escape Group {grp}, predicted {verdict}. Backing {nickname or name}? 👇",
+        ]
+    caption = f"{header_block}\n\n{rng.choice(hooks)}"
+
+    name_tag = "#" + name.replace(" ", "").replace(".", "")
+    conf_tag = "#" + conf if conf else None
+    extra = [t for t in (name_tag, conf_tag) if t]
     return {
         "caption": caption,
-        "hashtags": _TAGS_CORE + [f"#{name.replace(' ', '')}"] + _pick(_TAGS_REACH, 3, rng),
+        "hashtags": _TAGS_CORE + extra + _pick(_TAGS_REACH, 3, rng),
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 

@@ -97,24 +97,109 @@ def build_countdown_post(target_date: date | None = None) -> dict | None:
 # ===========================================================================
 # NATION
 # ===========================================================================
-def build_nation_post(tla: str) -> dict | None:
-    """Profile payload for one nation. None if the TLA isn't in NATIONS."""
+def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
+    """Rich payload for the 3-slide nation showcase. None if TLA unknown.
+
+    `today` defaults to date.today() and bounds the form window — so a post
+    rendered on June 14 picks up any J1 result already on the books for this
+    team. Pass an explicit date for deterministic test runs.
+    """
     tla = tla.upper()
     if tla not in wc_data.NATIONS:
         return None
+    today = today or date.today()
+    before_iso = today.isoformat()
+
     ref = wc_data.NATIONS[tla]
+    profile = wc_data.profile_for(tla) or {}
     stars = wc_data.stars_for(tla)
+    star = stars[0] if stars else None
+
+    letter, group_members = wc_data.group_for(tla)
+    fixtures = _group_fixtures_for(tla)
+
+    # WC history is DERIVED from the match dataset (+ a curated 22-podium table),
+    # never hand-typed — appearances, years, titles, best finish and the per-year
+    # finish for the last 5 WCs all come from nation_history. This is what fixes
+    # the Scotland-style inaccuracies.
+    import nation_history
+    hist = nation_history.history_for(tla)
+
+    # Honours line: WC titles are derived (always accurate); continental cups
+    # (Euro/Copa/AFCON…) stay curated — marquees in NATION_PROFILES, tier-2 in
+    # CONTINENTAL_HONOURS. Strip any stale WC entry so the derived count wins.
+    honours = []
+    if hist["titles"]:
+        honours.append({"label": "WC", "count": hist["titles"]})
+    curated = (profile.get("honours") or []) + wc_data.continental_honours_for(tla)
+    honours += [h for h in curated if h.get("label") != "WC"]
+
+    # Predictor signals — keyed by the post date so any J1 result already on the
+    # books shifts the strength score appropriately.
+    import nation_predict
+    quali = nation_predict.quali_pct(tla, before_iso)
+    pred_round = nation_predict.predicted_round(tla, before_iso)
+
     return {
         "post_id": f"WC2026-N-{tla}",
         "post_type": "nation",
+        "post_date": before_iso,
+        # ---- identity ----
         "tla": tla,
         "code": ref["a2"],
         "name": _nation_name(tla),
+        "nickname": profile.get("nickname"),
+        "confederation": profile.get("confederation"),
+        "federation_crest": wc_data.crest_for(tla),
+        "colors": profile.get("colors") or {"primary": "#0b1224", "secondary": "#FFFFFF", "accent": "#E7B549"},
+        # ---- group context ----
+        "group_letter": letter,
+        "group_members": group_members,
+        "fixtures": fixtures,
+        # ---- squad ----
         "fifa_rank": ref["rank"],
         "squad_value_eur_m": ref["value"],
-        "players_top5_leagues": ref["top5"],
-        "key_players": [{**s, "photo_url": None} for s in stars],
+        "avg_age": ref.get("age"),
+        "star_player": {**star, "photo_url": None} if star else None,
+        "players_to_watch": wc_data.players_to_watch_for(tla),
+        "coach": wc_data.coach_for(tla),
+        # ---- WC history (derived from dataset + curated podiums) ----
+        "wc_appearances": hist["appearances"],
+        "wc_best_finish": hist["best_finish"],
+        "wc_titles": hist["titles"],
+        "wc_history": hist["last5"],       # [{year, finish}, ...] most recent first
+        "is_first_wc": hist["is_first_wc"],
+        "honours": honours,
+        # ---- outlook ----
+        "quali_pct": quali,
+        "predicted_round": pred_round,
     }
+
+
+def _group_fixtures_for(tla: str) -> list[dict]:
+    """All 3 group fixtures this team plays, sorted chronologically.
+
+    Each fixture: { kickoff_utc, opponent_tla, opponent_code, opponent_name,
+                    venue, matchday }
+    """
+    out = []
+    for pair, venue_name in wc_data.GROUP_VENUES.items():
+        if tla not in pair:
+            continue
+        opp = next(iter(pair - {tla}))
+        fd_id = wc_data.GROUP_PAIR_ID.get(pair)
+        kickoff = wc_data.MATCH_KICKOFF_UTC.get(fd_id) if fd_id else None
+        out.append({
+            "kickoff_utc": kickoff,
+            "opponent_tla": opp,
+            "opponent_code": wc_data.alpha2(opp),
+            "opponent_name": TLA_DISPLAY.get(opp, opp.title()),
+            "venue": venue_name,
+        })
+    out.sort(key=lambda m: m.get("kickoff_utc") or "9999")
+    for i, m in enumerate(out, start=1):
+        m["matchday"] = i
+    return out
 
 
 def _nation_name(tla: str) -> str:

@@ -78,6 +78,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                         help="Pick the next stadium based on the publish schedule "
                              "(8h slots starting STADIUM_CAMPAIGN_START_UTC). "
                              "Designed for the GitHub Actions cron.")
+    parser.add_argument("--nation", type=str, default=None,
+                        help="Generate a nation showcase post for the given TLA "
+                             "(e.g. \"FRA\", \"BRA\"). Renders 3 slides with the "
+                             "per-nation palette.")
+    parser.add_argument("--nation-cron", action="store_true",
+                        help="Pick the next nation by the publish schedule "
+                             "(6h slots, 4/day, starting the nation campaign). "
+                             "Designed for the GitHub Actions cron.")
     parser.add_argument("--preview", action="store_true",
                         help="Preview mode: send slides to Telegram without "
                              "approval buttons, never publish.")
@@ -217,6 +225,41 @@ def process_countdown(*, preview: bool = False) -> int:
     return 0
 
 
+def process_nation(tla: str, *, preview: bool = False) -> int:
+    print(f"\n{'='*60}")
+    print(f"[1/4] Building nation post for {tla!r}…")
+    post = companion.build_nation_post(tla)
+    if post is None:
+        print(f"Unknown nation TLA {tla!r}. Nothing to do.")
+        return 1
+    print(f"      → {post['post_id']} — {post.get('name', '')}")
+
+    print("[2/4] Rendering slides…")
+    result = render_post(post)
+    slides = result["upload_paths"]
+    if not slides:
+        print("No slides rendered.")
+        return 1
+    print(f"      → {len(slides)} slide(s) in {result['source_dir']}")
+
+    post_json = result["source_dir"] / "post.json"
+    post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if preview:
+        _send_preview_to_telegram(post, slides)
+        return 0
+
+    print("[3/4] Review")
+    for p in slides:
+        print(f"      {p}")
+    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
+        print("Publishing cancelled. PNGs remain in output/.")
+        return 0
+    print("[4/4] Publishing…")
+    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    return 0
+
+
 def process_stadium(name: str, *, preview: bool = False) -> int:
     print(f"\n{'='*60}")
     print(f"[1/4] Building stadium post for {name!r}…")
@@ -295,6 +338,32 @@ def main() -> int:
 
     if args.stadium:
         return process_stadium(args.stadium, preview=args.preview)
+
+    if args.nation_cron:
+        from datetime import datetime, timezone
+        from wc_data import NATION_PUBLISH_ORDER
+        # 48 nations × 6h slots = 12 days. Starting 2026-06-06 00:00 UTC, the
+        # last profile lands ~18 Jun — around the end of matchday 1. Midnight-UTC
+        # start gives a merge buffer: the deterministic slot picker skips slots
+        # whose time has already passed, so starting at the next 00:00 boundary
+        # means no nation is dropped as long as the merge lands tonight.
+        START = datetime(2026, 6, 6, 0, 0, tzinfo=timezone.utc)
+        SLOT_HOURS = 6
+        now = datetime.now(timezone.utc)
+        delta_h = (now - START).total_seconds() / 3600
+        if delta_h < 0:
+            print(f"[nation-cron] campaign starts {START.isoformat()} — too early ({delta_h:.1f}h).")
+            return 0
+        slot = int(delta_h // SLOT_HOURS)
+        if slot >= len(NATION_PUBLISH_ORDER):
+            print(f"[nation-cron] campaign over (slot {slot} ≥ {len(NATION_PUBLISH_ORDER)}).")
+            return 0
+        tla = NATION_PUBLISH_ORDER[slot]
+        print(f"[nation-cron] slot {slot+1}/{len(NATION_PUBLISH_ORDER)} — {tla}")
+        return process_nation(tla, preview=args.preview)
+
+    if args.nation:
+        return process_nation(args.nation, preview=args.preview)
 
     refs = select_match_refs(args)
     if not refs:

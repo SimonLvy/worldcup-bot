@@ -24,60 +24,508 @@ NATIONS: dict[str, dict] = {
     # Values sourced from Transfermarkt (June 2025). Entries without TM data
     # retain prior estimates (marked # est).
     "ARG": {"a2": "ar", "rank": 1,  "value": 818,  "top5": 14},
-    "FRA": {"a2": "fr", "rank": 2,  "value": 1530, "top5": 21},
-    "ESP": {"a2": "es", "rank": 3,  "value": 1100, "top5": 20},  # est (TM page 404)
+    "FRA": {"a2": "fr", "rank": 3,  "value": 1530, "top5": 21},
+    "ESP": {"a2": "es", "rank": 2,  "value": 1100, "top5": 20},  # est (TM page 404)
     "ENG": {"a2": "gb-eng", "rank": 4, "value": 1310, "top5": 23},
-    "BRA": {"a2": "br", "rank": 5,  "value": 912,  "top5": 19},
-    "POR": {"a2": "pt", "rank": 6,  "value": 412,  "top5": 20},
-    "NED": {"a2": "nl", "rank": 7,  "value": 601,  "top5": 18},
-    "BEL": {"a2": "be", "rank": 8,  "value": 543,  "top5": 16},
-    "GER": {"a2": "de", "rank": 9,  "value": 850,  "top5": 19},  # est (TM 182 → wrong page)
-    "CRO": {"a2": "hr", "rank": 10, "value": 260,  "top5": 14},  # est (TM 25 → wrong page)
-    "ITA": {"a2": "it", "rank": 11, "value": 600,  "top5": 15},
-    "URY": {"a2": "uy", "rank": 12, "value": 64,   "top5": 13},
+    "BRA": {"a2": "br", "rank": 6,  "value": 912,  "top5": 19},
+    "POR": {"a2": "pt", "rank": 5,  "value": 412,  "top5": 20},
+    "NED": {"a2": "nl", "rank": 8,  "value": 601,  "top5": 18},
+    "BEL": {"a2": "be", "rank": 9,  "value": 543,  "top5": 16},
+    "GER": {"a2": "de", "rank": 10,  "value": 850,  "top5": 19},  # est (TM 182 → wrong page)
+    "CRO": {"a2": "hr", "rank": 11, "value": 260,  "top5": 14},  # est (TM 25 → wrong page)
+    "ITA": {"a2": "it", "rank": 12, "value": 600,  "top5": 15},
+    "URY": {"a2": "uy", "rank": 17, "value": 64,   "top5": 13},
     "COL": {"a2": "co", "rank": 13, "value": 234,  "top5": 11},
-    "MAR": {"a2": "ma", "rank": 14, "value": 350,  "top5": 13},  # est (TM 404)
-    "USA": {"a2": "us", "rank": 15, "value": 300,  "top5": 12},  # est (TM 13 → wrong page)
-    "SUI": {"a2": "ch", "rank": 16, "value": 42,   "top5": 11},
-    "JPN": {"a2": "jp", "rank": 17, "value": 153,  "top5": 12},
-    "SEN": {"a2": "sn", "rank": 18, "value": 486,  "top5": 13},
-    "DEN": {"a2": "dk", "rank": 19, "value": 340,  "top5": 12},  # est
-    "KOR": {"a2": "kr", "rank": 20, "value": 242,  "top5": 8},
-    "MEX": {"a2": "mx", "rank": 21, "value": 190,  "top5": 4},
-    "ECU": {"a2": "ec", "rank": 22, "value": 406,  "top5": 7},
+    "MAR": {"a2": "ma", "rank": 7, "value": 350,  "top5": 13},  # est (TM 404)
+    "USA": {"a2": "us", "rank": 16, "value": 300,  "top5": 12},  # est (TM 13 → wrong page)
+    "SUI": {"a2": "ch", "rank": 19, "value": 42,   "top5": 11},
+    "JPN": {"a2": "jp", "rank": 18, "value": 153,  "top5": 12},
+    "SEN": {"a2": "sn", "rank": 14, "value": 486,  "top5": 13},
+    "DEN": {"a2": "dk", "rank": 21, "value": 340,  "top5": 12},  # est
+    "KOR": {"a2": "kr", "rank": 25, "value": 242,  "top5": 8},
+    "MEX": {"a2": "mx", "rank": 15, "value": 190,  "top5": 4},
+    "ECU": {"a2": "ec", "rank": 24, "value": 406,  "top5": 7},
     "AUT": {"a2": "at", "rank": 23, "value": 196,  "top5": 11},
-    "SWE": {"a2": "se", "rank": 24, "value": 536,  "top5": 9},
-    "TUR": {"a2": "tr", "rank": 25, "value": 100,  "top5": 7},
-    "AUS": {"a2": "au", "rank": 26, "value": 90,   "top5": 3},   # est (TM 0 → wrong page)
-    "CIV": {"a2": "ci", "rank": 27, "value": 36,   "top5": 9},
-    "EGY": {"a2": "eg", "rank": 28, "value": 160,  "top5": 4},   # est (TM 0)
-    "NOR": {"a2": "no", "rank": 29, "value": 272,  "top5": 10},
-    "SCO": {"a2": "gb-sct", "rank": 30, "value": 200, "top5": 8},  # est (TM 10 → wrong)
-    "PAR": {"a2": "py", "rank": 31, "value": 234,  "top5": 4},
-    "TUN": {"a2": "tn", "rank": 32, "value": 90,   "top5": 3},   # est (TM 0)
-    "CZE": {"a2": "cz", "rank": 33, "value": 180,  "top5": 6},   # est (TM 404)
-    "ALG": {"a2": "dz", "rank": 34, "value": 200,  "top5": 7},   # est (TM 0)
-    "PAN": {"a2": "pa", "rank": 35, "value": 4,    "top5": 1},
-    "GHA": {"a2": "gh", "rank": 36, "value": 22,   "top5": 7},
-    "COD": {"a2": "cd", "rank": 37, "value": 150,  "top5": 6},   # est (TM 404)
-    "IRN": {"a2": "ir", "rank": 38, "value": 90,   "top5": 3},   # est (TM 0)
-    "KSA": {"a2": "sa", "rank": 39, "value": 40,   "top5": 0},   # est (TM 404)
-    "QAT": {"a2": "qa", "rank": 40, "value": 30,   "top5": 0},   # est (TM 0)
-    "JOR": {"a2": "jo", "rank": 41, "value": 25,   "top5": 0},   # est (TM 0)
-    "IRQ": {"a2": "iq", "rank": 42, "value": 25,   "top5": 0},   # est (TM 0)
-    "UZB": {"a2": "uz", "rank": 43, "value": 40,   "top5": 1},   # est (TM 0)
-    "RSA": {"a2": "za", "rank": 44, "value": 60,   "top5": 1},   # est (TM 0)
-    "BIH": {"a2": "ba", "rank": 45, "value": 30,   "top5": 6},
-    "CPV": {"a2": "cv", "rank": 46, "value": 56,   "top5": 2},
-    "HAI": {"a2": "ht", "rank": 47, "value": 30,   "top5": 1},   # est (TM 0)
-    "NZL": {"a2": "nz", "rank": 48, "value": 25,   "top5": 1},   # est (TM 0)
-    "CUW": {"a2": "cw", "rank": 49, "value": 30,   "top5": 1},   # est (TM 0)
-    "CAN": {"a2": "ca", "rank": 31, "value": 130,  "top5": 5},   # WC 2026 host
+    "SWE": {"a2": "se", "rank": 38, "value": 536,  "top5": 9},
+    "TUR": {"a2": "tr", "rank": 22, "value": 100,  "top5": 7},
+    "AUS": {"a2": "au", "rank": 27, "value": 90,   "top5": 3},   # est (TM 0 → wrong page)
+    "CIV": {"a2": "ci", "rank": 33, "value": 36,   "top5": 9},
+    "EGY": {"a2": "eg", "rank": 29, "value": 160,  "top5": 4},   # est (TM 0)
+    "NOR": {"a2": "no", "rank": 31, "value": 272,  "top5": 10},
+    "SCO": {"a2": "gb-sct", "rank": 43, "value": 200, "top5": 8},  # est (TM 10 → wrong)
+    "PAR": {"a2": "py", "rank": 40, "value": 234,  "top5": 4},
+    "TUN": {"a2": "tn", "rank": 46, "value": 90,   "top5": 3},   # est (TM 0)
+    "CZE": {"a2": "cz", "rank": 41, "value": 180,  "top5": 6},   # est (TM 404)
+    "ALG": {"a2": "dz", "rank": 28, "value": 200,  "top5": 7},   # est (TM 0)
+    "PAN": {"a2": "pa", "rank": 34, "value": 4,    "top5": 1},
+    "GHA": {"a2": "gh", "rank": 73, "value": 22,   "top5": 7},
+    "COD": {"a2": "cd", "rank": 45, "value": 150,  "top5": 6},   # est (TM 404)
+    "IRN": {"a2": "ir", "rank": 20, "value": 90,   "top5": 3},   # est (TM 0)
+    "KSA": {"a2": "sa", "rank": 61, "value": 40,   "top5": 0},   # est (TM 404)
+    "QAT": {"a2": "qa", "rank": 55, "value": 30,   "top5": 0},   # est (TM 0)
+    "JOR": {"a2": "jo", "rank": 63, "value": 25,   "top5": 0},   # est (TM 0)
+    "IRQ": {"a2": "iq", "rank": 56, "value": 25,   "top5": 0},   # est (TM 0)
+    "UZB": {"a2": "uz", "rank": 50, "value": 40,   "top5": 1},   # est (TM 0)
+    "RSA": {"a2": "za", "rank": 60, "value": 60,   "top5": 1},   # est (TM 0)
+    "BIH": {"a2": "ba", "rank": 64, "value": 30,   "top5": 6},
+    "CPV": {"a2": "cv", "rank": 68, "value": 56,   "top5": 2},
+    "HAI": {"a2": "ht", "rank": 81, "value": 30,   "top5": 1},   # est (TM 0)
+    "NZL": {"a2": "nz", "rank": 85, "value": 25,   "top5": 1},   # est (TM 0)
+    "CUW": {"a2": "cw", "rank": 83, "value": 30,   "top5": 1},   # est (TM 0)
+    "CAN": {"a2": "ca", "rank": 30, "value": 130,  "top5": 5},   # WC 2026 host
 }
 
 # ---------------------------------------------------------------------------
 # Key players (3 per nation) for the marquee sides. Teams not listed fall back
 # to names from the live API squad (club/stat unknown → graceful placeholder).
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Nation editorial profiles — the rich payload behind each nation showcase post.
+# Source of truth for the 3-slide nation carousel (identity / squad / outlook).
+# Populated progressively, marquee nations first. Missing entries fall back to
+# a placeholder profile so the renderer never crashes on unknown tla.
+# ---------------------------------------------------------------------------
+NATION_PROFILES: dict[str, dict] = {
+    # ----- Top 16 marquees (by FIFA rank). Verified from FIFA / Wikipedia
+    # records as of late 2025. Double-check coach names + WC histories before
+    # publishing — manager swaps happen. -----
+    "ARG": {
+        "nickname": "La Albiceleste",
+        "confederation": "CONMEBOL",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/c/c1/Argentina_football_association.svg",
+        "colors": {"primary": "#75AADB", "secondary": "#FFFFFF", "accent": "#6CACE4"},
+        "coach": {"name": "Lionel Scaloni", "nationality_code": "ar"},
+        "wc_appearances": 19,
+        "wc_best_finish": "Champions (1978, 1986, 2022)",
+        "wc_titles": 3,
+        "honours": [
+            {"label": "WC", "count": 3}, {"label": "Copa", "count": 16},
+            {"label": "Finalissima", "count": 1}, {"label": "Confed", "count": 1},
+        ],
+    },
+    "FRA": {
+        "nickname": "Les Bleus",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9b/France_national_football_team_seal.svg/180px-France_national_football_team_seal.svg.png",
+        "colors": {"primary": "#0055A4", "secondary": "#FFFFFF", "accent": "#EF4135"},
+        "coach": {"name": "Didier Deschamps", "nationality_code": "fr"},
+        "wc_appearances": 17,
+        "wc_best_finish": "Champions (1998, 2018)",
+        "wc_titles": 2,
+        "honours": [
+            {"label": "WC", "count": 2}, {"label": "Euro", "count": 2},
+            {"label": "Conf. Cup", "count": 2}, {"label": "UNL", "count": 1},
+        ],
+    },
+    "ESP": {
+        "nickname": "La Roja",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/9/99/RFEF.svg",
+        "colors": {"primary": "#C60B1E", "secondary": "#FFC400", "accent": "#FFFFFF"},
+        "coach": {"name": "Luis de la Fuente", "nationality_code": "es"},
+        "wc_appearances": 17,
+        "wc_best_finish": "Champions 2010",
+        "wc_titles": 1,
+        "honours": [
+            {"label": "WC", "count": 1}, {"label": "Euro", "count": 4},
+            {"label": "UNL", "count": 1},
+        ],
+    },
+    "ENG": {
+        "nickname": "Three Lions",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/8/8d/England_national_football_team_crest.svg",
+        "colors": {"primary": "#FFFFFF", "secondary": "#CE1124", "accent": "#001489"},
+        "coach": {"name": "Thomas Tuchel", "nationality_code": "de"},
+        "wc_appearances": 17,
+        "wc_best_finish": "Champions 1966",
+        "wc_titles": 1,
+        "honours": [{"label": "WC", "count": 1}],
+    },
+    "BRA": {
+        "nickname": "Seleção",
+        "confederation": "CONMEBOL",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/2/27/Brazilian_Football_Confederation_logo.svg",
+        "colors": {"primary": "#FEDF00", "secondary": "#009C3B", "accent": "#002776"},
+        "coach": {"name": "Carlo Ancelotti", "nationality_code": "it"},
+        "wc_appearances": 23,
+        "wc_best_finish": "Champions × 5 (1958, 1962, 1970, 1994, 2002)",
+        "wc_titles": 5,
+        "honours": [
+            {"label": "WC", "count": 5}, {"label": "Copa", "count": 9},
+            {"label": "Confed", "count": 4},
+        ],
+    },
+    "POR": {
+        "nickname": "A Seleção",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/2/2c/FPF_logo.svg",
+        "colors": {"primary": "#FF0000", "secondary": "#006600", "accent": "#FFCC00"},
+        "coach": {"name": "Roberto Martínez", "nationality_code": "es"},
+        "wc_appearances": 9,
+        "wc_best_finish": "3rd place 1966",
+        "wc_titles": 0,
+        "honours": [{"label": "Euro", "count": 1}, {"label": "UNL", "count": 1}],
+    },
+    "NED": {
+        "nickname": "Oranje",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/0/04/Royal_Dutch_Football_Association_logo.svg",
+        "colors": {"primary": "#FF6900", "secondary": "#FFFFFF", "accent": "#003DA5"},
+        "coach": {"name": "Ronald Koeman", "nationality_code": "nl"},
+        "wc_appearances": 12,
+        "wc_best_finish": "Final × 3 (1974, 1978, 2010)",
+        "wc_titles": 0,
+        "honours": [{"label": "Euro", "count": 1}],
+    },
+    "BEL": {
+        "nickname": "Red Devils",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/3/30/Royal_Belgian_Football_Association.svg",
+        "colors": {"primary": "#EF3340", "secondary": "#FAE042", "accent": "#000000"},
+        "coach": {"name": "Rudi Garcia", "nationality_code": "fr"},
+        "wc_appearances": 14,
+        "wc_best_finish": "3rd place 2018",
+        "wc_titles": 0,
+        "honours": [],
+    },
+    "GER": {
+        "nickname": "Die Mannschaft",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/a/ac/DFB-Logo.svg",
+        "colors": {"primary": "#000000", "secondary": "#DD0000", "accent": "#FFCE00"},
+        "coach": {"name": "Julian Nagelsmann", "nationality_code": "de"},
+        "wc_appearances": 21,
+        "wc_best_finish": "Champions × 4 (1954, 1974, 1990, 2014)",
+        "wc_titles": 4,
+        "honours": [
+            {"label": "WC", "count": 4}, {"label": "Euro", "count": 3},
+            {"label": "Confed", "count": 1},
+        ],
+    },
+    "CRO": {
+        "nickname": "Vatreni",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/2/29/Croatia_FA_logo.svg",
+        "colors": {"primary": "#FF0000", "secondary": "#FFFFFF", "accent": "#171796"},
+        "coach": {"name": "Zlatko Dalić", "nationality_code": "hr"},
+        "wc_appearances": 7,
+        "wc_best_finish": "Final 2018, 3rd 2022",
+        "wc_titles": 0,
+        "honours": [],
+    },
+    "URY": {
+        "nickname": "La Celeste",
+        "confederation": "CONMEBOL",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/1/15/Uruguay_national_football_team_crest.svg",
+        "colors": {"primary": "#75AADB", "secondary": "#FFFFFF", "accent": "#000000"},
+        "coach": {"name": "Marcelo Bielsa", "nationality_code": "ar"},
+        "wc_appearances": 14,
+        "wc_best_finish": "Champions × 2 (1930, 1950)",
+        "wc_titles": 2,
+        "honours": [{"label": "WC", "count": 2}, {"label": "Copa", "count": 15}],
+    },
+    "COL": {
+        "nickname": "Los Cafeteros",
+        "confederation": "CONMEBOL",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/en/3/34/Colombia_national_football_team_logo.svg",
+        "colors": {"primary": "#FFCD00", "secondary": "#003893", "accent": "#CE1126"},
+        "coach": {"name": "Néstor Lorenzo", "nationality_code": "ar"},
+        "wc_appearances": 7,
+        "wc_best_finish": "Quarter-final 2014",
+        "wc_titles": 0,
+        "honours": [{"label": "Copa", "count": 1}],
+    },
+    "MAR": {
+        "nickname": "Atlas Lions",
+        "confederation": "CAF",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/c/c7/FRMF_logo.svg",
+        "colors": {"primary": "#C1272D", "secondary": "#006233", "accent": "#FFFFFF"},
+        "coach": {"name": "Walid Regragui", "nationality_code": "ma"},
+        "wc_appearances": 7,
+        "wc_best_finish": "4th place 2022",
+        "wc_titles": 0,
+        "honours": [{"label": "AFCON", "count": 1}],
+    },
+    "USA": {
+        "nickname": "The Stars and Stripes",
+        "confederation": "CONCACAF",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/a/a5/United_States_Soccer_Federation_logo_2016.svg",
+        "colors": {"primary": "#002868", "secondary": "#BF0A30", "accent": "#FFFFFF"},
+        "coach": {"name": "Mauricio Pochettino", "nationality_code": "ar"},
+        "wc_appearances": 11,
+        "wc_best_finish": "3rd place 1930",
+        "wc_titles": 0,
+        "honours": [{"label": "Gold Cup", "count": 8}],
+    },
+    "SUI": {
+        "nickname": "Nati",
+        "confederation": "UEFA",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Swiss_Football_Association_logo.svg",
+        "colors": {"primary": "#FF0000", "secondary": "#FFFFFF", "accent": "#000000"},
+        "coach": {"name": "Murat Yakin", "nationality_code": "ch"},
+        "wc_appearances": 12,
+        "wc_best_finish": "Quarter-final (1934, 1938, 1954)",
+        "wc_titles": 0,
+        "honours": [],
+    },
+    "JPN": {
+        "nickname": "Samurai Blue",
+        "confederation": "AFC",
+        "federation_crest": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Japan_Football_Association.svg",
+        "colors": {"primary": "#BC002D", "secondary": "#FFFFFF", "accent": "#07045E"},
+        "coach": {"name": "Hajime Moriyasu", "nationality_code": "jp"},
+        "wc_appearances": 8,
+        "wc_best_finish": "Round of 16 (2002, 2010, 2018, 2022)",
+        "wc_titles": 0,
+        "honours": [{"label": "Asian Cup", "count": 4}],
+    },
+    # ----- Tier 2 stubs (rank 18-49). Nickname + colors + confederation so
+    # the renderer paints the right palette. Coach / WC history / honours
+    # to be curated progressively — empty/null fields are dropped gracefully
+    # by the template. -----
+    "SEN": {"nickname": "Lions of Teranga", "confederation": "CAF",  "colors": {"primary": "#00853F", "secondary": "#FDEF42", "accent": "#E31B23"}},
+    "KOR": {"nickname": "Taeguk Warriors",  "confederation": "AFC",  "colors": {"primary": "#003478", "secondary": "#FFFFFF", "accent": "#C60C30"}},
+    "MEX": {"nickname": "El Tri",            "confederation": "CONCACAF", "colors": {"primary": "#006847", "secondary": "#FFFFFF", "accent": "#CE1126"}},
+    "ECU": {"nickname": "La Tri",            "confederation": "CONMEBOL", "colors": {"primary": "#FFD100", "secondary": "#0072CE", "accent": "#EF3340"}},
+    "AUT": {"nickname": "Das Team",          "confederation": "UEFA", "colors": {"primary": "#ED2939", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "SWE": {"nickname": "Blågult",           "confederation": "UEFA", "colors": {"primary": "#006AA7", "secondary": "#FECC00", "accent": "#FFFFFF"}},
+    "TUR": {"nickname": "Crescent-Stars",    "confederation": "UEFA", "colors": {"primary": "#E30A17", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "AUS": {"nickname": "Socceroos",         "confederation": "AFC",  "colors": {"primary": "#FFCD00", "secondary": "#00843D", "accent": "#012169"}},
+    "CIV": {"nickname": "Les Éléphants",     "confederation": "CAF",  "colors": {"primary": "#F77F00", "secondary": "#FFFFFF", "accent": "#009E60"}},
+    "EGY": {"nickname": "Pharaohs",          "confederation": "CAF",  "colors": {"primary": "#CE1126", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "NOR": {"nickname": "Drillos",           "confederation": "UEFA", "colors": {"primary": "#EF2B2D", "secondary": "#002868", "accent": "#FFFFFF"}},
+    "SCO": {"nickname": "Tartan Army",       "confederation": "UEFA", "colors": {"primary": "#0065BD", "secondary": "#FFFFFF", "accent": "#3B3B3B"}},
+    "CAN": {"nickname": "Canucks",           "confederation": "CONCACAF", "colors": {"primary": "#FF0000", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "PAR": {"nickname": "La Albirroja",      "confederation": "CONMEBOL", "colors": {"primary": "#D52B1E", "secondary": "#FFFFFF", "accent": "#0038A8"}},
+    "TUN": {"nickname": "Eagles of Carthage","confederation": "CAF",  "colors": {"primary": "#E70013", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "CZE": {"nickname": "Národní tým",       "confederation": "UEFA", "colors": {"primary": "#11457E", "secondary": "#FFFFFF", "accent": "#D7141A"}},
+    "ALG": {"nickname": "Les Fennecs",       "confederation": "CAF",  "colors": {"primary": "#006633", "secondary": "#FFFFFF", "accent": "#C8102E"}},
+    "PAN": {"nickname": "Marea Roja",        "confederation": "CONCACAF", "colors": {"primary": "#DA121A", "secondary": "#005AA7", "accent": "#FFFFFF"}},
+    "GHA": {"nickname": "Black Stars",       "confederation": "CAF",  "colors": {"primary": "#CE1126", "secondary": "#FCD116", "accent": "#006B3F"}},
+    "COD": {"nickname": "Léopards",          "confederation": "CAF",  "colors": {"primary": "#007FFF", "secondary": "#F7D618", "accent": "#CE1021"}},
+    "IRN": {"nickname": "Team Melli",        "confederation": "AFC",  "colors": {"primary": "#239F40", "secondary": "#FFFFFF", "accent": "#DA0000"}},
+    "KSA": {"nickname": "Green Falcons",     "confederation": "AFC",  "colors": {"primary": "#006C35", "secondary": "#FFFFFF", "accent": "#FFFFFF"}},
+    "QAT": {"nickname": "Al-Annabi",         "confederation": "AFC",  "colors": {"primary": "#8A1538", "secondary": "#FFFFFF", "accent": "#000000"}},
+    "JOR": {"nickname": "Al-Nashama",        "confederation": "AFC",  "colors": {"primary": "#CE1126", "secondary": "#FFFFFF", "accent": "#007A3D"}},
+    "IRQ": {"nickname": "Lions of Mesopotamia", "confederation": "AFC", "colors": {"primary": "#CE1126", "secondary": "#FFFFFF", "accent": "#007A3D"}},
+    "UZB": {"nickname": "Oq Bo'rilar",       "confederation": "AFC",  "colors": {"primary": "#1EB53A", "secondary": "#FFFFFF", "accent": "#0099B5"}},
+    "RSA": {"nickname": "Bafana Bafana",     "confederation": "CAF",  "colors": {"primary": "#007A4D", "secondary": "#FFB81C", "accent": "#DE3831"}},
+    "BIH": {"nickname": "Zmajevi",           "confederation": "UEFA", "colors": {"primary": "#002F6C", "secondary": "#FECB00", "accent": "#FFFFFF"}},
+    "CPV": {"nickname": "Tubarões Azuis",    "confederation": "CAF",  "colors": {"primary": "#003893", "secondary": "#FFFFFF", "accent": "#CF2027"}},
+    "HAI": {"nickname": "Les Grenadiers",    "confederation": "CONCACAF", "colors": {"primary": "#00209F", "secondary": "#D21034", "accent": "#FFFFFF"}},
+    "NZL": {"nickname": "All Whites",         "confederation": "OFC",  "colors": {"primary": "#FFFFFF", "secondary": "#000000", "accent": "#012169"}},
+    "CUW": {"nickname": "Bida i Skuadra",    "confederation": "CONCACAF", "colors": {"primary": "#002B7F", "secondary": "#F9E814", "accent": "#FFFFFF"}},
+}
+
+
+# ---------------------------------------------------------------------------
+# Head coaches — single reviewable block for all 48. Hand-maintained (no free
+# live source). nationality_code is the a2 for the inline flag. Verify before
+# the tournament; managers do change. Confidence noted where lower.
+# ---------------------------------------------------------------------------
+COACHES: dict[str, dict] = {
+    # --- top 16 (cross-checked vs the user's examples) ---
+    "ARG": {"name": "Lionel Scaloni", "nationality_code": "ar"},
+    "FRA": {"name": "Didier Deschamps", "nationality_code": "fr"},
+    "ESP": {"name": "Luis de la Fuente", "nationality_code": "es"},
+    "ENG": {"name": "Thomas Tuchel", "nationality_code": "de"},
+    "BRA": {"name": "Carlo Ancelotti", "nationality_code": "it"},
+    "POR": {"name": "Roberto Martínez", "nationality_code": "es"},
+    "NED": {"name": "Ronald Koeman", "nationality_code": "nl"},
+    "BEL": {"name": "Rudi Garcia", "nationality_code": "fr"},
+    "GER": {"name": "Julian Nagelsmann", "nationality_code": "de"},
+    "CRO": {"name": "Zlatko Dalić", "nationality_code": "hr"},
+    "URY": {"name": "Marcelo Bielsa", "nationality_code": "ar"},
+    "COL": {"name": "Néstor Lorenzo", "nationality_code": "ar"},
+    "MAR": {"name": "Walid Regragui", "nationality_code": "ma"},
+    "USA": {"name": "Mauricio Pochettino", "nationality_code": "ar"},
+    "SUI": {"name": "Murat Yakin", "nationality_code": "ch"},
+    "JPN": {"name": "Hajime Moriyasu", "nationality_code": "jp"},
+    # --- tier 2 ---
+    "SEN": {"name": "Pape Thiaw", "nationality_code": "sn"},
+    "KOR": {"name": "Hong Myung-bo", "nationality_code": "kr"},
+    "MEX": {"name": "Javier Aguirre", "nationality_code": "mx"},
+    "ECU": {"name": "Sebastián Beccacece", "nationality_code": "ar"},
+    "AUT": {"name": "Ralf Rangnick", "nationality_code": "de"},
+    "SWE": {"name": "Jon Dahl Tomasson", "nationality_code": "dk"},
+    "TUR": {"name": "Vincenzo Montella", "nationality_code": "it"},
+    "AUS": {"name": "Tony Popovic", "nationality_code": "au"},
+    "CIV": {"name": "Emerse Faé", "nationality_code": "ci"},
+    "EGY": {"name": "Hossam Hassan", "nationality_code": "eg"},
+    "NOR": {"name": "Ståle Solbakken", "nationality_code": "no"},
+    "CAN": {"name": "Jesse Marsch", "nationality_code": "us"},
+    "PAR": {"name": "Gustavo Alfaro", "nationality_code": "ar"},
+    "TUN": {"name": "Sabri Lamouchi", "nationality_code": "fr"},
+    "CZE": {"name": "Ivan Hašek", "nationality_code": "cz"},
+    "ALG": {"name": "Vladimir Petković", "nationality_code": "ch"},
+    "PAN": {"name": "Thomas Christiansen", "nationality_code": "dk"},
+    "GHA": {"name": "Otto Addo", "nationality_code": "gh"},
+    "COD": {"name": "Sébastien Desabre", "nationality_code": "fr"},
+    "IRN": {"name": "Amir Ghalenoei", "nationality_code": "ir"},
+    "KSA": {"name": "Giorgos Donis", "nationality_code": "gr"},
+    "QAT": {"name": "Julen Lopetegui", "nationality_code": "es"},
+    "JOR": {"name": "Jamal Sellami", "nationality_code": "ma"},
+    "IRQ": {"name": "Graham Arnold", "nationality_code": "au"},
+    "UZB": {"name": "Fabio Cannavaro", "nationality_code": "it"},
+    "RSA": {"name": "Hugo Broos", "nationality_code": "be"},
+    "BIH": {"name": "Sergej Barbarez", "nationality_code": "ba"},
+    "CPV": {"name": "Pedro Brito \"Bubista\"", "nationality_code": "cv"},
+    "HAI": {"name": "Sébastien Migné", "nationality_code": "fr"},
+    "NZL": {"name": "Darren Bazeley", "nationality_code": "gb-eng"},
+    "CUW": {"name": "Dick Advocaat", "nationality_code": "nl"},
+    "SCO": {"name": "Steve Clarke", "nationality_code": "gb-sct"},
+}
+
+
+# Continental honours for tier-2 nations (marquees carry theirs in
+# NATION_PROFILES). WC titles are derived separately, never listed here.
+CONTINENTAL_HONOURS: dict[str, list[dict]] = {
+    "SEN": [{"label": "AFCON", "count": 1}],
+    "EGY": [{"label": "AFCON", "count": 7}],
+    "MEX": [{"label": "Gold Cup", "count": 9}],
+    "KOR": [{"label": "Asian Cup", "count": 2}],
+    "IRN": [{"label": "Asian Cup", "count": 3}],
+    "KSA": [{"label": "Asian Cup", "count": 3}],
+    "CIV": [{"label": "AFCON", "count": 3}],
+    "ALG": [{"label": "AFCON", "count": 2}],
+    "GHA": [{"label": "AFCON", "count": 4}],
+    "TUN": [{"label": "AFCON", "count": 1}],
+    "RSA": [{"label": "AFCON", "count": 1}],
+    "COD": [{"label": "AFCON", "count": 2}],
+    "CAN": [{"label": "Gold Cup", "count": 1}],
+    "PAR": [{"label": "Copa", "count": 2}],
+    "JOR": [],
+    "QAT": [{"label": "Asian Cup", "count": 2}],
+    "AUS": [{"label": "Asian Cup", "count": 1}],
+}
+
+
+# ---------------------------------------------------------------------------
+# Federation crests — the real association emblems (FFF cockerel, FA three
+# lions, CBF…), NOT flags. Sourced once from TheSportsDB (free, crowd-sourced
+# team badges), all 512×512 PNGs on a stable CDN. 48/48. The nation showcase
+# slide n1 shows this as a small inset beside the big flag hero.
+#   football-data crests were flags, not emblems — that's why they're not used.
+#   Refresh by re-running the TheSportsDB searchteams fetch if a logo updates.
+# ---------------------------------------------------------------------------
+NATION_CREST: dict[str, str] = {
+    "ALG": "https://r2.thesportsdb.com/images/media/team/badge/rrwpry1455460218.png",
+    "ARG": "https://r2.thesportsdb.com/images/media/team/badge/3zplhu1726167477.png",
+    "AUS": "https://r2.thesportsdb.com/images/media/team/badge/lark6k1661780848.png",
+    "AUT": "https://r2.thesportsdb.com/images/media/team/badge/874p631628721400.png",
+    "BEL": "https://r2.thesportsdb.com/images/media/team/badge/8xlvxv1592062265.png",
+    "BIH": "https://r2.thesportsdb.com/images/media/team/badge/hu9lj21739378200.png",
+    "BRA": "https://r2.thesportsdb.com/images/media/team/badge/jl6dip1726167280.png",
+    "CAN": "https://r2.thesportsdb.com/images/media/team/badge/2t631f1595154867.png",
+    "CIV": "https://r2.thesportsdb.com/images/media/team/badge/rwxuuu1455465643.png",
+    "COD": "https://r2.thesportsdb.com/images/media/team/badge/s85jjw1728749022.png",
+    "COL": "https://r2.thesportsdb.com/images/media/team/badge/4ymyku1691180081.png",
+    "CPV": "https://r2.thesportsdb.com/images/media/team/badge/5jn0o71593280376.png",
+    "CRO": "https://r2.thesportsdb.com/images/media/team/badge/vvtsyu1455465317.png",
+    "CUW": "https://r2.thesportsdb.com/images/media/team/badge/itygvb1600955363.png",
+    "CZE": "https://r2.thesportsdb.com/images/media/team/badge/1o0cx31654205806.png",
+    "ECU": "https://r2.thesportsdb.com/images/media/team/badge/47wv2y1591989301.png",
+    "EGY": "https://r2.thesportsdb.com/images/media/team/badge/uheyzo1742102234.png",
+    "ENG": "https://r2.thesportsdb.com/images/media/team/badge/vf5ttc1726166739.png",
+    "ESP": "https://r2.thesportsdb.com/images/media/team/badge/ncgqyr1726166942.png",
+    "FRA": "https://r2.thesportsdb.com/images/media/team/badge/p3n0z51726166851.png",
+    "GER": "https://r2.thesportsdb.com/images/media/team/badge/1xysi51726167152.png",
+    "GHA": "https://r2.thesportsdb.com/images/media/team/badge/j589xw1751526124.png",
+    "HAI": "https://r2.thesportsdb.com/images/media/team/badge/gml8wx1598135302.png",
+    "IRN": "https://r2.thesportsdb.com/images/media/team/badge/uttpvw1455465617.png",
+    "IRQ": "https://r2.thesportsdb.com/images/media/team/badge/aqidfn1742100110.png",
+    "JOR": "https://r2.thesportsdb.com/images/media/team/badge/59fo2s1742100034.png",
+    "JPN": "https://r2.thesportsdb.com/images/media/team/badge/ffsyxz1591989843.png",
+    "KOR": "https://r2.thesportsdb.com/images/media/team/badge/a8nqfs1589564916.png",
+    "KSA": "https://r2.thesportsdb.com/images/media/team/badge/24xwpq1594125742.png",
+    "MAR": "https://r2.thesportsdb.com/images/media/team/badge/hbmwkj1731791275.png",
+    "MEX": "https://r2.thesportsdb.com/images/media/team/badge/3rmosi1748525208.png",
+    "NED": "https://r2.thesportsdb.com/images/media/team/badge/1p0hr41593787110.png",
+    "NOR": "https://r2.thesportsdb.com/images/media/team/badge/gyfn811591973155.png",
+    "NZL": "https://r2.thesportsdb.com/images/media/team/badge/91xpk81742982935.png",
+    "PAN": "https://r2.thesportsdb.com/images/media/team/badge/asp2ck1715849700.png",
+    "PAR": "https://r2.thesportsdb.com/images/media/team/badge/khgav41553419195.png",
+    "POR": "https://r2.thesportsdb.com/images/media/team/badge/swqvpy1455466083.png",
+    "QAT": "https://r2.thesportsdb.com/images/media/team/badge/rs3ir31642708685.png",
+    "RSA": "https://r2.thesportsdb.com/images/media/team/badge/xjz9j91553368824.png",
+    "SCO": "https://r2.thesportsdb.com/images/media/team/badge/3691i11552945146.png",
+    "SEN": "https://www.thesportsdb.com/images/media/team/badge/slayb01780546342.png",
+    "SUI": "https://r2.thesportsdb.com/images/media/team/badge/mb7yqe1717365808.png",
+    "SWE": "https://r2.thesportsdb.com/images/media/team/badge/h5adzg1591981772.png",
+    "TUN": "https://r2.thesportsdb.com/images/media/team/badge/7r89rg1526727277.png",
+    "TUR": "https://r2.thesportsdb.com/images/media/team/badge/70c4oo1591982459.png",
+    "URY": "https://r2.thesportsdb.com/images/media/team/badge/6vjbr11726167756.png",
+    "USA": "https://r2.thesportsdb.com/images/media/team/badge/86mluc1731001482.png",
+    "UZB": "https://r2.thesportsdb.com/images/media/team/badge/u5bgze1597943605.png",
+}
+
+
+# ---------------------------------------------------------------------------
+# "Players to watch" — the rising / under-the-radar names worth keeping an eye
+# on per nation, distinct from the marquee star in STARS. Used in slide 2 of
+# the nation showcase, names-only (no photo) to stay compact.
+# ---------------------------------------------------------------------------
+PLAYERS_TO_WATCH: dict[str, list[str]] = {
+    "ARG": ["Julián Álvarez", "Alejandro Garnacho"],
+    "FRA": ["Désiré Doué", "William Saliba"],
+    "ESP": ["Lamine Yamal", "Pedri"],
+    "ENG": ["Bukayo Saka", "Cole Palmer"],
+    "BRA": ["Endrick", "Estêvão Willian"],
+    "POR": ["João Neves", "Rafael Leão"],
+    "NED": ["Xavi Simons", "Cody Gakpo"],
+    "BEL": ["Jérémy Doku", "Charles De Ketelaere"],
+    "GER": ["Florian Wirtz", "Karim Adeyemi"],
+    "CRO": ["Joško Gvardiol", "Petar Sučić"],
+    "URY": ["Manuel Ugarte", "Maximiliano Araújo"],
+    "COL": ["Jhon Durán", "James Rodríguez"],
+    "MAR": ["Bilal El Khannouss", "Brahim Díaz"],
+    "USA": ["Yunus Musah", "Folarin Balogun"],
+    "SUI": ["Manuel Akanji", "Breel Embolo"],
+    "JPN": ["Takefusa Kubo", "Kaoru Mitoma"],
+    # --- tier 2 ---
+    "SEN": ["Nicolas Jackson", "Pape Matar Sarr"],
+    "KOR": ["Lee Kang-in", "Kim Min-jae"],
+    "MEX": ["Edson Álvarez", "Gilberto Mora"],
+    "ECU": ["Kendry Páez", "Piero Hincapié"],
+    "AUT": ["Konrad Laimer", "Marcel Sabitzer"],
+    "SWE": ["Viktor Gyökeres", "Dejan Kulusevski"],
+    "TUR": ["Kenan Yıldız", "Hakan Çalhanoğlu"],
+    "AUS": ["Nestory Irankunda", "Garang Kuol"],
+    "CIV": ["Amad Diallo", "Simon Adingra"],
+    "EGY": ["Omar Marmoush", "Mostafa Mohamed"],
+    "NOR": ["Martin Ødegaard", "Antonio Nusa"],
+    "CAN": ["Jonathan David", "Tani Oluwaseyi"],
+    "PAR": ["Julio Enciso", "Diego Gómez"],
+    "TUN": ["Elyes Skhiri", "Montassar Talbi"],
+    "CZE": ["Adam Hložek", "Tomáš Souček"],
+    "ALG": ["Houssem Aouar", "Ismaël Bennacer"],
+    "PAN": ["Ismael Díaz", "Michael Murillo"],
+    "GHA": ["Antoine Semenyo", "Thomas Partey"],
+    "COD": ["Silas Katompa", "Chancel Mbemba"],
+    "IRN": ["Sardar Azmoun", "Mehdi Ghayedi"],
+    "KSA": ["Firas Al-Buraikan", "Saud Abdulhamid"],
+    "QAT": ["Almoez Ali", "Hassan Al-Haydos"],
+    "JOR": ["Yazan Al-Naimat", "Nizar Al-Rashdan"],
+    "UZB": ["Abbosbek Fayzullaev", "Khusayin Norchaev"],
+    "RSA": ["Percy Tau", "Relebohile Mofokeng"],
+    "BIH": ["Amar Dedić", "Benjamin Šeško"],
+    "CPV": ["Jovane Cabral", "Gilson Tavares"],
+    "HAI": ["Danley Jean Jacques", "Duckens Nazon"],
+    "NZL": ["Marko Stamenić", "Liberato Cacace"],
+    "CUW": ["Juninho Bacuna", "Jürgen Locadia"],
+    "SCO": ["Billy Gilmour", "Andrew Robertson"],
+    "IRQ": ["Zidane Iqbal", "Ali Jasim"],
+}
+
+
+# ---------------------------------------------------------------------------
+# Per-nation curated key players ("stars"). The FIRST entry is the marquee
+# (used by the nation showcase slide). Selection criteria, in order:
+#   1. International recognition (Ballon d'Or, big-club captain, talisman)
+#   2. Recent club form (UCL contenders preferred)
+#   3. Caps + goals for the national team
+# Nations not listed fall back to live API squad order (no club / stat shown).
 # ---------------------------------------------------------------------------
 STARS: dict[str, list[dict]] = {
     "FRA": [
@@ -145,6 +593,54 @@ STARS: dict[str, list[dict]] = {
         {"name": "Brahim Díaz", "club": "Real Madrid", "stat": "Silky playmaker"},
         {"name": "Sofyan Amrabat", "club": "Fiorentina", "stat": "Midfield shield"},
     ],
+    "COL": [
+        {"name": "Luis Díaz", "club": "Liverpool", "stat": "Direct, fearless winger"},
+        {"name": "James Rodríguez", "club": "Rayo Vallecano", "stat": "Creative captain"},
+        {"name": "Daniel Muñoz", "club": "Crystal Palace", "stat": "Marauding full-back"},
+    ],
+    "JPN": [
+        {"name": "Wataru Endo", "club": "Liverpool", "stat": "Captain & midfield anchor"},
+        {"name": "Kaoru Mitoma", "club": "Brighton", "stat": "Premier League dribbler"},
+        {"name": "Takefusa Kubo", "club": "Real Sociedad", "stat": "Mr. Right Foot"},
+    ],
+    "SUI": [
+        {"name": "Granit Xhaka", "club": "Bayer Leverkusen", "stat": "Bundesliga champion & captain"},
+        {"name": "Manuel Akanji", "club": "Man City", "stat": "Defensive rock"},
+        {"name": "Breel Embolo", "club": "Monaco", "stat": "Focal-point striker"},
+    ],
+    # --- tier 2 (marquee star only; the slide shows the first) ---
+    "SEN": [{"name": "Sadio Mané", "club": "Al-Nassr", "stat": "Talisman & all-time top scorer"}],
+    "KOR": [{"name": "Son Heung-min", "club": "LAFC", "stat": "Captain & icon"}],
+    "MEX": [{"name": "Santiago Giménez", "club": "AC Milan", "stat": "Lead striker"}],
+    "ECU": [{"name": "Moisés Caicedo", "club": "Chelsea", "stat": "Midfield engine"}],
+    "AUT": [{"name": "David Alaba", "club": "Real Madrid", "stat": "Veteran leader"}],
+    "SWE": [{"name": "Alexander Isak", "club": "Liverpool", "stat": "Elite finisher"}],
+    "TUR": [{"name": "Arda Güler", "club": "Real Madrid", "stat": "Generational playmaker"}],
+    "AUS": [{"name": "Mathew Ryan", "club": "Roma", "stat": "Captain & keeper"}],
+    "CIV": [{"name": "Franck Kessié", "club": "Al-Ahli", "stat": "Midfield powerhouse"}],
+    "EGY": [{"name": "Mohamed Salah", "club": "Liverpool", "stat": "Egypt's all-time great"}],
+    "NOR": [{"name": "Erling Haaland", "club": "Man City", "stat": "Goal machine"}],
+    "CAN": [{"name": "Alphonso Davies", "club": "Bayern Munich", "stat": "Flying full-back"}],
+    "PAR": [{"name": "Miguel Almirón", "club": "Atlanta United", "stat": "Pace & energy"}],
+    "TUN": [{"name": "Hannibal Mejbri", "club": "Burnley", "stat": "Midfield spark"}],
+    "CZE": [{"name": "Patrik Schick", "club": "Bayer Leverkusen", "stat": "Clinical striker"}],
+    "ALG": [{"name": "Riyad Mahrez", "club": "Al-Ahli", "stat": "Magic left foot"}],
+    "PAN": [{"name": "Adalberto Carrasquilla", "club": "Pumas", "stat": "Midfield metronome"}],
+    "GHA": [{"name": "Mohammed Kudus", "club": "Tottenham", "stat": "Explosive attacker"}],
+    "COD": [{"name": "Yoane Wissa", "club": "Newcastle", "stat": "Versatile forward"}],
+    "IRN": [{"name": "Mehdi Taremi", "club": "Inter", "stat": "Lethal centre-forward"}],
+    "KSA": [{"name": "Salem Al-Dawsari", "club": "Al-Hilal", "stat": "Match-winner"}],
+    "QAT": [{"name": "Akram Afif", "club": "Al-Sadd", "stat": "Asian Cup star"}],
+    "JOR": [{"name": "Mousa Al-Tamari", "club": "Montpellier", "stat": "Dynamic winger"}],
+    "UZB": [{"name": "Eldor Shomurodov", "club": "Roma", "stat": "Focal striker"}],
+    "RSA": [{"name": "Lyle Foster", "club": "Burnley", "stat": "Lead striker"}],
+    "BIH": [{"name": "Edin Džeko", "club": "Fenerbahçe", "stat": "Record goalscorer"}],
+    "CPV": [{"name": "Ryan Mendes", "club": "Al-Wakrah", "stat": "Captain & creator"}],
+    "HAI": [{"name": "Frantzdy Pierrot", "club": "Gaziantep", "stat": "Target man"}],
+    "NZL": [{"name": "Chris Wood", "club": "Nottingham Forest", "stat": "Premier League striker"}],
+    "CUW": [{"name": "Leandro Bacuna", "club": "free agent", "stat": "Experienced leader"}],
+    "SCO": [{"name": "Scott McTominay", "club": "Napoli", "stat": "Serie A champion"}],
+    "IRQ": [{"name": "Aymen Hussein", "club": "Al-Qadsiah", "stat": "Lead striker"}],
 }
 
 # ---------------------------------------------------------------------------
@@ -305,6 +801,19 @@ STADIUM_PUBLISH_ORDER: list[str] = [
     "Lumen Field",             # 15 Jun
     "Hard Rock Stadium",       # 15 Jun
     "Arrowhead Stadium",       # 17 Jun
+]
+
+
+# Pre-tournament nation showcase campaign: 48 posts, one per nation, dripped
+# 4×/day (every 6h). Order is "earliest first group match first" so each
+# nation's profile lands ahead of (or around) its opening fixture.
+NATION_PUBLISH_ORDER: list[str] = [
+    "MEX", "RSA", "CZE", "KOR", "BIH", "CAN", "PAR", "USA",   # 11–12 Jun openers
+    "QAT", "SUI", "BRA", "MAR", "HAI", "SCO", "AUS", "TUR",   # 13–14 Jun
+    "CUW", "GER", "JPN", "NED", "CIV", "ECU", "SWE", "TUN",   # 14–15 Jun
+    "CPV", "ESP", "BEL", "EGY", "KSA", "URY", "IRN", "NZL",   # 15–16 Jun
+    "FRA", "SEN", "IRQ", "NOR", "ALG", "ARG", "AUT", "JOR",   # 16–17 Jun
+    "COD", "POR", "CRO", "ENG", "GHA", "PAN", "COL", "UZB",   # 17–18 Jun
 ]
 
 # Local timezone per venue for summer 2026 (UTC offset hours, short label).
@@ -501,6 +1010,67 @@ def alpha2(tla: str) -> str:
 
 def stars_for(tla: str) -> list[dict]:
     return STARS.get((tla or "").upper(), [])
+
+
+def profile_for(tla: str) -> dict | None:
+    """Editorial profile for a nation showcase post. None if not yet curated."""
+    return NATION_PROFILES.get((tla or "").upper())
+
+
+def crest_for(tla: str) -> str | None:
+    """Federation crest URL (TheSportsDB). None if unknown."""
+    return NATION_CREST.get((tla or "").upper())
+
+
+def coach_for(tla: str) -> dict | None:
+    """Head coach {name, nationality_code}. None if not on file."""
+    return COACHES.get((tla or "").upper())
+
+
+def continental_honours_for(tla: str) -> list[dict]:
+    """Curated continental honours (Euro/Copa/AFCON…) for tier-2 nations.
+    Marquees carry theirs in NATION_PROFILES; this fills the rest."""
+    return CONTINENTAL_HONOURS.get((tla or "").upper(), [])
+
+
+def players_to_watch_for(tla: str) -> list[str]:
+    """Rising/under-the-radar players to keep an eye on (excludes the star)."""
+    return PLAYERS_TO_WATCH.get((tla or "").upper(), [])
+
+
+def group_for(tla: str) -> tuple[str | None, list[str]]:
+    """Return (group_letter, [4 tlas in that group]) for the given nation.
+
+    Derives the group composition by reverse-walking GROUP_VENUES — each tla
+    appears in 3 pairs, the union is the group. The letter mapping mirrors the
+    GROUP_LETTERS order used in fetch_match's schedule generator (A → L).
+    """
+    tla = (tla or "").upper()
+    members = set()
+    for pair in GROUP_VENUES:
+        if tla in pair:
+            members.update(pair)
+    if not members:
+        return None, []
+    # Group letter: find a representative pair in the canonical group order.
+    GROUP_ORDER = [
+        ("A", {"MEX", "RSA", "KOR", "CZE"}),
+        ("B", {"CAN", "BIH", "QAT", "SUI"}),
+        ("C", {"BRA", "MAR", "HAI", "SCO"}),
+        ("D", {"USA", "PAR", "AUS", "TUR"}),
+        ("E", {"GER", "CUW", "CIV", "ECU"}),
+        ("F", {"NED", "JPN", "SWE", "TUN"}),
+        ("G", {"BEL", "EGY", "IRN", "NZL"}),
+        ("H", {"ESP", "CPV", "KSA", "URY"}),
+        ("I", {"FRA", "SEN", "IRQ", "NOR"}),
+        ("J", {"AUT", "JOR", "ARG", "ALG"}),
+        ("K", {"POR", "COD", "UZB", "COL"}),
+        ("L", {"ENG", "CRO", "GHA", "PAN"}),
+    ]
+    for letter, teams in GROUP_ORDER:
+        if tla in teams:
+            return letter, sorted(teams)
+    return None, sorted(members)
 
 
 def venue(name: str) -> dict | None:

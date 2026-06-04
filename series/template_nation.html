@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Cup 2026 — Nation Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Anton&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="core.css" />
+<link rel="stylesheet" href="slides.css" />
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck"></div>
+</div>
+
+<!-- nav + counter (3-slide carousel) -->
+<button class="nav-btn nav-prev" id="prev" aria-label="Previous">‹</button>
+<button class="nav-btn nav-next" id="next" aria-label="Next">›</button>
+<div class="counter">
+  <span class="lbl" id="cnum">01 / 03</span>
+  <span class="dots" id="dots"></span>
+</div>
+
+<!-- data helpers + the three nation slide modules -->
+<script src="data.js"></script>
+<script src="slides_nation/n1.js"></script>
+<script src="slides_nation/n2.js"></script>
+<script src="slides_nation/n3.js"></script>
+
+<!-- bootstrap: nation reads window.__post (Python injects it, like __match on the
+     match template). Alias it to __match so the shared engine renders it as `m`.
+     ?nation=FRA in the URL picks one of the inline preview payloads below so the
+     designer can flip through representative palettes (FRA blue, BRA yellow/green,
+     ARG light blue, MAR red/green, USA navy/red, ISL first-WC fallback). -->
+<script>
+  window.WC_CONFIG = { slides: ['n1', 'n2', 'n3'] };
+
+  /* ------------------------------------------------------------------
+     Per-nation background gradient — generated INLINE from colors.primary
+     so every nation's carousel echoes its own palette.
+
+     The shared engine (render.js) calls WCF.themeFor(m) to derive --bg.
+     We wrap it so post_type === 'nation' takes the JS-derived gradient,
+     and every other post_type keeps the original dark-jewel themeFor().
+  ------------------------------------------------------------------ */
+  (function () {
+    if (!window.WCF || !window.WCF.themeFor) return;
+    const baseThemeFor = window.WCF.themeFor;
+
+    // hex (#RRGGBB) -> {h,s,l} (h:0..360, s/l:0..1)
+    function hexToHsl(hex) {
+      const m = (hex || '').replace('#', '').match(/^([0-9a-f]{6})$/i);
+      if (!m) return { h: 220, s: 0.5, l: 0.3 };
+      const r = parseInt(m[1].slice(0, 2), 16) / 255;
+      const g = parseInt(m[1].slice(2, 4), 16) / 255;
+      const b = parseInt(m[1].slice(4, 6), 16) / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      let h = 0, s = 0; const l = (mx + mn) / 2;
+      if (mx !== mn) {
+        const d = mx - mn;
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (mx === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h *= 60;
+      }
+      return { h, s, l };
+    }
+    function hsl(c, lPct) {
+      return `hsl(${c.h.toFixed(1)} ${(c.s * 100).toFixed(1)}% ${(lPct * 100).toFixed(1)}%)`;
+    }
+
+    window.WCF.themeFor = function (m) {
+      if (!m || m.post_type !== 'nation') return baseThemeFor(m);
+      const primary = (m.colors && m.colors.primary) || '#17345f';
+      const accent  = (m.colors && (m.colors.accent || m.colors.secondary)) || '#e7b549';
+      const c = hexToHsl(primary);
+
+      // Bright primary nations (white, pale yellow) wash out on a 1080×1350
+      // canvas with white text — clamp lightness so the gradient still reads
+      // as a "dark" background and the WC2026 ghost-mark stays visible.
+      const topL = Math.min(c.l, 0.42);
+      const midL = Math.max(topL - 0.18, 0.06);
+      const botL = Math.max(topL - 0.32, 0.04);
+
+      // Accent gets a lightness floor too so dark accents (deep green, navy)
+      // stay visible as text/numbers on the gradient.
+      const ac = hexToHsl(accent);
+      const accentL = Math.max(ac.l, 0.55);
+      const accentSoft = `hsl(${ac.h.toFixed(1)} ${(ac.s * 100).toFixed(1)}% ${(Math.min(accentL + 0.12, 0.92) * 100).toFixed(1)}%)`;
+      const accentHi   = `hsl(${ac.h.toFixed(1)} ${(ac.s * 100).toFixed(1)}% ${(accentL * 100).toFixed(1)}%)`;
+      // Same hue at 20% alpha for accent-tinted backgrounds.
+      const accentTint = `hsla(${ac.h.toFixed(1)}, ${(ac.s * 100).toFixed(1)}%, ${(accentL * 100).toFixed(1)}%, 0.16)`;
+
+      const deck = document.getElementById('deck');
+      if (deck) {
+        deck.style.setProperty('--accent', accentHi);
+        deck.style.setProperty('--accent-soft', accentSoft);
+        deck.style.setProperty('--accent-tint', accentTint);
+      }
+
+      const top = hsl(c, topL);
+      const mid = hsl(c, midL);
+      const bot = hsl(c, botL);
+      return `radial-gradient(125% 90% at 50% -10%, ${top} 0%, ${mid} 46%, ${bot} 100%)`;
+    };
+  })();
+
+  /* ------------------------------------------------------------------
+     Live-preview payloads. Python injects the real window.__post in
+     production; here we ship a small set so the designer can flip
+     across palettes via ?nation=XXX.
+  ------------------------------------------------------------------ */
+  const PREVIEW = {
+    FRA: {
+      post_id: 'WC2026-N-FRA', post_type: 'nation', post_date: '2026-06-14',
+      tla: 'FRA', code: 'fr', name: 'France', nickname: 'Les Bleus',
+      confederation: 'UEFA',
+      federation_crest: null,
+      colors: { primary: '#0055A4', secondary: '#FFFFFF', accent: '#EF4135' },
+      group_letter: 'I',
+      group_members: ['FRA', 'IRQ', 'NOR', 'SEN'],
+      fixtures: [
+        { kickoff_utc: '2026-06-16T19:00:00Z', opponent_tla: 'SEN', opponent_code: 'sn', opponent_name: 'Senegal', venue: 'MetLife Stadium', matchday: 1 },
+        { kickoff_utc: '2026-06-22T21:00:00Z', opponent_tla: 'IRQ', opponent_code: 'iq', opponent_name: 'Iraq', venue: 'Lincoln Financial Field', matchday: 2 },
+        { kickoff_utc: '2026-06-26T19:00:00Z', opponent_tla: 'NOR', opponent_code: 'no', opponent_name: 'Norway', venue: 'Gillette Stadium', matchday: 3 }
+      ],
+      fifa_rank: 2, squad_value_eur_m: 1530, avg_age: 27,
+      star_player: { name: 'Kylian Mbappé', club: 'Real Madrid', stat: '48 goals for France', photo_url: null },
+      players_to_watch: ['Désiré Doué', 'William Saliba'],
+      coach: { name: 'Didier Deschamps', nationality_code: 'fr' },
+      wc_appearances: 17, wc_best_finish: 'Champions (1998, 2018)', wc_titles: 2,
+      wc_history: [
+        { year: 2022, finish: 'Final' }, { year: 2018, finish: 'Champions' },
+        { year: 2014, finish: 'Quarter-final' }, { year: 2010, finish: 'Group stage' },
+        { year: 2006, finish: 'Final' }
+      ],
+      is_first_wc: false,
+      honours: [
+        { label: 'WC', count: 2 }, { label: 'Euro', count: 2 },
+        { label: 'Conf. Cup', count: 2 }, { label: 'UNL', count: 1 }
+      ],
+      quali_pct: 92, predicted_round: 'Final'
+    },
+
+    BRA: {
+      post_id: 'WC2026-N-BRA', post_type: 'nation', post_date: '2026-06-14',
+      tla: 'BRA', code: 'br', name: 'Brazil', nickname: 'Seleção',
+      confederation: 'CONMEBOL',
+      federation_crest: null,
+      colors: { primary: '#009B3A', secondary: '#FFDF00', accent: '#FFDF00' },
+      group_letter: 'D', group_members: ['BRA', 'CMR', 'JPN', 'TUN'],
+      fixtures: [
+        { kickoff_utc: '2026-06-15T22:00:00Z', opponent_tla: 'CMR', opponent_code: 'cm', opponent_name: 'Cameroon', venue: 'SoFi Stadium', matchday: 1 },
+        { kickoff_utc: '2026-06-21T20:00:00Z', opponent_tla: 'JPN', opponent_code: 'jp', opponent_name: 'Japan', venue: 'Levi\u2019s Stadium', matchday: 2 },
+        { kickoff_utc: '2026-06-25T22:00:00Z', opponent_tla: 'TUN', opponent_code: 'tn', opponent_name: 'Tunisia', venue: 'AT&T Stadium', matchday: 3 }
+      ],
+      fifa_rank: 5, squad_value_eur_m: 1180, avg_age: 26,
+      star_player: { name: 'Vinícius Jr.', club: 'Real Madrid', stat: '34 goals for Brazil', photo_url: null },
+      players_to_watch: ['Endrick', 'Rodrygo'],
+      coach: { name: 'Dorival Júnior', nationality_code: 'br' },
+      wc_appearances: 22, wc_best_finish: 'Champions (1958, 1962, 1970, 1994, 2002)', wc_titles: 5,
+      wc_history: [
+        { year: 2022, finish: 'Quarter-final' }, { year: 2018, finish: 'Quarter-final' },
+        { year: 2014, finish: 'Fourth' }, { year: 2010, finish: 'Quarter-final' },
+        { year: 2006, finish: 'Quarter-final' }
+      ],
+      is_first_wc: false,
+      honours: [
+        { label: 'WC', count: 5 }, { label: 'Copa', count: 9 }, { label: 'Conf. Cup', count: 4 }
+      ],
+      quali_pct: 96, predicted_round: 'Semi-final'
+    },
+
+    ARG: {
+      post_id: 'WC2026-N-ARG', post_type: 'nation', post_date: '2026-06-14',
+      tla: 'ARG', code: 'ar', name: 'Argentina', nickname: 'La Albiceleste',
+      confederation: 'CONMEBOL',
+      federation_crest: null,
+      colors: { primary: '#75AADB', secondary: '#FFFFFF', accent: '#F6B40E' },
+      group_letter: 'A', group_members: ['ARG', 'MEX', 'POL', 'KSA'],
+      fixtures: [
+        { kickoff_utc: '2026-06-13T20:00:00Z', opponent_tla: 'KSA', opponent_code: 'sa', opponent_name: 'Saudi Arabia', venue: 'Estadio Azteca', matchday: 1 },
+        { kickoff_utc: '2026-06-19T18:00:00Z', opponent_tla: 'POL', opponent_code: 'pl', opponent_name: 'Poland', venue: 'BMO Field', matchday: 2 },
+        { kickoff_utc: '2026-06-24T20:00:00Z', opponent_tla: 'MEX', opponent_code: 'mx', opponent_name: 'Mexico', venue: 'Estadio BBVA', matchday: 3 }
+      ],
+      fifa_rank: 1, squad_value_eur_m: 880, avg_age: 28,
+      star_player: { name: 'Lionel Messi', club: 'Inter Miami', stat: '109 goals for Argentina', photo_url: null },
+      players_to_watch: ['Julián Álvarez', 'Enzo Fernández'],
+      coach: { name: 'Lionel Scaloni', nationality_code: 'ar' },
+      wc_appearances: 19, wc_best_finish: 'Champions (1978, 1986, 2022)', wc_titles: 3,
+      wc_history: [
+        { year: 2022, finish: 'Champions' }, { year: 2018, finish: 'Round of 16' },
+        { year: 2014, finish: 'Final' }, { year: 2010, finish: 'Quarter-final' },
+        { year: 2006, finish: 'Quarter-final' }
+      ],
+      is_first_wc: false,
+      honours: [
+        { label: 'WC', count: 3 }, { label: 'Copa', count: 16 }, { label: 'Finalissima', count: 1 }
+      ],
+      quali_pct: 95, predicted_round: 'Final'
+    },
+
+    MAR: {
+      post_id: 'WC2026-N-MAR', post_type: 'nation', post_date: '2026-06-14',
+      tla: 'MAR', code: 'ma', name: 'Morocco', nickname: 'Atlas Lions',
+      confederation: 'CAF',
+      federation_crest: null,
+      colors: { primary: '#C1272D', secondary: '#006233', accent: '#006233' },
+      group_letter: 'G', group_members: ['MAR', 'BEL', 'KOR', 'CRC'],
+      fixtures: [
+        { kickoff_utc: '2026-06-17T19:00:00Z', opponent_tla: 'CRC', opponent_code: 'cr', opponent_name: 'Costa Rica', venue: 'GEHA Field at Arrowhead', matchday: 1 },
+        { kickoff_utc: '2026-06-23T20:00:00Z', opponent_tla: 'KOR', opponent_code: 'kr', opponent_name: 'Korea Republic', venue: 'Mercedes-Benz Stadium', matchday: 2 },
+        { kickoff_utc: '2026-06-27T18:00:00Z', opponent_tla: 'BEL', opponent_code: 'be', opponent_name: 'Belgium', venue: 'Hard Rock Stadium', matchday: 3 }
+      ],
+      fifa_rank: 14, squad_value_eur_m: 320, avg_age: 27,
+      star_player: { name: 'Achraf Hakimi', club: 'Paris Saint-Germain', stat: '11 goals for Morocco', photo_url: null },
+      players_to_watch: ['Brahim Díaz', 'Bilal El Khannouss'],
+      coach: { name: 'Walid Regragui', nationality_code: 'ma' },
+      wc_appearances: 7, wc_best_finish: 'Fourth place (2022)', wc_titles: 0,
+      wc_history: [
+        { year: 2022, finish: 'Fourth' }, { year: 2018, finish: 'Group stage' },
+        { year: 1998, finish: 'Group stage' }, { year: 1994, finish: 'Group stage' },
+        { year: 1986, finish: 'Round of 16' }
+      ],
+      is_first_wc: false,
+      honours: [
+        { label: 'AFCON', count: 1 }
+      ],
+      quali_pct: 78, predicted_round: 'Round of 16'
+    },
+
+    USA: {
+      post_id: 'WC2026-N-USA', post_type: 'nation', post_date: '2026-06-12',
+      tla: 'USA', code: 'us', name: 'United States', nickname: 'USMNT',
+      confederation: 'CONCACAF',
+      federation_crest: null,
+      colors: { primary: '#0A3161', secondary: '#FFFFFF', accent: '#B31942' },
+      group_letter: 'A', group_members: ['USA', 'ECU', 'EGY', 'UZB'],
+      fixtures: [
+        { kickoff_utc: '2026-06-12T00:00:00Z', opponent_tla: 'UZB', opponent_code: 'uz', opponent_name: 'Uzbekistan', venue: 'SoFi Stadium', matchday: 1 },
+        { kickoff_utc: '2026-06-18T00:00:00Z', opponent_tla: 'EGY', opponent_code: 'eg', opponent_name: 'Egypt', venue: 'Lumen Field', matchday: 2 },
+        { kickoff_utc: '2026-06-24T00:00:00Z', opponent_tla: 'ECU', opponent_code: 'ec', opponent_name: 'Ecuador', venue: 'Levi\u2019s Stadium', matchday: 3 }
+      ],
+      fifa_rank: 16, squad_value_eur_m: 410, avg_age: 25,
+      star_player: { name: 'Christian Pulisic', club: 'AC Milan', stat: '32 goals for USMNT', photo_url: null },
+      players_to_watch: ['Yunus Musah', 'Folarin Balogun'],
+      coach: { name: 'Mauricio Pochettino', nationality_code: 'ar' },
+      wc_appearances: 12, wc_best_finish: 'Third place (1930)', wc_titles: 0,
+      wc_history: [
+        { year: 2022, finish: 'Round of 16' }, { year: 2014, finish: 'Round of 16' },
+        { year: 2010, finish: 'Round of 16' }, { year: 2006, finish: 'Group stage' },
+        { year: 2002, finish: 'Quarter-final' }
+      ],
+      is_first_wc: false,
+      honours: [
+        { label: 'Gold Cup', count: 7 }, { label: 'Nations League', count: 3 }
+      ],
+      quali_pct: 72, predicted_round: 'Quarter-final'
+    },
+
+    /* sparse / first-WC nation — exercises the empty-state branches */
+    ISL: {
+      post_id: 'WC2026-N-ISL', post_type: 'nation', post_date: '2026-06-14',
+      tla: 'ISL', code: 'is', name: 'Iceland', nickname: 'Strákarnir okkar',
+      confederation: 'UEFA', federation_crest: null,
+      colors: { primary: '#02529C', secondary: '#FFFFFF', accent: '#DC1E35' },
+      group_letter: 'L', group_members: ['ISL', 'ENG', 'CRC', 'UGA'],
+      fixtures: [
+        { kickoff_utc: '2026-06-15T18:00:00Z', opponent_tla: 'UGA', opponent_code: 'ug', opponent_name: 'Uganda', venue: 'BC Place', matchday: 1 }
+      ],
+      fifa_rank: 72, squad_value_eur_m: 95, avg_age: 28,
+      star_player: { name: null, club: null, stat: null, photo_url: null },
+      players_to_watch: [],
+      coach: null,
+      wc_appearances: 2, wc_best_finish: null, wc_titles: 0,
+      wc_history: [],
+      is_first_wc: true,
+      honours: [],
+      quali_pct: 34, predicted_round: 'Group stage'
+    }
+  };
+
+  const url = new URLSearchParams(location.search);
+  const want = (url.get('nation') || 'FRA').toUpperCase();
+  window.__match = window.__post || PREVIEW[want] || PREVIEW.FRA;
+</script>
+
+<!-- shared engine (unchanged) -->
+<script src="render.js"></script>
+</body>
+</html>
