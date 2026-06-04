@@ -6,10 +6,12 @@ name: Stadium showcase drip
 # since the campaign start, so a missed/delayed fire just skips a slot.
 on:
   schedule:
-    # 3 fires per day at 06/14/22 UTC — slots aligned to STADIUM_CAMPAIGN_START.
-    - cron: "0 6 * * *"
-    - cron: "0 14 * * *"
-    - cron: "0 22 * * *"
+    # 3 fires/day at 06/14/22 UTC, offset to :17 — GitHub frequently delays or
+    # drops schedules fired exactly at the top of the hour (peak load). The
+    # deterministic slot picker tolerates the offset (it floors to the 8h slot).
+    - cron: "17 6 * * *"
+    - cron: "17 14 * * *"
+    - cron: "17 22 * * *"
   workflow_dispatch:
     inputs:
       venue:
