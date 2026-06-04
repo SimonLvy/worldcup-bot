@@ -98,13 +98,19 @@ def quali_pct(tla: str, before_date: str) -> int:
     return max(3, min(97, base + nudge))
 
 
+def _qualified_48() -> list[str]:
+    """The actual 48 qualified nations (derived from the group draw), not the
+    first 48 keys of NATIONS — that used to leak non-qualified sides (ITA, DEN)
+    into the strength ranking and skew the round predictions."""
+    return sorted({t for pair in wc_data.GROUP_VENUES for t in pair})
+
+
 def predicted_round(tla: str, before_date: str) -> str:
     """Bucket prediction for how far this team will go. Deterministic and
     grounded in the global strength ranking among the 48 qualified nations.
     """
-    qualified = list(wc_data.NATIONS.keys())[:48]  # full pool
     ranked = sorted(
-        [(t, strength(t, before_date)) for t in qualified],
+        [(t, strength(t, before_date)) for t in _qualified_48()],
         key=lambda x: x[1],
         reverse=True,
     )

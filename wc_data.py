@@ -24,55 +24,55 @@ NATIONS: dict[str, dict] = {
     # Values sourced from Transfermarkt (June 2025). Entries without TM data
     # retain prior estimates (marked # est).
     "ARG": {"a2": "ar", "rank": 1,  "value": 818,  "top5": 14},
-    "FRA": {"a2": "fr", "rank": 2,  "value": 1530, "top5": 21},
-    "ESP": {"a2": "es", "rank": 3,  "value": 1100, "top5": 20},  # est (TM page 404)
+    "FRA": {"a2": "fr", "rank": 3,  "value": 1530, "top5": 21},
+    "ESP": {"a2": "es", "rank": 2,  "value": 1100, "top5": 20},  # est (TM page 404)
     "ENG": {"a2": "gb-eng", "rank": 4, "value": 1310, "top5": 23},
-    "BRA": {"a2": "br", "rank": 5,  "value": 912,  "top5": 19},
-    "POR": {"a2": "pt", "rank": 6,  "value": 412,  "top5": 20},
-    "NED": {"a2": "nl", "rank": 7,  "value": 601,  "top5": 18},
-    "BEL": {"a2": "be", "rank": 8,  "value": 543,  "top5": 16},
-    "GER": {"a2": "de", "rank": 9,  "value": 850,  "top5": 19},  # est (TM 182 → wrong page)
-    "CRO": {"a2": "hr", "rank": 10, "value": 260,  "top5": 14},  # est (TM 25 → wrong page)
-    "ITA": {"a2": "it", "rank": 11, "value": 600,  "top5": 15},
-    "URY": {"a2": "uy", "rank": 12, "value": 64,   "top5": 13},
+    "BRA": {"a2": "br", "rank": 6,  "value": 912,  "top5": 19},
+    "POR": {"a2": "pt", "rank": 5,  "value": 412,  "top5": 20},
+    "NED": {"a2": "nl", "rank": 8,  "value": 601,  "top5": 18},
+    "BEL": {"a2": "be", "rank": 9,  "value": 543,  "top5": 16},
+    "GER": {"a2": "de", "rank": 10,  "value": 850,  "top5": 19},  # est (TM 182 → wrong page)
+    "CRO": {"a2": "hr", "rank": 11, "value": 260,  "top5": 14},  # est (TM 25 → wrong page)
+    "ITA": {"a2": "it", "rank": 12, "value": 600,  "top5": 15},
+    "URY": {"a2": "uy", "rank": 17, "value": 64,   "top5": 13},
     "COL": {"a2": "co", "rank": 13, "value": 234,  "top5": 11},
-    "MAR": {"a2": "ma", "rank": 14, "value": 350,  "top5": 13},  # est (TM 404)
-    "USA": {"a2": "us", "rank": 15, "value": 300,  "top5": 12},  # est (TM 13 → wrong page)
-    "SUI": {"a2": "ch", "rank": 16, "value": 42,   "top5": 11},
-    "JPN": {"a2": "jp", "rank": 17, "value": 153,  "top5": 12},
-    "SEN": {"a2": "sn", "rank": 18, "value": 486,  "top5": 13},
-    "DEN": {"a2": "dk", "rank": 19, "value": 340,  "top5": 12},  # est
-    "KOR": {"a2": "kr", "rank": 20, "value": 242,  "top5": 8},
-    "MEX": {"a2": "mx", "rank": 21, "value": 190,  "top5": 4},
-    "ECU": {"a2": "ec", "rank": 22, "value": 406,  "top5": 7},
+    "MAR": {"a2": "ma", "rank": 7, "value": 350,  "top5": 13},  # est (TM 404)
+    "USA": {"a2": "us", "rank": 16, "value": 300,  "top5": 12},  # est (TM 13 → wrong page)
+    "SUI": {"a2": "ch", "rank": 19, "value": 42,   "top5": 11},
+    "JPN": {"a2": "jp", "rank": 18, "value": 153,  "top5": 12},
+    "SEN": {"a2": "sn", "rank": 14, "value": 486,  "top5": 13},
+    "DEN": {"a2": "dk", "rank": 21, "value": 340,  "top5": 12},  # est
+    "KOR": {"a2": "kr", "rank": 25, "value": 242,  "top5": 8},
+    "MEX": {"a2": "mx", "rank": 15, "value": 190,  "top5": 4},
+    "ECU": {"a2": "ec", "rank": 24, "value": 406,  "top5": 7},
     "AUT": {"a2": "at", "rank": 23, "value": 196,  "top5": 11},
-    "SWE": {"a2": "se", "rank": 24, "value": 536,  "top5": 9},
-    "TUR": {"a2": "tr", "rank": 25, "value": 100,  "top5": 7},
-    "AUS": {"a2": "au", "rank": 26, "value": 90,   "top5": 3},   # est (TM 0 → wrong page)
-    "CIV": {"a2": "ci", "rank": 27, "value": 36,   "top5": 9},
-    "EGY": {"a2": "eg", "rank": 28, "value": 160,  "top5": 4},   # est (TM 0)
-    "NOR": {"a2": "no", "rank": 29, "value": 272,  "top5": 10},
-    "SCO": {"a2": "gb-sct", "rank": 30, "value": 200, "top5": 8},  # est (TM 10 → wrong)
-    "PAR": {"a2": "py", "rank": 31, "value": 234,  "top5": 4},
-    "TUN": {"a2": "tn", "rank": 32, "value": 90,   "top5": 3},   # est (TM 0)
-    "CZE": {"a2": "cz", "rank": 33, "value": 180,  "top5": 6},   # est (TM 404)
-    "ALG": {"a2": "dz", "rank": 34, "value": 200,  "top5": 7},   # est (TM 0)
-    "PAN": {"a2": "pa", "rank": 35, "value": 4,    "top5": 1},
-    "GHA": {"a2": "gh", "rank": 36, "value": 22,   "top5": 7},
-    "COD": {"a2": "cd", "rank": 37, "value": 150,  "top5": 6},   # est (TM 404)
-    "IRN": {"a2": "ir", "rank": 38, "value": 90,   "top5": 3},   # est (TM 0)
-    "KSA": {"a2": "sa", "rank": 39, "value": 40,   "top5": 0},   # est (TM 404)
-    "QAT": {"a2": "qa", "rank": 40, "value": 30,   "top5": 0},   # est (TM 0)
-    "JOR": {"a2": "jo", "rank": 41, "value": 25,   "top5": 0},   # est (TM 0)
-    "IRQ": {"a2": "iq", "rank": 42, "value": 25,   "top5": 0},   # est (TM 0)
-    "UZB": {"a2": "uz", "rank": 43, "value": 40,   "top5": 1},   # est (TM 0)
-    "RSA": {"a2": "za", "rank": 44, "value": 60,   "top5": 1},   # est (TM 0)
-    "BIH": {"a2": "ba", "rank": 45, "value": 30,   "top5": 6},
-    "CPV": {"a2": "cv", "rank": 46, "value": 56,   "top5": 2},
-    "HAI": {"a2": "ht", "rank": 47, "value": 30,   "top5": 1},   # est (TM 0)
-    "NZL": {"a2": "nz", "rank": 48, "value": 25,   "top5": 1},   # est (TM 0)
-    "CUW": {"a2": "cw", "rank": 49, "value": 30,   "top5": 1},   # est (TM 0)
-    "CAN": {"a2": "ca", "rank": 31, "value": 130,  "top5": 5},   # WC 2026 host
+    "SWE": {"a2": "se", "rank": 38, "value": 536,  "top5": 9},
+    "TUR": {"a2": "tr", "rank": 22, "value": 100,  "top5": 7},
+    "AUS": {"a2": "au", "rank": 27, "value": 90,   "top5": 3},   # est (TM 0 → wrong page)
+    "CIV": {"a2": "ci", "rank": 33, "value": 36,   "top5": 9},
+    "EGY": {"a2": "eg", "rank": 29, "value": 160,  "top5": 4},   # est (TM 0)
+    "NOR": {"a2": "no", "rank": 31, "value": 272,  "top5": 10},
+    "SCO": {"a2": "gb-sct", "rank": 43, "value": 200, "top5": 8},  # est (TM 10 → wrong)
+    "PAR": {"a2": "py", "rank": 40, "value": 234,  "top5": 4},
+    "TUN": {"a2": "tn", "rank": 46, "value": 90,   "top5": 3},   # est (TM 0)
+    "CZE": {"a2": "cz", "rank": 41, "value": 180,  "top5": 6},   # est (TM 404)
+    "ALG": {"a2": "dz", "rank": 28, "value": 200,  "top5": 7},   # est (TM 0)
+    "PAN": {"a2": "pa", "rank": 34, "value": 4,    "top5": 1},
+    "GHA": {"a2": "gh", "rank": 73, "value": 22,   "top5": 7},
+    "COD": {"a2": "cd", "rank": 45, "value": 150,  "top5": 6},   # est (TM 404)
+    "IRN": {"a2": "ir", "rank": 20, "value": 90,   "top5": 3},   # est (TM 0)
+    "KSA": {"a2": "sa", "rank": 61, "value": 40,   "top5": 0},   # est (TM 404)
+    "QAT": {"a2": "qa", "rank": 55, "value": 30,   "top5": 0},   # est (TM 0)
+    "JOR": {"a2": "jo", "rank": 63, "value": 25,   "top5": 0},   # est (TM 0)
+    "IRQ": {"a2": "iq", "rank": 56, "value": 25,   "top5": 0},   # est (TM 0)
+    "UZB": {"a2": "uz", "rank": 50, "value": 40,   "top5": 1},   # est (TM 0)
+    "RSA": {"a2": "za", "rank": 60, "value": 60,   "top5": 1},   # est (TM 0)
+    "BIH": {"a2": "ba", "rank": 64, "value": 30,   "top5": 6},
+    "CPV": {"a2": "cv", "rank": 68, "value": 56,   "top5": 2},
+    "HAI": {"a2": "ht", "rank": 81, "value": 30,   "top5": 1},   # est (TM 0)
+    "NZL": {"a2": "nz", "rank": 85, "value": 25,   "top5": 1},   # est (TM 0)
+    "CUW": {"a2": "cw", "rank": 83, "value": 30,   "top5": 1},   # est (TM 0)
+    "CAN": {"a2": "ca", "rank": 30, "value": 130,  "top5": 5},   # WC 2026 host
 }
 
 # ---------------------------------------------------------------------------
@@ -320,59 +320,62 @@ NATION_PROFILES: dict[str, dict] = {
 
 
 # ---------------------------------------------------------------------------
-# Federation crests — pulled once from football-data.org (stable IDs). Same
-# source as the live match crests, so no per-nation manual sourcing. 48/48.
-# The nation showcase slide n1 shows this as a small inset beside the flag.
+# Federation crests — the real association emblems (FFF cockerel, FA three
+# lions, CBF…), NOT flags. Sourced once from TheSportsDB (free, crowd-sourced
+# team badges), all 512×512 PNGs on a stable CDN. 48/48. The nation showcase
+# slide n1 shows this as a small inset beside the big flag hero.
+#   football-data crests were flags, not emblems — that's why they're not used.
+#   Refresh by re-running the TheSportsDB searchteams fetch if a logo updates.
 # ---------------------------------------------------------------------------
 NATION_CREST: dict[str, str] = {
-    "ALG": "https://crests.football-data.org/algeria.svg",
-    "ARG": "https://crests.football-data.org/762.png",
-    "AUS": "https://crests.football-data.org/779.svg",
-    "AUT": "https://crests.football-data.org/816.svg",
-    "BEL": "https://crests.football-data.org/805.svg",
-    "BIH": "https://crests.football-data.org/bosnia.svg",
-    "BRA": "https://crests.football-data.org/764.svg",
-    "CAN": "https://crests.football-data.org/canada.svg",
-    "CIV": "https://crests.football-data.org/787.svg",
-    "COD": "https://crests.football-data.org/congo_dr.svg",
-    "COL": "https://crests.football-data.org/818.svg",
-    "CPV": "https://crests.football-data.org/cape_verde.svg",
-    "CRO": "https://crests.football-data.org/799.svg",
-    "CUW": "https://crests.football-data.org/curacao.svg",
-    "CZE": "https://crests.football-data.org/798.svg",
-    "ECU": "https://crests.football-data.org/791.svg",
-    "EGY": "https://crests.football-data.org/825.svg",
-    "ENG": "https://crests.football-data.org/770.svg",
-    "ESP": "https://crests.football-data.org/760.svg",
-    "FRA": "https://crests.football-data.org/773.svg",
-    "GER": "https://crests.football-data.org/759.svg",
-    "GHA": "https://crests.football-data.org/ghana.svg",
-    "HAI": "https://crests.football-data.org/haiti.svg",
-    "IRN": "https://crests.football-data.org/iran.svg",
-    "IRQ": "https://crests.football-data.org/iraq.svg",
-    "JOR": "https://crests.football-data.org/8049.png",
-    "JPN": "https://crests.football-data.org/766.svg",
-    "KOR": "https://crests.football-data.org/772.png",
-    "KSA": "https://crests.football-data.org/saudi_arabia.svg",
-    "MAR": "https://crests.football-data.org/morocco.svg",
-    "MEX": "https://crests.football-data.org/769.svg",
-    "NED": "https://crests.football-data.org/8601.svg",
-    "NOR": "https://crests.football-data.org/813.svg",
-    "NZL": "https://crests.football-data.org/783.svg",
-    "PAN": "https://crests.football-data.org/panama.svg",
-    "PAR": "https://crests.football-data.org/761.svg",
-    "POR": "https://crests.football-data.org/765.svg",
-    "QAT": "https://crests.football-data.org/8030.svg",
-    "RSA": "https://crests.football-data.org/9396.svg",
-    "SCO": "https://crests.football-data.org/814.svg",
-    "SEN": "https://crests.football-data.org/senegal.svg",
-    "SUI": "https://crests.football-data.org/788.svg",
-    "SWE": "https://crests.football-data.org/792.svg",
-    "TUN": "https://crests.football-data.org/tunisia.svg",
-    "TUR": "https://crests.football-data.org/803.svg",
-    "URY": "https://crests.football-data.org/758.svg",
-    "USA": "https://crests.football-data.org/usa.svg",
-    "UZB": "https://crests.football-data.org/8070.png",
+    "ALG": "https://r2.thesportsdb.com/images/media/team/badge/rrwpry1455460218.png",
+    "ARG": "https://r2.thesportsdb.com/images/media/team/badge/3zplhu1726167477.png",
+    "AUS": "https://r2.thesportsdb.com/images/media/team/badge/lark6k1661780848.png",
+    "AUT": "https://r2.thesportsdb.com/images/media/team/badge/874p631628721400.png",
+    "BEL": "https://r2.thesportsdb.com/images/media/team/badge/8xlvxv1592062265.png",
+    "BIH": "https://r2.thesportsdb.com/images/media/team/badge/hu9lj21739378200.png",
+    "BRA": "https://r2.thesportsdb.com/images/media/team/badge/jl6dip1726167280.png",
+    "CAN": "https://r2.thesportsdb.com/images/media/team/badge/2t631f1595154867.png",
+    "CIV": "https://r2.thesportsdb.com/images/media/team/badge/rwxuuu1455465643.png",
+    "COD": "https://r2.thesportsdb.com/images/media/team/badge/s85jjw1728749022.png",
+    "COL": "https://r2.thesportsdb.com/images/media/team/badge/4ymyku1691180081.png",
+    "CPV": "https://r2.thesportsdb.com/images/media/team/badge/5jn0o71593280376.png",
+    "CRO": "https://r2.thesportsdb.com/images/media/team/badge/vvtsyu1455465317.png",
+    "CUW": "https://r2.thesportsdb.com/images/media/team/badge/itygvb1600955363.png",
+    "CZE": "https://r2.thesportsdb.com/images/media/team/badge/1o0cx31654205806.png",
+    "ECU": "https://r2.thesportsdb.com/images/media/team/badge/47wv2y1591989301.png",
+    "EGY": "https://r2.thesportsdb.com/images/media/team/badge/uheyzo1742102234.png",
+    "ENG": "https://r2.thesportsdb.com/images/media/team/badge/vf5ttc1726166739.png",
+    "ESP": "https://r2.thesportsdb.com/images/media/team/badge/ncgqyr1726166942.png",
+    "FRA": "https://r2.thesportsdb.com/images/media/team/badge/p3n0z51726166851.png",
+    "GER": "https://r2.thesportsdb.com/images/media/team/badge/1xysi51726167152.png",
+    "GHA": "https://r2.thesportsdb.com/images/media/team/badge/j589xw1751526124.png",
+    "HAI": "https://r2.thesportsdb.com/images/media/team/badge/gml8wx1598135302.png",
+    "IRN": "https://r2.thesportsdb.com/images/media/team/badge/uttpvw1455465617.png",
+    "IRQ": "https://r2.thesportsdb.com/images/media/team/badge/aqidfn1742100110.png",
+    "JOR": "https://r2.thesportsdb.com/images/media/team/badge/59fo2s1742100034.png",
+    "JPN": "https://r2.thesportsdb.com/images/media/team/badge/ffsyxz1591989843.png",
+    "KOR": "https://r2.thesportsdb.com/images/media/team/badge/a8nqfs1589564916.png",
+    "KSA": "https://r2.thesportsdb.com/images/media/team/badge/24xwpq1594125742.png",
+    "MAR": "https://r2.thesportsdb.com/images/media/team/badge/hbmwkj1731791275.png",
+    "MEX": "https://r2.thesportsdb.com/images/media/team/badge/3rmosi1748525208.png",
+    "NED": "https://r2.thesportsdb.com/images/media/team/badge/1p0hr41593787110.png",
+    "NOR": "https://r2.thesportsdb.com/images/media/team/badge/gyfn811591973155.png",
+    "NZL": "https://r2.thesportsdb.com/images/media/team/badge/91xpk81742982935.png",
+    "PAN": "https://r2.thesportsdb.com/images/media/team/badge/asp2ck1715849700.png",
+    "PAR": "https://r2.thesportsdb.com/images/media/team/badge/khgav41553419195.png",
+    "POR": "https://r2.thesportsdb.com/images/media/team/badge/swqvpy1455466083.png",
+    "QAT": "https://r2.thesportsdb.com/images/media/team/badge/rs3ir31642708685.png",
+    "RSA": "https://r2.thesportsdb.com/images/media/team/badge/xjz9j91553368824.png",
+    "SCO": "https://r2.thesportsdb.com/images/media/team/badge/3691i11552945146.png",
+    "SEN": "https://www.thesportsdb.com/images/media/team/badge/slayb01780546342.png",
+    "SUI": "https://r2.thesportsdb.com/images/media/team/badge/mb7yqe1717365808.png",
+    "SWE": "https://r2.thesportsdb.com/images/media/team/badge/h5adzg1591981772.png",
+    "TUN": "https://r2.thesportsdb.com/images/media/team/badge/7r89rg1526727277.png",
+    "TUR": "https://r2.thesportsdb.com/images/media/team/badge/70c4oo1591982459.png",
+    "URY": "https://r2.thesportsdb.com/images/media/team/badge/6vjbr11726167756.png",
+    "USA": "https://r2.thesportsdb.com/images/media/team/badge/86mluc1731001482.png",
+    "UZB": "https://r2.thesportsdb.com/images/media/team/badge/u5bgze1597943605.png",
 }
 
 
