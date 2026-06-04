@@ -356,18 +356,18 @@ COACHES: dict[str, dict] = {
     "NOR": {"name": "Ståle Solbakken", "nationality_code": "no"},
     "CAN": {"name": "Jesse Marsch", "nationality_code": "us"},
     "PAR": {"name": "Gustavo Alfaro", "nationality_code": "ar"},
-    "TUN": {"name": "Sami Trabelsi", "nationality_code": "tn"},      # lower confidence
+    "TUN": {"name": "Sabri Lamouchi", "nationality_code": "fr"},
     "CZE": {"name": "Ivan Hašek", "nationality_code": "cz"},
     "ALG": {"name": "Vladimir Petković", "nationality_code": "ch"},
     "PAN": {"name": "Thomas Christiansen", "nationality_code": "dk"},
     "GHA": {"name": "Otto Addo", "nationality_code": "gh"},
     "COD": {"name": "Sébastien Desabre", "nationality_code": "fr"},
     "IRN": {"name": "Amir Ghalenoei", "nationality_code": "ir"},
-    "KSA": {"name": "Hervé Renard", "nationality_code": "fr"},       # lower confidence
-    "QAT": {"name": "Luís Castro", "nationality_code": "pt"},        # lower confidence
-    "JOR": {"name": "Jamal Sellami", "nationality_code": "ma"},      # lower confidence
+    "KSA": {"name": "Giorgos Donis", "nationality_code": "gr"},
+    "QAT": {"name": "Julen Lopetegui", "nationality_code": "es"},
+    "JOR": {"name": "Jamal Sellami", "nationality_code": "ma"},
     "IRQ": {"name": "Graham Arnold", "nationality_code": "au"},
-    "UZB": {"name": "Timur Kapadze", "nationality_code": "uz"},      # lower confidence
+    "UZB": {"name": "Fabio Cannavaro", "nationality_code": "it"},
     "RSA": {"name": "Hugo Broos", "nationality_code": "be"},
     "BIH": {"name": "Sergej Barbarez", "nationality_code": "ba"},
     "CPV": {"name": "Pedro Brito \"Bubista\"", "nationality_code": "cv"},
