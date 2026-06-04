@@ -245,10 +245,37 @@ def _nation(post: dict) -> dict:
 
 
 def _stadium(post: dict) -> dict:
+    import wc_data
     rng = _rng_for(post)
     name = post.get("stadium", "Stadium")
     city = post.get("city", "")
-    caption = f"🏟 {name} — {city}.\n\nOne of 16 venues hosting WC 2026.\n\nVisited? 👇"
+    country = post.get("country", "")
+    capacity = post.get("capacity") or 0
+    n_matches = len(post.get("matches") or [])
+
+    # Lead block: the same info that lands at the top of the Telegram preview,
+    # so social viewers see the venue identity before the editorial hook.
+    header_lines = [
+        f"🏟 {name}",
+        f"📍 {city}, {country}".strip(", "),
+    ]
+    if capacity:
+        header_lines.append(f"👥 Capacity: {capacity:,}")
+    if n_matches:
+        plural = "match" if n_matches == 1 else "matches"
+        header_lines.append(f"⚽️ {n_matches} {plural} scheduled")
+    header = "\n".join(header_lines)
+
+    # Per-venue editorial hook (curated in CITY_BRANDS). Generic fallbacks only
+    # exist as a safety net for unknown venues.
+    brand = wc_data.city_brand(name) or {}
+    hook = brand.get("caption_hook") or rng.choice([
+        "One of 16 venues hosting WC 2026. Visited? 👇",
+        "Where memories will be written this summer. Been here? 👇",
+        "Built for the world's game. Catching a match here? 👇",
+        "The road to the trophy runs through here. Which fixture excites you? 👇",
+    ])
+    caption = f"{header}\n\n{hook}"
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + ["#Stadium", "#WC26Venues"] + _pick(_TAGS_REACH, 3, rng),

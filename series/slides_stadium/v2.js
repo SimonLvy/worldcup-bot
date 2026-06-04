@@ -28,10 +28,17 @@ window.WCSlides.v2 = (function () {
             <span class="v2-mono">${esc(ini)}</span>
             <span class="ph-lbl">brand emblem coming soon</span>
           </div>`;
+      // Per-logo escape hatch: some SVGs (e.g. mexico_city) ship with a viewBox
+      // larger than their content, so object-fit:contain leaves visible padding
+      // around the artwork. `logo_scale` lets the pipeline boost those one-off
+      // logos (e.g. 1.4) without clipping the well-cropped ones. The proper fix
+      // is to re-export those SVGs with a tight viewBox; this is the fallback.
+      const scale = Number(m.logo_scale) > 0 ? Number(m.logo_scale) : null;
+      const scaleStyle = scale ? ` style="transform:scale(${scale})"` : '';
       const emblem = m.city_logo
         ? `<div class="v2-emblem">
             ${ph}
-            <img class="v2-logo" src="${esc(m.city_logo)}" alt="" />
+            <img class="v2-logo" src="${esc(m.city_logo)}" alt=""${scaleStyle} />
           </div>`
         : `<div class="v2-emblem">${ph}</div>`;
 

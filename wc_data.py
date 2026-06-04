@@ -199,73 +199,113 @@ VENUES: dict[str, dict] = {
 CITY_BRANDS: dict[str, dict] = {
     "Estadio Azteca":          {
         "logo_path": "assets/city_logos/mexico_city.svg",
+        "logo_scale": 1.4,
         "motif": "Estadio Azteca becomes the first venue ever to host three World Cup opening matches. CDMX brings 150+ museums and world-renowned cuisine to the world stage.",
+        "caption_hook": "The only stadium in history to host THREE World Cups — 1970, 1986, and now 2026. Maradona's Hand of God, Pelé's third trophy, and on June 11 the opener of WC26. Hyped? 👇",
     },
     "Estadio Akron":           {
         "logo_path": "assets/city_logos/guadalajara.webp",
         "motif": "Capital of tequila and mariachi. Four matches in a city where Pelé once shined — and where the famous stadium 'Wave' was born in 1986.",
+        "caption_hook": "Home of Chivas Guadalajara — the only Liga MX club that fields Mexican-only players. Mariachi country welcomes the world. ¿Listos? 👇",
     },
     "Estadio BBVA":            {
         "logo_path": "assets/city_logos/monterrey.webp",
         "motif": "Mexico's industrial capital where mountains meet skyscrapers. Four matches at one of Latin America's most modern venues, continuing the 1986 World Cup tradition.",
+        "caption_hook": "Nicknamed \"El Gigante de Acero\" — The Steel Giant — with the iconic Cerro de la Silla mountain framing every match. Most scenic venue of WC26? 👇",
     },
     "MetLife Stadium":         {
         "logo_path": "assets/city_logos/new_york_nj.svg",
         "motif": "Eight matches including the Final. From the Manhattan skyline to the Jersey Shore, the soccer-passionate region with 120 miles of coastline welcomes the world.",
+        "caption_hook": "The road ends here on July 19. The trophy lifts here. Who lifts it? 👇",
     },
     "SoFi Stadium":            {
         "logo_path": "assets/city_logos/los_angeles.svg",
         "motif": "Eight matches including the USMNT opener. A global capital for sport and culture, returning to the legacy of the FIFA World Cup USA 1994 Final.",
+        "caption_hook": "Around $5 billion to build — one of the most expensive stadiums ever made. Stage for the USMNT opener vs Paraguay. Tuning in? 👇",
     },
     "AT&T Stadium":            {
         "logo_path": "assets/city_logos/dallas.svg",
         "motif": "Nine matches including five group stage games and the July 14 semi-final. Fun fact: the entire Statue of Liberty fits inside Dallas Stadium with the roof closed.",
+        "caption_hook": "Home of one of the largest center-hung HD video boards in sport — and stage for the July 14 semi-final. Texas does it bigger. 👇",
     },
     "Mercedes-Benz Stadium":   {
         "logo_path": "assets/city_logos/atlanta.webp",
         "motif": "Eight matches including a semi-final in the 'City in the Forest', where green neighborhoods meet a fast-growing skyline.",
+        "caption_hook": "The eight-petal \"camera-aperture\" roof opens in 8 minutes flat — engineering theatre before kickoff. Hosts a semi-final on July 15. 👇",
     },
     "NRG Stadium":             {
         "logo_path": "assets/city_logos/houston.svg",
         "motif": "A city built for the world stage. Houston brings its global spirit and unmatched hospitality to the world's game.",
+        "caption_hook": "The first NFL venue ever built with a retractable roof. Houston's hospitality goes global this summer. Ready? 👇",
     },
     "Arrowhead Stadium":       {
         "logo_path": "assets/city_logos/kansas_city.svg",
         "motif": "The Soccer Capital of America®. Two states united by an unmatched passion for the game, where progress meets promise.",
+        "caption_hook": "Guinness World Record holder for the loudest crowd roar — 142.2 decibels. Bring earplugs. Hyped? 👇",
     },
     "Lincoln Financial Field": {
         "logo_path": "assets/city_logos/philadelphia.svg",
         "motif": "Birthplace of American democracy. Six matches including a historic July 4 showdown, coinciding with the United States' 250th anniversary.",
+        "caption_hook": "A historic July 4 R16 fixture at the birthplace of American independence — on the country's 250th anniversary. Goosebump matchup? 👇",
     },
     "Levi's Stadium":          {
         "logo_path": "assets/city_logos/bay_area.svg",
         "motif": "Six matches in a region defined by coastlines, culture and innovation. The Bay Area returns to the 1994 World Cup stage.",
+        "caption_hook": "Silicon Valley meets the world's game. The Bay Area returns to the WC stage for the first time since 1994. Excited? 👇",
     },
     "Lumen Field":             {
         "logo_path": "assets/city_logos/seattle.svg",
         "motif": "Where the Salish Sea meets the Cascades. Seattle Stadium is famous for record-breaking noise and the raucous Sounders atmosphere.",
+        "caption_hook": "Famous for the Sounders crowd — among the loudest open-air venues in North America. Hyped for the noise? 👇",
     },
     "Gillette Stadium":        {
         "logo_path": "assets/city_logos/boston.svg",
         "motif": "Birthplace of the American Revolution, founded in 1630. Seven matches building on Boston's FIFA World Cup USA 1994 legacy.",
+        "caption_hook": "Boston's WC return since 1994 — seven matches in a region that lives and breathes soccer. Heading there? 👇",
     },
     "Hard Rock Stadium":       {
         "logo_path": "assets/city_logos/miami.svg",
         "motif": "Where Latin America, the Caribbean and Europe meet between the Atlantic Ocean and Biscayne Bay. Diverse, dynamic, ready for the world.",
+        "caption_hook": "Hosts BOTH a quarter-final AND the third-place playoff — Miami's full WC arc, from the QF run to the bronze medal match. Which fixture grabs you? 👇",
     },
     "BC Place":                {
         "logo_path": "assets/city_logos/vancouver.webp",
         "motif": "Seven matches at one of the few World Cup stadiums in a downtown core. A 10,000-seat open-air FIFA Fan Festival amphitheatre awaits at Hastings Park.",
+        "caption_hook": "One of the only WC venues you can walk to from downtown. A 10,000-seat open-air Fan Festival awaits at Hastings Park. Worth the trip? 👇",
     },
     "BMO Field":               {
         "logo_path": "assets/city_logos/toronto.svg",
         "motif": "Canada's largest city and home of its first soccer-specific stadium. Six matches across 150+ vibrant neighborhoods.",
+        "caption_hook": "Canada's first soccer-specific stadium — host of Canada's WC return vs Bosnia on June 12. Watching the Maple Leaf rise? 👇",
     },
 }
 
 
 def city_brand(stadium: str) -> dict | None:
     return CITY_BRANDS.get(stadium)
+
+
+# Pre-tournament stadium showcase campaign: 16 posts, one per venue, dripped
+# at 8-hour intervals starting CAMPAIGN_START_UTC. Order is "earliest first
+# hosted match first" so the next-up venue gets its spotlight next.
+STADIUM_PUBLISH_ORDER: list[str] = [
+    "Estadio Azteca",          # 11 Jun · opening match (MEX vs RSA)
+    "Estadio Akron",           # 12 Jun
+    "BMO Field",               # 12 Jun
+    "SoFi Stadium",            # 13 Jun
+    "Levi's Stadium",          # 13 Jun
+    "MetLife Stadium",         # 13 Jun · hosts the FINAL
+    "Gillette Stadium",        # 14 Jun
+    "BC Place",                # 14 Jun
+    "NRG Stadium",             # 14 Jun
+    "AT&T Stadium",            # 14 Jun
+    "Lincoln Financial Field", # 14 Jun
+    "Estadio BBVA",            # 15 Jun
+    "Mercedes-Benz Stadium",   # 15 Jun
+    "Lumen Field",             # 15 Jun
+    "Hard Rock Stadium",       # 15 Jun
+    "Arrowhead Stadium",       # 17 Jun
+]
 
 # Local timezone per venue for summer 2026 (UTC offset hours, short label).
 # Mexico abolished DST in 2023 → CST = UTC-6 year-round. US/Canada are on DST
@@ -465,3 +505,305 @@ def stars_for(tla: str) -> list[dict]:
 
 def venue(name: str) -> dict | None:
     return VENUES.get(name)
+
+# ===== AUTO-GENERATED SCHEDULE — DO NOT EDIT BY HAND =====
+# Source: football-data.org /competitions/WC/matches (104 fixtures).
+# Regenerate via `python _gen_schedule.py` whenever the official schedule changes.
+
+MATCH_KICKOFF_UTC: dict[int, str] = {
+    # ----- GROUP_STAGE (72) -----
+    537327: "2026-06-11T19:00:00Z",  # A · MEX vs RSA
+    537328: "2026-06-12T02:00:00Z",  # A · KOR vs CZE
+    537333: "2026-06-12T19:00:00Z",  # B · CAN vs BIH
+    537345: "2026-06-13T01:00:00Z",  # D · USA vs PAR
+    537334: "2026-06-13T19:00:00Z",  # B · QAT vs SUI
+    537339: "2026-06-13T22:00:00Z",  # C · BRA vs MAR
+    537340: "2026-06-14T01:00:00Z",  # C · HAI vs SCO
+    537346: "2026-06-14T04:00:00Z",  # D · AUS vs TUR
+    537351: "2026-06-14T17:00:00Z",  # E · GER vs CUW
+    537357: "2026-06-14T20:00:00Z",  # F · NED vs JPN
+    537352: "2026-06-14T23:00:00Z",  # E · CIV vs ECU
+    537358: "2026-06-15T02:00:00Z",  # F · SWE vs TUN
+    537369: "2026-06-15T16:00:00Z",  # H · ESP vs CPV
+    537363: "2026-06-15T19:00:00Z",  # G · BEL vs EGY
+    537370: "2026-06-15T22:00:00Z",  # H · KSA vs URY
+    537364: "2026-06-16T01:00:00Z",  # G · IRN vs NZL
+    537391: "2026-06-16T19:00:00Z",  # I · FRA vs SEN
+    537392: "2026-06-16T22:00:00Z",  # I · IRQ vs NOR
+    537397: "2026-06-17T01:00:00Z",  # J · ARG vs ALG
+    537398: "2026-06-17T04:00:00Z",  # J · AUT vs JOR
+    537403: "2026-06-17T17:00:00Z",  # K · POR vs COD
+    537409: "2026-06-17T20:00:00Z",  # L · ENG vs CRO
+    537410: "2026-06-17T23:00:00Z",  # L · GHA vs PAN
+    537404: "2026-06-18T02:00:00Z",  # K · UZB vs COL
+    537329: "2026-06-18T16:00:00Z",  # A · CZE vs RSA
+    537335: "2026-06-18T19:00:00Z",  # B · SUI vs BIH
+    537336: "2026-06-18T22:00:00Z",  # B · CAN vs QAT
+    537330: "2026-06-19T01:00:00Z",  # A · MEX vs KOR
+    537348: "2026-06-19T19:00:00Z",  # D · USA vs AUS
+    537342: "2026-06-19T22:00:00Z",  # C · SCO vs MAR
+    537341: "2026-06-20T00:30:00Z",  # C · BRA vs HAI
+    537347: "2026-06-20T03:00:00Z",  # D · TUR vs PAR
+    537359: "2026-06-20T17:00:00Z",  # F · NED vs SWE
+    537353: "2026-06-20T20:00:00Z",  # E · GER vs CIV
+    537354: "2026-06-21T00:00:00Z",  # E · ECU vs CUW
+    537360: "2026-06-21T04:00:00Z",  # F · TUN vs JPN
+    537371: "2026-06-21T16:00:00Z",  # H · ESP vs KSA
+    537365: "2026-06-21T19:00:00Z",  # G · BEL vs IRN
+    537372: "2026-06-21T22:00:00Z",  # H · URY vs CPV
+    537366: "2026-06-22T01:00:00Z",  # G · NZL vs EGY
+    537399: "2026-06-22T17:00:00Z",  # J · ARG vs AUT
+    537393: "2026-06-22T21:00:00Z",  # I · FRA vs IRQ
+    537394: "2026-06-23T00:00:00Z",  # I · NOR vs SEN
+    537400: "2026-06-23T03:00:00Z",  # J · JOR vs ALG
+    537405: "2026-06-23T17:00:00Z",  # K · POR vs UZB
+    537411: "2026-06-23T20:00:00Z",  # L · ENG vs GHA
+    537412: "2026-06-23T23:00:00Z",  # L · PAN vs CRO
+    537406: "2026-06-24T02:00:00Z",  # K · COL vs COD
+    537337: "2026-06-24T19:00:00Z",  # B · SUI vs CAN
+    537338: "2026-06-24T19:00:00Z",  # B · BIH vs QAT
+    537344: "2026-06-24T22:00:00Z",  # C · MAR vs HAI
+    537343: "2026-06-24T22:00:00Z",  # C · SCO vs BRA
+    537331: "2026-06-25T01:00:00Z",  # A · CZE vs MEX
+    537332: "2026-06-25T01:00:00Z",  # A · RSA vs KOR
+    537355: "2026-06-25T20:00:00Z",  # E · ECU vs GER
+    537356: "2026-06-25T20:00:00Z",  # E · CUW vs CIV
+    537361: "2026-06-25T23:00:00Z",  # F · TUN vs NED
+    537362: "2026-06-25T23:00:00Z",  # F · JPN vs SWE
+    537349: "2026-06-26T02:00:00Z",  # D · TUR vs USA
+    537350: "2026-06-26T02:00:00Z",  # D · PAR vs AUS
+    537395: "2026-06-26T19:00:00Z",  # I · NOR vs FRA
+    537396: "2026-06-26T19:00:00Z",  # I · SEN vs IRQ
+    537373: "2026-06-27T00:00:00Z",  # H · URY vs ESP
+    537374: "2026-06-27T00:00:00Z",  # H · CPV vs KSA
+    537367: "2026-06-27T03:00:00Z",  # G · NZL vs BEL
+    537368: "2026-06-27T03:00:00Z",  # G · EGY vs IRN
+    537413: "2026-06-27T21:00:00Z",  # L · PAN vs ENG
+    537414: "2026-06-27T21:00:00Z",  # L · CRO vs GHA
+    537407: "2026-06-27T23:30:00Z",  # K · COL vs POR
+    537408: "2026-06-27T23:30:00Z",  # K · COD vs UZB
+    537401: "2026-06-28T02:00:00Z",  # J · JOR vs ARG
+    537402: "2026-06-28T02:00:00Z",  # J · ALG vs AUT
+    # ----- LAST_32 (16) -----
+    537417: "2026-06-28T19:00:00Z",  # TBD vs TBD
+    537423: "2026-06-29T17:00:00Z",  # TBD vs TBD
+    537415: "2026-06-29T20:30:00Z",  # TBD vs TBD
+    537418: "2026-06-30T01:00:00Z",  # TBD vs TBD
+    537424: "2026-06-30T17:00:00Z",  # TBD vs TBD
+    537416: "2026-06-30T21:00:00Z",  # TBD vs TBD
+    537425: "2026-07-01T01:00:00Z",  # TBD vs TBD
+    537426: "2026-07-01T16:00:00Z",  # TBD vs TBD
+    537422: "2026-07-01T20:00:00Z",  # TBD vs TBD
+    537421: "2026-07-02T00:00:00Z",  # TBD vs TBD
+    537420: "2026-07-02T19:00:00Z",  # TBD vs TBD
+    537419: "2026-07-02T23:00:00Z",  # TBD vs TBD
+    537429: "2026-07-03T03:00:00Z",  # TBD vs TBD
+    537428: "2026-07-03T18:00:00Z",  # TBD vs TBD
+    537427: "2026-07-03T22:00:00Z",  # TBD vs TBD
+    537430: "2026-07-04T01:30:00Z",  # TBD vs TBD
+    # ----- LAST_16 (8) -----
+    537376: "2026-07-04T17:00:00Z",  # TBD vs TBD
+    537375: "2026-07-04T21:00:00Z",  # TBD vs TBD
+    537377: "2026-07-05T20:00:00Z",  # TBD vs TBD
+    537378: "2026-07-06T00:00:00Z",  # TBD vs TBD
+    537379: "2026-07-06T19:00:00Z",  # TBD vs TBD
+    537380: "2026-07-07T00:00:00Z",  # TBD vs TBD
+    537381: "2026-07-07T16:00:00Z",  # TBD vs TBD
+    537382: "2026-07-07T20:00:00Z",  # TBD vs TBD
+    # ----- QUARTER_FINALS (4) -----
+    537383: "2026-07-09T20:00:00Z",  # TBD vs TBD
+    537384: "2026-07-10T19:00:00Z",  # TBD vs TBD
+    537385: "2026-07-11T21:00:00Z",  # TBD vs TBD
+    537386: "2026-07-12T01:00:00Z",  # TBD vs TBD
+    # ----- SEMI_FINALS (2) -----
+    537387: "2026-07-14T19:00:00Z",  # TBD vs TBD
+    537388: "2026-07-15T19:00:00Z",  # TBD vs TBD
+    # ----- THIRD_PLACE (1) -----
+    537389: "2026-07-18T21:00:00Z",  # TBD vs TBD
+    # ----- FINAL (1) -----
+    537390: "2026-07-19T19:00:00Z",  # TBD vs TBD
+}
+
+GROUP_PAIR_ID: dict[frozenset[str], int] = {
+    frozenset({"MEX", "RSA"}): 537327,  # Group A
+    frozenset({"KOR", "CZE"}): 537328,  # Group A
+    frozenset({"CAN", "BIH"}): 537333,  # Group B
+    frozenset({"USA", "PAR"}): 537345,  # Group D
+    frozenset({"QAT", "SUI"}): 537334,  # Group B
+    frozenset({"BRA", "MAR"}): 537339,  # Group C
+    frozenset({"HAI", "SCO"}): 537340,  # Group C
+    frozenset({"AUS", "TUR"}): 537346,  # Group D
+    frozenset({"GER", "CUW"}): 537351,  # Group E
+    frozenset({"NED", "JPN"}): 537357,  # Group F
+    frozenset({"CIV", "ECU"}): 537352,  # Group E
+    frozenset({"SWE", "TUN"}): 537358,  # Group F
+    frozenset({"ESP", "CPV"}): 537369,  # Group H
+    frozenset({"BEL", "EGY"}): 537363,  # Group G
+    frozenset({"KSA", "URY"}): 537370,  # Group H
+    frozenset({"IRN", "NZL"}): 537364,  # Group G
+    frozenset({"FRA", "SEN"}): 537391,  # Group I
+    frozenset({"IRQ", "NOR"}): 537392,  # Group I
+    frozenset({"ARG", "ALG"}): 537397,  # Group J
+    frozenset({"AUT", "JOR"}): 537398,  # Group J
+    frozenset({"POR", "COD"}): 537403,  # Group K
+    frozenset({"ENG", "CRO"}): 537409,  # Group L
+    frozenset({"GHA", "PAN"}): 537410,  # Group L
+    frozenset({"UZB", "COL"}): 537404,  # Group K
+    frozenset({"CZE", "RSA"}): 537329,  # Group A
+    frozenset({"SUI", "BIH"}): 537335,  # Group B
+    frozenset({"CAN", "QAT"}): 537336,  # Group B
+    frozenset({"MEX", "KOR"}): 537330,  # Group A
+    frozenset({"USA", "AUS"}): 537348,  # Group D
+    frozenset({"SCO", "MAR"}): 537342,  # Group C
+    frozenset({"BRA", "HAI"}): 537341,  # Group C
+    frozenset({"TUR", "PAR"}): 537347,  # Group D
+    frozenset({"NED", "SWE"}): 537359,  # Group F
+    frozenset({"GER", "CIV"}): 537353,  # Group E
+    frozenset({"ECU", "CUW"}): 537354,  # Group E
+    frozenset({"TUN", "JPN"}): 537360,  # Group F
+    frozenset({"ESP", "KSA"}): 537371,  # Group H
+    frozenset({"BEL", "IRN"}): 537365,  # Group G
+    frozenset({"URY", "CPV"}): 537372,  # Group H
+    frozenset({"NZL", "EGY"}): 537366,  # Group G
+    frozenset({"ARG", "AUT"}): 537399,  # Group J
+    frozenset({"FRA", "IRQ"}): 537393,  # Group I
+    frozenset({"NOR", "SEN"}): 537394,  # Group I
+    frozenset({"JOR", "ALG"}): 537400,  # Group J
+    frozenset({"POR", "UZB"}): 537405,  # Group K
+    frozenset({"ENG", "GHA"}): 537411,  # Group L
+    frozenset({"PAN", "CRO"}): 537412,  # Group L
+    frozenset({"COL", "COD"}): 537406,  # Group K
+    frozenset({"SUI", "CAN"}): 537337,  # Group B
+    frozenset({"BIH", "QAT"}): 537338,  # Group B
+    frozenset({"MAR", "HAI"}): 537344,  # Group C
+    frozenset({"SCO", "BRA"}): 537343,  # Group C
+    frozenset({"CZE", "MEX"}): 537331,  # Group A
+    frozenset({"RSA", "KOR"}): 537332,  # Group A
+    frozenset({"ECU", "GER"}): 537355,  # Group E
+    frozenset({"CUW", "CIV"}): 537356,  # Group E
+    frozenset({"TUN", "NED"}): 537361,  # Group F
+    frozenset({"JPN", "SWE"}): 537362,  # Group F
+    frozenset({"TUR", "USA"}): 537349,  # Group D
+    frozenset({"PAR", "AUS"}): 537350,  # Group D
+    frozenset({"NOR", "FRA"}): 537395,  # Group I
+    frozenset({"SEN", "IRQ"}): 537396,  # Group I
+    frozenset({"URY", "ESP"}): 537373,  # Group H
+    frozenset({"CPV", "KSA"}): 537374,  # Group H
+    frozenset({"NZL", "BEL"}): 537367,  # Group G
+    frozenset({"EGY", "IRN"}): 537368,  # Group G
+    frozenset({"PAN", "ENG"}): 537413,  # Group L
+    frozenset({"CRO", "GHA"}): 537414,  # Group L
+    frozenset({"COL", "POR"}): 537407,  # Group K
+    frozenset({"COD", "UZB"}): 537408,  # Group K
+    frozenset({"JOR", "ARG"}): 537401,  # Group J
+    frozenset({"ALG", "AUT"}): 537402,  # Group J
+}
+
+MATCH_STAGE: dict[int, str] = {
+    537327: "group",
+    537328: "group",
+    537333: "group",
+    537345: "group",
+    537334: "group",
+    537339: "group",
+    537340: "group",
+    537346: "group",
+    537351: "group",
+    537357: "group",
+    537352: "group",
+    537358: "group",
+    537369: "group",
+    537363: "group",
+    537370: "group",
+    537364: "group",
+    537391: "group",
+    537392: "group",
+    537397: "group",
+    537398: "group",
+    537403: "group",
+    537409: "group",
+    537410: "group",
+    537404: "group",
+    537329: "group",
+    537335: "group",
+    537336: "group",
+    537330: "group",
+    537348: "group",
+    537342: "group",
+    537341: "group",
+    537347: "group",
+    537359: "group",
+    537353: "group",
+    537354: "group",
+    537360: "group",
+    537371: "group",
+    537365: "group",
+    537372: "group",
+    537366: "group",
+    537399: "group",
+    537393: "group",
+    537394: "group",
+    537400: "group",
+    537405: "group",
+    537411: "group",
+    537412: "group",
+    537406: "group",
+    537337: "group",
+    537338: "group",
+    537344: "group",
+    537343: "group",
+    537331: "group",
+    537332: "group",
+    537355: "group",
+    537356: "group",
+    537361: "group",
+    537362: "group",
+    537349: "group",
+    537350: "group",
+    537395: "group",
+    537396: "group",
+    537373: "group",
+    537374: "group",
+    537367: "group",
+    537368: "group",
+    537413: "group",
+    537414: "group",
+    537407: "group",
+    537408: "group",
+    537401: "group",
+    537402: "group",
+    537417: "r32",
+    537423: "r32",
+    537415: "r32",
+    537418: "r32",
+    537424: "r32",
+    537416: "r32",
+    537425: "r32",
+    537426: "r32",
+    537422: "r32",
+    537421: "r32",
+    537420: "r32",
+    537419: "r32",
+    537429: "r32",
+    537428: "r32",
+    537427: "r32",
+    537430: "r32",
+    537376: "r16",
+    537375: "r16",
+    537377: "r16",
+    537378: "r16",
+    537379: "r16",
+    537380: "r16",
+    537381: "r16",
+    537382: "r16",
+    537383: "qf",
+    537384: "qf",
+    537385: "qf",
+    537386: "qf",
+    537387: "sf",
+    537388: "sf",
+    537389: "third",
+    537390: "final",
+}
+
+# ===== END AUTO-GENERATED SCHEDULE =====
