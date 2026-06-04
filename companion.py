@@ -117,11 +117,24 @@ def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
 
     letter, group_members = wc_data.group_for(tla)
     fixtures = _group_fixtures_for(tla)
-    wc_history = wc_data.wc_history_for(tla)
-    is_first_wc = (profile.get("wc_appearances") or 0) <= 1 and not wc_history
 
-    # Predictor signals — both keyed by the post date so any J1 result already
-    # on the books shifts the strength score appropriately.
+    # WC history is DERIVED from the match dataset (+ a curated 22-podium table),
+    # never hand-typed — appearances, years, titles, best finish and the per-year
+    # finish for the last 5 WCs all come from nation_history. This is what fixes
+    # the Scotland-style inaccuracies.
+    import nation_history
+    hist = nation_history.history_for(tla)
+
+    # Honours line: WC titles are derived (always accurate); continental cups
+    # (Euro/Copa/AFCON…) stay curated in NATION_PROFILES. Strip any stale WC
+    # entry from the curated list so the derived count is the single source.
+    honours = []
+    if hist["titles"]:
+        honours.append({"label": "WC", "count": hist["titles"]})
+    honours += [h for h in (profile.get("honours") or []) if h.get("label") != "WC"]
+
+    # Predictor signals — keyed by the post date so any J1 result already on the
+    # books shifts the strength score appropriately.
     import nation_predict
     quali = nation_predict.quali_pct(tla, before_iso)
     pred_round = nation_predict.predicted_round(tla, before_iso)
@@ -136,7 +149,7 @@ def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
         "name": _nation_name(tla),
         "nickname": profile.get("nickname"),
         "confederation": profile.get("confederation"),
-        "federation_crest": profile.get("federation_crest"),
+        "federation_crest": wc_data.crest_for(tla),
         "colors": profile.get("colors") or {"primary": "#0b1224", "secondary": "#FFFFFF", "accent": "#E7B549"},
         # ---- group context ----
         "group_letter": letter,
@@ -149,13 +162,13 @@ def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
         "star_player": {**star, "photo_url": None} if star else None,
         "players_to_watch": wc_data.players_to_watch_for(tla),
         "coach": profile.get("coach"),
-        # ---- WC history (replaces last-5 form, no daily-freshness liability) ----
-        "wc_appearances": profile.get("wc_appearances"),
-        "wc_best_finish": profile.get("wc_best_finish"),
-        "wc_titles": profile.get("wc_titles"),
-        "wc_history": wc_history,        # last up to 5 appearances
-        "is_first_wc": is_first_wc,      # surfaced as a badge
-        "honours": profile.get("honours") or [],
+        # ---- WC history (derived from dataset + curated podiums) ----
+        "wc_appearances": hist["appearances"],
+        "wc_best_finish": hist["best_finish"],
+        "wc_titles": hist["titles"],
+        "wc_history": hist["last5"],       # [{year, finish}, ...] most recent first
+        "is_first_wc": hist["is_first_wc"],
+        "honours": honours,
         # ---- outlook ----
         "quali_pct": quali,
         "predicted_round": pred_round,

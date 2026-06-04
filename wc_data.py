@@ -320,44 +320,59 @@ NATION_PROFILES: dict[str, dict] = {
 
 
 # ---------------------------------------------------------------------------
-# WC participation history per nation. Most recent first, list of (year, finish).
-# First-time WC nations get an empty list → renderer shows a "FIRST WC" badge.
-# The nation slide displays up to 5 of these (slicing to keep the layout tight).
-# Source: FIFA WC tournament records.
+# Federation crests — pulled once from football-data.org (stable IDs). Same
+# source as the live match crests, so no per-nation manual sourcing. 48/48.
+# The nation showcase slide n1 shows this as a small inset beside the flag.
 # ---------------------------------------------------------------------------
-WC_HISTORY: dict[str, list[tuple[int, str]]] = {
-    "ARG": [(2022, "Champions"), (2018, "Round of 16"), (2014, "Final"),
-            (2010, "Quarter-final"), (2006, "Quarter-final")],
-    "FRA": [(2022, "Final"), (2018, "Champions"), (2014, "Quarter-final"),
-            (2010, "Group stage"), (2006, "Final")],
-    "ESP": [(2022, "Round of 16"), (2018, "Round of 16"), (2014, "Group stage"),
-            (2010, "Champions"), (2006, "Round of 16")],
-    "ENG": [(2022, "Quarter-final"), (2018, "4th place"), (2014, "Group stage"),
-            (2010, "Round of 16"), (2006, "Quarter-final")],
-    "BRA": [(2022, "Quarter-final"), (2018, "Quarter-final"), (2014, "4th place"),
-            (2010, "Quarter-final"), (2006, "Quarter-final")],
-    "POR": [(2022, "Quarter-final"), (2018, "Round of 16"), (2014, "Group stage"),
-            (2010, "Round of 16"), (2006, "4th place")],
-    "NED": [(2022, "Quarter-final"), (2014, "3rd place"), (2010, "Final"),
-            (2006, "Round of 16"), (1998, "4th place")],
-    "BEL": [(2022, "Group stage"), (2018, "3rd place"), (2014, "Quarter-final"),
-            (2002, "Round of 16"), (1998, "Group stage")],
-    "GER": [(2022, "Group stage"), (2018, "Group stage"), (2014, "Champions"),
-            (2010, "3rd place"), (2006, "3rd place")],
-    "CRO": [(2022, "3rd place"), (2018, "Final"), (2014, "Group stage"),
-            (2006, "Group stage"), (2002, "Group stage")],
-    "URY": [(2022, "Group stage"), (2018, "Quarter-final"), (2014, "Round of 16"),
-            (2010, "4th place"), (2002, "Group stage")],
-    "COL": [(2018, "Round of 16"), (2014, "Quarter-final"), (1998, "Group stage"),
-            (1994, "Group stage"), (1990, "Round of 16")],
-    "MAR": [(2022, "4th place"), (2018, "Group stage"), (1998, "Group stage"),
-            (1994, "Group stage"), (1986, "Round of 16")],
-    "USA": [(2022, "Round of 16"), (2014, "Round of 16"), (2010, "Round of 16"),
-            (2006, "Group stage"), (2002, "Quarter-final")],
-    "SUI": [(2022, "Round of 16"), (2018, "Round of 16"), (2014, "Round of 16"),
-            (2010, "Group stage"), (2006, "Round of 16")],
-    "JPN": [(2022, "Round of 16"), (2018, "Round of 16"), (2014, "Group stage"),
-            (2010, "Round of 16"), (2006, "Group stage")],
+NATION_CREST: dict[str, str] = {
+    "ALG": "https://crests.football-data.org/algeria.svg",
+    "ARG": "https://crests.football-data.org/762.png",
+    "AUS": "https://crests.football-data.org/779.svg",
+    "AUT": "https://crests.football-data.org/816.svg",
+    "BEL": "https://crests.football-data.org/805.svg",
+    "BIH": "https://crests.football-data.org/bosnia.svg",
+    "BRA": "https://crests.football-data.org/764.svg",
+    "CAN": "https://crests.football-data.org/canada.svg",
+    "CIV": "https://crests.football-data.org/787.svg",
+    "COD": "https://crests.football-data.org/congo_dr.svg",
+    "COL": "https://crests.football-data.org/818.svg",
+    "CPV": "https://crests.football-data.org/cape_verde.svg",
+    "CRO": "https://crests.football-data.org/799.svg",
+    "CUW": "https://crests.football-data.org/curacao.svg",
+    "CZE": "https://crests.football-data.org/798.svg",
+    "ECU": "https://crests.football-data.org/791.svg",
+    "EGY": "https://crests.football-data.org/825.svg",
+    "ENG": "https://crests.football-data.org/770.svg",
+    "ESP": "https://crests.football-data.org/760.svg",
+    "FRA": "https://crests.football-data.org/773.svg",
+    "GER": "https://crests.football-data.org/759.svg",
+    "GHA": "https://crests.football-data.org/ghana.svg",
+    "HAI": "https://crests.football-data.org/haiti.svg",
+    "IRN": "https://crests.football-data.org/iran.svg",
+    "IRQ": "https://crests.football-data.org/iraq.svg",
+    "JOR": "https://crests.football-data.org/8049.png",
+    "JPN": "https://crests.football-data.org/766.svg",
+    "KOR": "https://crests.football-data.org/772.png",
+    "KSA": "https://crests.football-data.org/saudi_arabia.svg",
+    "MAR": "https://crests.football-data.org/morocco.svg",
+    "MEX": "https://crests.football-data.org/769.svg",
+    "NED": "https://crests.football-data.org/8601.svg",
+    "NOR": "https://crests.football-data.org/813.svg",
+    "NZL": "https://crests.football-data.org/783.svg",
+    "PAN": "https://crests.football-data.org/panama.svg",
+    "PAR": "https://crests.football-data.org/761.svg",
+    "POR": "https://crests.football-data.org/765.svg",
+    "QAT": "https://crests.football-data.org/8030.svg",
+    "RSA": "https://crests.football-data.org/9396.svg",
+    "SCO": "https://crests.football-data.org/814.svg",
+    "SEN": "https://crests.football-data.org/senegal.svg",
+    "SUI": "https://crests.football-data.org/788.svg",
+    "SWE": "https://crests.football-data.org/792.svg",
+    "TUN": "https://crests.football-data.org/tunisia.svg",
+    "TUR": "https://crests.football-data.org/803.svg",
+    "URY": "https://crests.football-data.org/758.svg",
+    "USA": "https://crests.football-data.org/usa.svg",
+    "UZB": "https://crests.football-data.org/8070.png",
 }
 
 
@@ -838,14 +853,9 @@ def profile_for(tla: str) -> dict | None:
     return NATION_PROFILES.get((tla or "").upper())
 
 
-def wc_history_for(tla: str) -> list[dict]:
-    """Last 5 WC appearances for the nation, most recent first.
-
-    Returns up to 5 entries shaped as {year, finish}. Empty list = nation has
-    never played a World Cup before 2026 (renderer flags this as "FIRST WC").
-    """
-    hist = WC_HISTORY.get((tla or "").upper(), [])
-    return [{"year": y, "finish": f} for y, f in hist[:5]]
+def crest_for(tla: str) -> str | None:
+    """Federation crest URL (football-data). None if unknown."""
+    return NATION_CREST.get((tla or "").upper())
 
 
 def players_to_watch_for(tla: str) -> list[str]:
