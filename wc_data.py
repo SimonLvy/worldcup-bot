@@ -72,6 +72,7 @@ NATIONS: dict[str, dict] = {
     "HAI": {"a2": "ht", "rank": 47, "value": 30,   "top5": 1},   # est (TM 0)
     "NZL": {"a2": "nz", "rank": 48, "value": 25,   "top5": 1},   # est (TM 0)
     "CUW": {"a2": "cw", "rank": 49, "value": 30,   "top5": 1},   # est (TM 0)
+    "CAN": {"a2": "ca", "rank": 31, "value": 130,  "top5": 5},   # WC 2026 host
 }
 
 # ---------------------------------------------------------------------------
