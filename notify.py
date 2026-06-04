@@ -132,7 +132,22 @@ def _caption(post: dict) -> str:
         return _caption_countdown(post)
     if post_type == "stadium":
         return _caption_stadium(post)
+    if post_type == "nation":
+        return _caption_nation(post)
     return _caption_match(post)
+
+
+def _caption_nation(post: dict) -> str:
+    parts = [
+        f"🏳 {post.get('name', '?')}",
+        f"💬 {post.get('nickname', '')}" if post.get('nickname') else "",
+        f"🌍 {post.get('confederation', '')} · Group {post.get('group_letter', '?')}",
+        f"📊 FIFA #{post.get('fifa_rank', '?')}",
+        f"🎯 Quali {post.get('quali_pct', '?')}% · {post.get('predicted_round', '?')}",
+        "",
+        "Validate to publish, or cancel.",
+    ]
+    return "\n".join(p for p in parts if p)
 
 
 def _caption_stadium(post: dict) -> str:

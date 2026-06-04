@@ -97,24 +97,95 @@ def build_countdown_post(target_date: date | None = None) -> dict | None:
 # ===========================================================================
 # NATION
 # ===========================================================================
-def build_nation_post(tla: str) -> dict | None:
-    """Profile payload for one nation. None if the TLA isn't in NATIONS."""
+def build_nation_post(tla: str, *, today: date | None = None) -> dict | None:
+    """Rich payload for the 3-slide nation showcase. None if TLA unknown.
+
+    `today` defaults to date.today() and bounds the form window — so a post
+    rendered on June 14 picks up any J1 result already on the books for this
+    team. Pass an explicit date for deterministic test runs.
+    """
     tla = tla.upper()
     if tla not in wc_data.NATIONS:
         return None
+    today = today or date.today()
+    before_iso = today.isoformat()
+
     ref = wc_data.NATIONS[tla]
+    profile = wc_data.profile_for(tla) or {}
     stars = wc_data.stars_for(tla)
+    star = stars[0] if stars else None
+
+    letter, group_members = wc_data.group_for(tla)
+    fixtures = _group_fixtures_for(tla)
+    wc_history = wc_data.wc_history_for(tla)
+    is_first_wc = (profile.get("wc_appearances") or 0) <= 1 and not wc_history
+
+    # Predictor signals — both keyed by the post date so any J1 result already
+    # on the books shifts the strength score appropriately.
+    import nation_predict
+    quali = nation_predict.quali_pct(tla, before_iso)
+    pred_round = nation_predict.predicted_round(tla, before_iso)
+
     return {
         "post_id": f"WC2026-N-{tla}",
         "post_type": "nation",
+        "post_date": before_iso,
+        # ---- identity ----
         "tla": tla,
         "code": ref["a2"],
         "name": _nation_name(tla),
+        "nickname": profile.get("nickname"),
+        "confederation": profile.get("confederation"),
+        "federation_crest": profile.get("federation_crest"),
+        "colors": profile.get("colors") or {"primary": "#0b1224", "secondary": "#FFFFFF", "accent": "#E7B549"},
+        # ---- group context ----
+        "group_letter": letter,
+        "group_members": group_members,
+        "fixtures": fixtures,
+        # ---- squad ----
         "fifa_rank": ref["rank"],
         "squad_value_eur_m": ref["value"],
-        "players_top5_leagues": ref["top5"],
-        "key_players": [{**s, "photo_url": None} for s in stars],
+        "avg_age": ref.get("age"),
+        "star_player": {**star, "photo_url": None} if star else None,
+        "players_to_watch": wc_data.players_to_watch_for(tla),
+        "coach": profile.get("coach"),
+        # ---- WC history (replaces last-5 form, no daily-freshness liability) ----
+        "wc_appearances": profile.get("wc_appearances"),
+        "wc_best_finish": profile.get("wc_best_finish"),
+        "wc_titles": profile.get("wc_titles"),
+        "wc_history": wc_history,        # last up to 5 appearances
+        "is_first_wc": is_first_wc,      # surfaced as a badge
+        "honours": profile.get("honours") or [],
+        # ---- outlook ----
+        "quali_pct": quali,
+        "predicted_round": pred_round,
     }
+
+
+def _group_fixtures_for(tla: str) -> list[dict]:
+    """All 3 group fixtures this team plays, sorted chronologically.
+
+    Each fixture: { kickoff_utc, opponent_tla, opponent_code, opponent_name,
+                    venue, matchday }
+    """
+    out = []
+    for pair, venue_name in wc_data.GROUP_VENUES.items():
+        if tla not in pair:
+            continue
+        opp = next(iter(pair - {tla}))
+        fd_id = wc_data.GROUP_PAIR_ID.get(pair)
+        kickoff = wc_data.MATCH_KICKOFF_UTC.get(fd_id) if fd_id else None
+        out.append({
+            "kickoff_utc": kickoff,
+            "opponent_tla": opp,
+            "opponent_code": wc_data.alpha2(opp),
+            "opponent_name": TLA_DISPLAY.get(opp, opp.title()),
+            "venue": venue_name,
+        })
+    out.sort(key=lambda m: m.get("kickoff_utc") or "9999")
+    for i, m in enumerate(out, start=1):
+        m["matchday"] = i
+    return out
 
 
 def _nation_name(tla: str) -> str:

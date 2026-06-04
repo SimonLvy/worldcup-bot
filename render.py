@@ -40,6 +40,9 @@ def render_post(post: dict) -> dict:
     elif post_type == "stadium":
         post_id = post.get("post_id", "stadium")
         renderer = render_slides.render_stadium
+    elif post_type == "nation":
+        post_id = post.get("post_id", "nation")
+        renderer = render_slides.render_nation
     else:
         post_id = post.get("match_id", "match")
         renderer = render_slides.render_match

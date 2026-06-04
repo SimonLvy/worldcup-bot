@@ -26,6 +26,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 TEMPLATE = HERE / "template.html"
 TEMPLATE_COUNTDOWN = HERE / "template_countdown.html"
 TEMPLATE_STADIUM = HERE / "template_stadium.html"
+TEMPLATE_NATION = HERE / "template_nation.html"
 
 
 def _render(data: dict, template: pathlib.Path, out_dir: pathlib.Path, scale: int) -> pathlib.Path:
@@ -77,6 +78,12 @@ def render_stadium(post: dict, out_root: str | pathlib.Path = "output", scale: i
     """Render the 3-slide host-stadium carousel."""
     out_dir = pathlib.Path(out_root) / post.get("post_id", "stadium")
     return _render(post, TEMPLATE_STADIUM, out_dir, scale)
+
+
+def render_nation(post: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
+    """Render the 3-slide nation showcase carousel."""
+    out_dir = pathlib.Path(out_root) / post.get("post_id", "nation")
+    return _render(post, TEMPLATE_NATION, out_dir, scale)
 
 
 if __name__ == "__main__":
