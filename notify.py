@@ -97,10 +97,10 @@ def send_slides_with_approval(
 
 
 def _send_editorial_pack(token: str, chat_id: str, post: dict) -> None:
-    """Send 3 paste-ready messages: TikTok caption, IG caption, IG first comment.
+    """Send ONE paste-ready caption: the TikTok block (text + 5 hashtags).
 
-    No headers, no labels — each message is a single <pre> block ready to
-    copy whole. Order is always: TikTok → Instagram → IG first comment.
+    The account is TikTok-only, so the old 3-message pack (TikTok / IG / IG
+    first comment) was noise. One <pre> block, tap-and-hold to copy whole.
     """
     import captions
 
@@ -108,18 +108,18 @@ def _send_editorial_pack(token: str, chat_id: str, post: dict) -> None:
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     pack = captions.for_telegram(post)
-    for body in (pack["tiktok_text"], pack["instagram_text"], pack["ig_first_comment"]):
-        if not body:
-            continue
-        requests.post(
-            BASE.format(token=token, method="sendMessage"),
-            data={
-                "chat_id": chat_id,
-                "text": f"<pre>{esc(body)}</pre>",
-                "parse_mode": "HTML",
-            },
-            timeout=30,
-        )
+    body = pack.get("tiktok_text")
+    if not body:
+        return
+    requests.post(
+        BASE.format(token=token, method="sendMessage"),
+        data={
+            "chat_id": chat_id,
+            "text": f"<pre>{esc(body)}</pre>",
+            "parse_mode": "HTML",
+        },
+        timeout=30,
+    )
 
 
 # ---------------------------------------------------------------------------
