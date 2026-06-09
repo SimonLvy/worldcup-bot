@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Cup 2026 — Reaction Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Anton&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="core.css" />
+<link rel="stylesheet" href="slides.css" />
+</head>
+<body>
+<div class="stage">
+  <div class="deck" id="deck"></div>
+</div>
+
+<button class="nav-btn nav-prev" id="prev" aria-label="Previous">‹</button>
+<button class="nav-btn nav-next" id="next" aria-label="Next">›</button>
+<div class="counter">
+  <span class="lbl" id="cnum">01 / 02</span>
+  <span class="dots" id="dots"></span>
+</div>
+
+<script src="data.js"></script>
+<script src="slides_reaction/r1.js"></script>
+<script src="slides_reaction/r2.js"></script>
+
+<script>
+  window.WC_CONFIG = { slides: ['r1', 'r2'] };
+  // Live-preview default. Production injects window.__post with the real
+  // finished-match reaction payload.
+  window.__match = window.__post || {
+    post_id: 'WC2026-R-537391', post_type: 'reaction', match_id: '537391',
+    stage: 'group', group: 'I', venue: 'MetLife Stadium',
+    home: { name: 'France', code: 'fr', tla: 'FRA', fifa_rank: 3 },
+    away: { name: 'Senegal', code: 'sn', tla: 'SEN', fifa_rank: 14 },
+    actual: { home: 1, away: 2 },
+    predicted: { home: 2, away: 2 },
+    verdict: 'upset',
+    actual_outcome: 'A', winner_name: 'Senegal', loser_name: 'France'
+  };
+</script>
+
+<script src="render.js"></script>
+</body>
+</html>

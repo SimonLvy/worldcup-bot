@@ -86,6 +86,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                         help="Pick the next nation by the publish schedule "
                              "(6h slots, 4/day, starting the nation campaign). "
                              "Designed for the GitHub Actions cron.")
+    parser.add_argument("--reaction", type=str, default=None,
+                        help="Build a post-match reaction for one finished fixture id "
+                             "(manual / testing).")
+    parser.add_argument("--reactions", action="store_true",
+                        help="Cron mode: react to every match that just finished in "
+                             "the last polling window. Designed for the reaction cron.")
     parser.add_argument("--preview", action="store_true",
                         help="Preview mode: send slides to Telegram without "
                              "approval buttons, never publish.")
@@ -260,6 +266,53 @@ def process_nation(tla: str, *, preview: bool = False) -> int:
     return 0
 
 
+def process_reaction(match_id: str, *, preview: bool = True) -> int:
+    print(f"\n{'='*60}")
+    print(f"[1/3] Building reaction for finished match {match_id!r}…")
+    post = companion.build_reaction_post(match_id)
+    if post is None:
+        print("Match not finished yet (no score). Nothing to do.")
+        return 0
+    h, a = post["home"], post["away"]
+    ac = post["actual"]
+    print(f"      → {h['name']} {ac['home']}-{ac['away']} {a['name']} · verdict={post['verdict']}")
+
+    print("[2/3] Rendering slides…")
+    result = render_post(post)
+    slides = result["upload_paths"]
+    if not slides:
+        print("No slides rendered.")
+        return 1
+    post_json = result["source_dir"] / "post.json"
+    post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    print("[3/3] Sending to Telegram (preview)…")
+    _send_preview_to_telegram(post, slides)
+    return 0
+
+
+def process_reactions_cron(*, lookback_min: int = 35) -> int:
+    """Poll for matches that finished in the last `lookback_min` minutes and
+    react to each. Stateless: a match is only inside the window for ~one cron
+    cycle, and the FINISHED check means we never react before the score exists.
+    Manual posting tolerates the rare boundary double-send."""
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(minutes=lookback_min)
+    ids = companion.finished_match_ids(start, now)
+    if not ids:
+        print(f"[reactions] no match settled in the last {lookback_min} min.")
+        return 0
+    print(f"[reactions] {len(ids)} freshly-finished match(es): {ids}")
+    rc = 0
+    for mid in ids:
+        try:
+            rc |= process_reaction(mid, preview=True)
+        except Exception as exc:  # noqa: BLE001 — one bad match must not kill the batch
+            print(f"[error] reaction {mid} failed: {exc!r}")
+    return rc
+
+
 def process_stadium(name: str, *, preview: bool = False) -> int:
     print(f"\n{'='*60}")
     print(f"[1/4] Building stadium post for {name!r}…")
@@ -379,6 +432,12 @@ def main() -> int:
 
     if args.nation:
         return process_nation(args.nation, preview=args.preview)
+
+    if args.reactions:
+        return process_reactions_cron()
+
+    if args.reaction:
+        return process_reaction(args.reaction, preview=True)
 
     refs = select_match_refs(args)
     if not refs:

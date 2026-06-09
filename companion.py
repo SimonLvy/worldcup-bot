@@ -13,7 +13,7 @@ The Playwright renderer picks the matching HTML template via `post_type`.
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import config
@@ -219,6 +219,108 @@ TLA_DISPLAY: dict[str, str] = {
     "BIH": "Bosnia-Herzegovina", "CPV": "Cape Verde", "HAI": "Haiti", "NZL": "New Zealand",
     "CUW": "Curaçao", "KOR": "South Korea", "ECU": "Ecuador", "CAN": "Canada",
 }
+
+
+# ===========================================================================
+# REACTION — live result + our pre-match prediction vs reality
+# ===========================================================================
+def _outcome(h: int, a: int) -> str:
+    return "H" if h > a else ("A" if a > h else "D")
+
+
+def build_reaction_post(match_id: str, *, raw_override: dict | None = None) -> dict | None:
+    """Post-match reaction payload: final score + the prediction we posted
+    before the game (reproduced deterministically), with a verdict on how
+    the call aged.
+
+    Returns None if the match isn't finished yet (no score). `raw_override`
+    lets tests inject a finished raw fixture without hitting the API.
+    """
+    import fetch_match as fm
+
+    raw = raw_override
+    if raw is None:
+        raw = next((m for m in fm.list_matches() if str(m["id"]) == str(match_id)), None)
+    if not raw or raw.get("status") != "FINISHED":
+        return None
+    ft = (raw.get("score") or {}).get("fullTime") or {}
+    ah, aa = ft.get("home"), ft.get("away")
+    if ah is None or aa is None:
+        return None
+
+    # Reproduce the exact pre-match prediction. fetch_match pins form to the
+    # kickoff date (form_before), and predict is seeded by match_id, so this
+    # returns the identical scoreline we published in the preview.
+    match = fm.fetch_match(str(match_id))
+    if not match:
+        return None
+    pred = match.get("prediction") or {}
+    ph, pa = pred.get("home_score"), pred.get("away_score")
+
+    home, away = match["home"], match["away"]
+    # TLA comes straight from the raw fixture (the assembled match dict only
+    # carries the alpha-2 'code', which won't key into NATION_TAGS).
+    home_tla = (raw.get("homeTeam") or {}).get("tla") or (home.get("code") or "").upper()
+    away_tla = (raw.get("awayTeam") or {}).get("tla") or (away.get("code") or "").upper()
+    actual_o, pred_o = _outcome(ah, aa), _outcome(ph, pa)
+    exact = (ah == ph and aa == pa)
+    correct = (actual_o == pred_o)
+
+    # Upset = the lower-ranked side got a result the prediction didn't give it.
+    hr = home.get("fifa_rank") or 99
+    ar = away.get("fifa_rank") or 99
+    favourite = "H" if hr < ar else "A"
+    underdog_won = (actual_o != "D" and actual_o != favourite)
+    big_gap = abs(hr - ar) >= 10
+
+    if exact:
+        verdict = "nailed"
+    elif correct:
+        verdict = "called"
+    elif underdog_won and big_gap:
+        verdict = "upset"
+    else:
+        verdict = "missed"
+
+    return {
+        "post_id": f"WC2026-R-{match_id}",
+        "post_type": "reaction",
+        "match_id": str(match_id),
+        "stage": match.get("stage"),
+        "group": match.get("group"),
+        "venue": (match.get("venue") or {}).get("stadium"),
+        "kickoff_utc": match.get("kickoff_utc"),
+        "home": {"name": home["name"], "code": home.get("code"),
+                 "tla": home_tla, "fifa_rank": hr},
+        "away": {"name": away["name"], "code": away.get("code"),
+                 "tla": away_tla, "fifa_rank": ar},
+        "actual": {"home": ah, "away": aa},
+        "predicted": {"home": ph, "away": pa},
+        "verdict": verdict,            # nailed | called | upset | missed
+        "actual_outcome": actual_o,
+        "winner_name": (home["name"] if actual_o == "H"
+                        else away["name"] if actual_o == "A" else None),
+        "loser_name": (away["name"] if actual_o == "H"
+                       else home["name"] if actual_o == "A" else None),
+    }
+
+
+def finished_match_ids(window_start_utc, window_end_utc) -> list[str]:
+    """IDs of WC matches whose kickoff+settle time falls in the given UTC
+    window AND that football-data reports FINISHED. Used by the reaction cron
+    to pick exactly the matches that just wrapped up."""
+    import fetch_match as fm
+    out = []
+    for m in fm.list_matches():
+        if m.get("status") != "FINISHED":
+            continue
+        ko = m.get("utcDate")
+        if not ko:
+            continue
+        settle = datetime.fromisoformat(ko.replace("Z", "+00:00")) + timedelta(minutes=150)
+        if window_start_utc < settle <= window_end_utc:
+            out.append(str(m["id"]))
+    return out
 
 
 # ===========================================================================

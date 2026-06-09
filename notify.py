@@ -134,7 +134,21 @@ def _caption(post: dict) -> str:
         return _caption_stadium(post)
     if post_type == "nation":
         return _caption_nation(post)
+    if post_type == "reaction":
+        return _caption_reaction(post)
     return _caption_match(post)
+
+
+def _caption_reaction(post: dict) -> str:
+    h, a = post.get("home", {}), post.get("away", {})
+    ac, pr = post.get("actual", {}), post.get("predicted", {})
+    parts = [
+        f"⚽️ FT: {h.get('name','?')} {ac.get('home')}-{ac.get('away')} {a.get('name','?')}",
+        f"🤖 Called: {pr.get('home')}-{pr.get('away')} · verdict: {post.get('verdict','?').upper()}",
+        "",
+        "Validate to publish, or cancel.",
+    ]
+    return "\n".join(p for p in parts if p)
 
 
 def _caption_nation(post: dict) -> str:
