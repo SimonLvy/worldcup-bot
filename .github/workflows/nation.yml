@@ -6,12 +6,12 @@ name: Nation showcase drip
 # the campaign start, so a missed/delayed fire just skips a slot.
 on:
   schedule:
-    # 4 fires/day at 00/06/12/18 UTC, offset to :37 — GitHub frequently delays
-    # or drops schedules fired exactly at the top of the hour (peak load). The
-    # deterministic slot picker tolerates the offset (it floors to the 6h slot).
-    - cron: "37 0 * * *"
+    # 2 fires/day at 06/18 UTC, offset to :37 — cut down from 4/day after
+    # TikTok throttle analysis (over-posting was killing reach). Campaign
+    # spreads to ~30 Jun instead of ~18 Jun; remaining nations still drop
+    # before / during the early matchdays. The deterministic slot picker
+    # works on elapsed time, so spacing slots just dilates the campaign.
     - cron: "37 6 * * *"
-    - cron: "37 12 * * *"
     - cron: "37 18 * * *"
   workflow_dispatch:
     inputs:

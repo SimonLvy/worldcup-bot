@@ -342,24 +342,39 @@ def main() -> int:
     if args.nation_cron:
         from datetime import datetime, timezone
         from wc_data import NATION_PUBLISH_ORDER
-        # 48 nations × 6h slots = 12 days. Starting 2026-06-06 00:00 UTC, the
-        # last profile lands ~18 Jun — around the end of matchday 1. Midnight-UTC
-        # start gives a merge buffer: the deterministic slot picker skips slots
-        # whose time has already passed, so starting at the next 00:00 boundary
-        # means no nation is dropped as long as the merge lands tonight.
-        START = datetime(2026, 6, 6, 0, 0, tzinfo=timezone.utc)
-        SLOT_HOURS = 6
+        # Volume cut after TikTok throttle analysis: 4/day → 2/day. The cutover
+        # is the first fire of the new (2/day) regime, sized so we don't double-
+        # post or skip nations as long as the merge lands within ~12h.
+        #
+        # Before CUTOVER  : legacy 6h slots (4/day) from 2026-06-06 00:00 UTC.
+        # From CUTOVER    : 12h slots (2/day), continuing where legacy stopped.
+        #
+        # Worst-case timing (merge >12h late) re-publishes one nation — much
+        # better than skipping or dropping content silently. Use workflow_dispatch
+        # to fire a specific nation manually if needed.
+        LEGACY_START = datetime(2026, 6, 6, 0, 0, tzinfo=timezone.utc)
+        LEGACY_SLOT_HOURS = 6
+        CUTOVER = datetime(2026, 6, 10, 6, 37, tzinfo=timezone.utc)
+        NEW_SLOT_HOURS = 12
+
         now = datetime.now(timezone.utc)
-        delta_h = (now - START).total_seconds() / 3600
-        if delta_h < 0:
-            print(f"[nation-cron] campaign starts {START.isoformat()} — too early ({delta_h:.1f}h).")
+        if now < LEGACY_START:
+            print(f"[nation-cron] campaign starts {LEGACY_START.isoformat()} — too early.")
             return 0
-        slot = int(delta_h // SLOT_HOURS)
+        if now < CUTOVER:
+            delta_h = (now - LEGACY_START).total_seconds() / 3600
+            slot = int(delta_h // LEGACY_SLOT_HOURS)
+            regime = "legacy 6h"
+        else:
+            pre = int((CUTOVER - LEGACY_START).total_seconds() / 3600 / LEGACY_SLOT_HOURS)
+            post_delta = (now - CUTOVER).total_seconds() / 3600
+            slot = pre + int(post_delta // NEW_SLOT_HOURS)
+            regime = "new 12h"
         if slot >= len(NATION_PUBLISH_ORDER):
             print(f"[nation-cron] campaign over (slot {slot} ≥ {len(NATION_PUBLISH_ORDER)}).")
             return 0
         tla = NATION_PUBLISH_ORDER[slot]
-        print(f"[nation-cron] slot {slot+1}/{len(NATION_PUBLISH_ORDER)} — {tla}")
+        print(f"[nation-cron] regime={regime} slot {slot+1}/{len(NATION_PUBLISH_ORDER)} — {tla}")
         return process_nation(tla, preview=args.preview)
 
     if args.nation:
