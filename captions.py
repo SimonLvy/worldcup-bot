@@ -76,8 +76,11 @@ def for_telegram(post: dict) -> dict:
     hashtags = pack["hashtags"]
     first_comment_raw = pack["first_comment"]
 
-    # TikTok: lean on 5 hashtags
-    tt_tags = hashtags[:5]
+    # TikTok: 5 hashtags. If the builder curated a TikTok-specific set
+    # (3 niche + 2 pillars per nation/stadium), use that — it kills the
+    # bot-signature of identical tags everywhere.
+    tt_tags = pack.get("tiktok_hashtags") or hashtags[:5]
+    tt_tags = tt_tags[:5]
     tiktok_text = f"{caption}\n\n{' '.join(tt_tags)}"
 
     # Instagram: 12 hashtags inline
@@ -234,20 +237,22 @@ def _match(post: dict) -> dict:
 # Stubs for upcoming post types (return safe defaults so nothing crashes)
 # ===========================================================================
 def _nation(post: dict) -> dict:
+    import tiktok_tags
     rng = _rng_for(post)
     name = post.get("name", "Team")
+    tla = post.get("tla", "")
     nickname = post.get("nickname")
     conf = post.get("confederation", "")
     grp = post.get("group_letter", "?")
     rank = post.get("fifa_rank")
     star = (post.get("star_player") or {}).get("name")
+    coach = (post.get("coach") or {}).get("name")
     quali = post.get("quali_pct")
     verdict = post.get("predicted_round")
     titles = post.get("wc_titles") or 0
     first_wc = post.get("is_first_wc")
 
-    # Lead block — mirrors the Telegram preview header so social viewers get
-    # the identity at a glance before the editorial hook.
+    # Lead block — identity at a glance before the editorial hook.
     header = [f"🏳 {name}" + (f" · {nickname}" if nickname else "")]
     header.append(f"🌍 {conf} · Group {grp}" + (f" · FIFA #{rank}" if rank else ""))
     if first_wc:
@@ -258,32 +263,62 @@ def _nation(post: dict) -> dict:
         header.append(f"⭐ {star}")
     header_block = "\n".join(header)
 
-    # Hook leans on the predictor verdict — the bot's hot take drives replies.
+    # Hook variants — open questions, not bot verdicts. The pool is wide so
+    # 48 nation posts don't read like one template repeated. Seed = post_id
+    # so each nation picks deterministically from the right cluster.
     if first_wc:
         hooks = [
-            f"{name} land on the biggest stage for the very first time. Dark horse or out early? 👇",
-            f"A debut on the world stage for {name}. How far do they go? 👇",
+            f"First WC ever for {name}. Are you watching them or sleeping on them?",
+            f"{name} get their first taste of the World Cup. Underdog story or out by matchday 3?",
+            f"This is the moment {name} have been waiting for. What's your prediction for their debut?",
+            f"A whole nation tunes in for the first time. Who's in their starting XI in your head right now?",
+        ]
+    elif titles >= 3:
+        hooks = [
+            f"{titles} stars on the shirt. Are {name} adding a {titles+1}th this summer?",
+            f"{name} know what it takes. Can {nickname or 'they'} go all the way again?",
+            f"Champions {titles} times. Does the {verdict} sound like enough for {name}?",
+            f"The pedigree is there. Is {verdict} the floor or the ceiling for {name}?",
+        ]
+    elif quali and quali >= 80:
+        hooks = [
+            f"{name} look locked in for the knockouts. Who do you want them to draw?",
+            f"Group {grp} feels safe for {name}. But how deep do they really go?",
+            f"Strong on paper, {name} are heading out of the group. Quarters? Further?",
+            f"Easy through the group — then what? {name}'s ceiling this summer is…?",
+        ]
+    elif quali and quali >= 40:
+        hooks = [
+            f"Group {grp} is a coin flip for {name}. Are they good enough to escape?",
+            f"{name} have a real shout in Group {grp}. Who do they need to beat?",
+            f"Coach {coach} has work to do. Can {name} pull off the upset this summer?" if coach else f"Can {name} pull off the upset this summer?",
+            f"50/50 from the group. What does {name}'s World Cup look like to you?",
         ]
     else:
         hooks = [
-            f"The bot's call: {name} reach the {verdict}. Agree or madness? 👇",
-            f"Pre-tournament verdict — {name} to the {verdict}, {quali}% out of the group. Your take? 👇",
-            f"{quali}% to escape Group {grp}, predicted {verdict}. Backing {nickname or name}? 👇",
+            f"Few are backing {name}. Convince me they're more than tourists.",
+            f"On paper, {name} are the underdog. Got a memorable WC story they could write?",
+            f"Long road for {name}. One game they need to win to make this trip worth it?",
+            f"Outsiders in Group {grp}. Who do you want them to embarrass?",
         ]
     caption = f"{header_block}\n\n{rng.choice(hooks)}"
 
+    # TikTok pulls from the curated map — 3 specific + 2 pillars. Instagram
+    # variant (12 tags) keeps the broader pool for fuller reach.
+    tiktok_5 = tiktok_tags.for_nation(tla)
     name_tag = "#" + name.replace(" ", "").replace(".", "")
     conf_tag = "#" + conf if conf else None
-    extra = [t for t in (name_tag, conf_tag) if t]
+    ig_extra = [t for t in (name_tag, conf_tag) if t]
     return {
         "caption": caption,
-        "hashtags": _TAGS_CORE + extra + _pick(_TAGS_REACH, 3, rng),
+        "hashtags": _TAGS_CORE + ig_extra + _pick(_TAGS_REACH, 3, rng),
+        "tiktok_hashtags": tiktok_5,
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 
 
 def _stadium(post: dict) -> dict:
-    import wc_data
+    import wc_data, tiktok_tags
     rng = _rng_for(post)
     name = post.get("stadium", "Stadium")
     city = post.get("city", "")
@@ -317,6 +352,7 @@ def _stadium(post: dict) -> dict:
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + ["#Stadium", "#WC26Venues"] + _pick(_TAGS_REACH, 3, rng),
+        "tiktok_hashtags": tiktok_tags.for_stadium(name),
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 
