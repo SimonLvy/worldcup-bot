@@ -27,6 +27,7 @@ TEMPLATE = HERE / "template.html"
 TEMPLATE_COUNTDOWN = HERE / "template_countdown.html"
 TEMPLATE_STADIUM = HERE / "template_stadium.html"
 TEMPLATE_NATION = HERE / "template_nation.html"
+TEMPLATE_REACTION = HERE / "template_reaction.html"
 
 
 def _render(data: dict, template: pathlib.Path, out_dir: pathlib.Path, scale: int) -> pathlib.Path:
@@ -84,6 +85,12 @@ def render_nation(post: dict, out_root: str | pathlib.Path = "output", scale: in
     """Render the 3-slide nation showcase carousel."""
     out_dir = pathlib.Path(out_root) / post.get("post_id", "nation")
     return _render(post, TEMPLATE_NATION, out_dir, scale)
+
+
+def render_reaction(post: dict, out_root: str | pathlib.Path = "output", scale: int = 2) -> pathlib.Path:
+    """Render the 2-slide post-match reaction (result + verdict)."""
+    out_dir = pathlib.Path(out_root) / post.get("post_id", "reaction")
+    return _render(post, TEMPLATE_REACTION, out_dir, scale)
 
 
 if __name__ == "__main__":

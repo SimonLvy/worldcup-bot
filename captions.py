@@ -57,6 +57,8 @@ def build_caption(post: dict) -> dict:
         return _stadium(post)
     if post_type == "group":
         return _group(post)
+    if post_type == "reaction":
+        return _reaction(post)
     # Sensible fallback
     return {"caption": "World Cup 2026 update.", "hashtags": _TAGS_CORE, "first_comment": ""}
 
@@ -311,6 +313,65 @@ def _nation(post: dict) -> dict:
         "hashtags": _TAGS_CORE + ig_extra + _pick(_TAGS_REACH, 3, rng),
         "tiktok_hashtags": tiktok_5,
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
+    }
+
+
+def _reaction(post: dict) -> dict:
+    """Post-match reaction caption — @thefootballbro reacting live to the
+    result vs the call we posted before kickoff. Hype, first person, no em
+    dashes, ends on a comment-baiting question."""
+    import tiktok_tags
+    rng = _rng_for(post)
+    h, a = post["home"], post["away"]
+    hn, an = h["name"], a["name"]
+    ph, pa = post["predicted"]["home"], post["predicted"]["away"]
+    ah, aa = post["actual"]["home"], post["actual"]["away"]
+    verdict = post.get("verdict")
+    winner = post.get("winner_name")
+    loser = post.get("loser_name")
+    pred_str = f"{ph}-{pa}"
+    ft_str = f"{ah}-{aa}"
+
+    if verdict == "nailed":
+        hooks = [
+            f"I CALLED IT. 🎯 {hn} {ft_str} {an}, EXACTLY what I said. Bow down. 👇",
+            f"Wrote {hn} {pred_str} {an}. Final score? {ft_str}. 🔮 Call me Nostradamus. Who doubted me? 👇",
+            f"{ft_str}. EXACT scoreline I predicted. 😤 Screenshot this. Y'all owe me an apology. 👇",
+        ]
+    elif verdict == "called":
+        win = winner or "them"
+        hooks = [
+            f"Told you {win} had this one. ✅ {hn} {ft_str} {an}. Said {pred_str}, close enough. Who listened? 👇",
+            f"Called the result. {win} get it done, {ft_str}. 🎯 I'm cooking this tournament. Agree? 👇",
+            f"{win} win, just like I said. {ft_str}. 💪 Score wasn't spot on but the call was. Respect? 👇",
+        ]
+    elif verdict == "upset":
+        hooks = [
+            f"NOBODY saw this coming. 🤯 {hn} {ft_str} {an}. I had {pred_str}. The bracket is COOKED. Did you call it? 👇",
+            f"UPSET ALERT. 🚨 {winner} just shocked the world, {ft_str}. I got it SO wrong. Who actually predicted this?? 👇",
+            f"{winner}?! {ft_str}?! 😱 I said {pred_str} and I've never been more wrong. This tournament is chaos. 👇",
+        ]
+    else:  # missed
+        hooks = [
+            f"Yeah I got that one WRONG. 😭 {hn} {ft_str} {an}. I said {pred_str}. Roast me in the comments. 👇",
+            f"Delete my account. {ft_str}, I had {pred_str}. 🤡 You saw it coming and I didn't, didn't you? 👇",
+            f"That did NOT go how I called it. {ft_str} vs my {pred_str}. 😬 Tell me you had it. 👇",
+        ]
+    caption = rng.choice(hooks)
+
+    # Tags: both nations + pillars so it surfaces to both fanbases searching
+    # the result right now.
+    htags = tiktok_tags.NATION_TAGS.get(h.get("tla"), ())
+    atags = tiktok_tags.NATION_TAGS.get(a.get("tla"), ())
+    specific = [t for t in (htags[:1] + atags[:1]) if t][:2]
+    while len(specific) < 3:
+        specific.append("#WC26")
+    tiktok_5 = specific[:3] + list(tiktok_tags.PILLARS)
+    return {
+        "caption": caption,
+        "hashtags": _TAGS_CORE + _pick(_TAGS_REACH, 3, rng),
+        "tiktok_hashtags": tiktok_5,
+        "first_comment": "",
     }
 
 
