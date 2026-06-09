@@ -244,67 +244,64 @@ def _nation(post: dict) -> dict:
     nickname = post.get("nickname")
     conf = post.get("confederation", "")
     grp = post.get("group_letter", "?")
-    rank = post.get("fifa_rank")
-    star = (post.get("star_player") or {}).get("name")
-    coach = (post.get("coach") or {}).get("name")
-    quali = post.get("quali_pct")
+    star = (post.get("star_player") or {}).get("name") or "their best"
     verdict = post.get("predicted_round")
+    quali = post.get("quali_pct")
     titles = post.get("wc_titles") or 0
     first_wc = post.get("is_first_wc")
 
-    # Lead block — identity at a glance before the editorial hook.
-    header = [f"🏳 {name}" + (f" · {nickname}" if nickname else "")]
-    header.append(f"🌍 {conf} · Group {grp}" + (f" · FIFA #{rank}" if rank else ""))
-    if first_wc:
-        header.append("✨ First-ever World Cup")
-    elif titles:
-        header.append(f"🏆 World Champions ×{titles}")
-    if star:
-        header.append(f"⭐ {star}")
-    header_block = "\n".join(header)
-
-    # Hook variants — open questions, not bot verdicts. The pool is wide so
-    # 48 nation posts don't read like one template repeated. Seed = post_id
-    # so each nation picks deterministically from the right cluster.
+    # VOICE: @thefootballbro — hyped football fan, first person, loud, emotional,
+    # debate-baiting. No data table (the slides carry facts), no "bot" framing,
+    # NO em dashes (AI tell). Caps used sparingly for punch. Always end on a
+    # question that begs a comment. Pool is wide so 48 nations never read alike.
     if first_wc:
         hooks = [
-            f"First WC ever for {name}. Are you watching them or sleeping on them?",
-            f"{name} get their first taste of the World Cup. Underdog story or out by matchday 3?",
-            f"This is the moment {name} have been waiting for. What's your prediction for their debut?",
-            f"A whole nation tunes in for the first time. Who's in their starting XI in your head right now?",
+            f"{name.upper()}. FIRST WORLD CUP EVER. 🔥 I am not ready for this story. Who's riding with them? 👇",
+            f"Nobody is talking about {name} and that's criminal. Their FIRST Mondial. 🤯 Dark horse or gone by matchday 3?",
+            f"{star} is dragging {name} to their FIRST World Cup. 🌍 Tell me you're not a little bit hyped. 👇",
+            f"A whole country waiting their WHOLE life for this. {name}, first ever. 🥹 You backing them? 👇",
         ]
     elif titles >= 3:
-        hooks = [
-            f"{titles} stars on the shirt. Are {name} adding a {titles+1}th this summer?",
-            f"{name} know what it takes. Can {nickname or 'they'} go all the way again?",
-            f"Champions {titles} times. Does the {verdict} sound like enough for {name}?",
-            f"The pedigree is there. Is {verdict} the floor or the ceiling for {name}?",
-        ]
+        deep = verdict in ("Champions", "Final", "Semi-final")
+        if deep:
+            hooks = [
+                f"{titles}x WORLD CHAMPIONS and I've got {name} going ALL the way. 🏆 Too confident? Come at me. 👇",
+                f"{star} leading {titles}-time winners {name}. I'm calling {verdict}. 🤯 With me or against me? 👇",
+                f"{titles} stars on that shirt and I think they add another. 😤 {name} winning it? Tell me. 👇",
+                f"{name} don't rebuild, they RELOAD. {titles} titles deep and I've got them in the {verdict}. 🐐 👇",
+            ]
+        else:
+            hooks = [
+                f"{titles}x WORLD CHAMPIONS and I've got {name} OUT by the {verdict}?! 🤯 Come tell me I'm wrong. 👇",
+                f"{star} leading {titles}-time winners {name}, but I'm not sold past the {verdict}. 😬 Defend them. 👇",
+                f"Hot take: {titles}-time champs {name} crash in the {verdict}. 🔥 Too disrespectful? 👇",
+                f"{titles} stars on the shirt but I've got {name} going home in the {verdict}. 🫣 Wrong? 👇",
+            ]
     elif quali and quali >= 80:
         hooks = [
-            f"{name} look locked in for the knockouts. Who do you want them to draw?",
-            f"Group {grp} feels safe for {name}. But how deep do they really go?",
-            f"Strong on paper, {name} are heading out of the group. Quarters? Further?",
-            f"Easy through the group — then what? {name}'s ceiling this summer is…?",
+            f"{name} are CRUISING out of this group. 😤 But how far do they actually go? I need your call. 👇",
+            f"{star} plus this {name} squad equals problems for EVERYONE. 🔥 Semis? Final? Tell me. 👇",
+            f"Sleep on {name} if you want. {star} will make you pay. 👀 How deep do they run? 👇",
+            f"Calling it now: {name} are dangerous. ⚡ {verdict} minimum for me. Too bold? 👇",
         ]
     elif quali and quali >= 40:
         hooks = [
-            f"Group {grp} is a coin flip for {name}. Are they good enough to escape?",
-            f"{name} have a real shout in Group {grp}. Who do they need to beat?",
-            f"Coach {coach} has work to do. Can {name} pull off the upset this summer?" if coach else f"Can {name} pull off the upset this summer?",
-            f"50/50 from the group. What does {name}'s World Cup look like to you?",
+            f"Group {grp} is a WAR and {name} are right in the middle of it. ⚔️ Surviving or going home? 👇",
+            f"Everybody sleeping on {name}. {star} says otherwise. 👀 Upset loading? 👇",
+            f"{name} can SHOCK somebody in Group {grp}. 🔥 Who do they take down? 👇",
+            f"Toss a coin on {name} this summer. 🪙 I think they've got one big night in them. You? 👇",
         ]
     else:
         hooks = [
-            f"Few are backing {name}. Convince me they're more than tourists.",
-            f"On paper, {name} are the underdog. Got a memorable WC story they could write?",
-            f"Long road for {name}. One game they need to win to make this trip worth it?",
-            f"Outsiders in Group {grp}. Who do you want them to embarrass?",
+            f"Nobody is backing {name}. 💀 Prove me wrong. One game they SHOCK the world? 👇",
+            f"{name} are the underdog of Group {grp}. 🐺 Who do you WANT them to ruin? 👇",
+            f"Real talk, {name} are outsiders. But one magic night? 🌙 Tell me it's possible. 👇",
+            f"Everyone's writing off {name}. 😤 {star} didn't come this far to roll over. Watching them? 👇",
         ]
-    caption = f"{header_block}\n\n{rng.choice(hooks)}"
+    caption = rng.choice(hooks)
 
     # TikTok pulls from the curated map — 3 specific + 2 pillars. Instagram
-    # variant (12 tags) keeps the broader pool for fuller reach.
+    # variant keeps the broader pool (kept for completeness, TikTok-only for now).
     tiktok_5 = tiktok_tags.for_nation(tla)
     name_tag = "#" + name.replace(" ", "").replace(".", "")
     conf_tag = "#" + conf if conf else None
