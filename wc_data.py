@@ -1,13 +1,13 @@
 """Static reference data filling the gaps in football-data.org's free tier.
 
 The free tier gives fixtures, standings, head-to-head, form and a (partial)
-squad — but NOT: ISO alpha-2 codes (needed for flagcdn), stadium/venue,
+squad, but NOT: ISO alpha-2 codes (needed for flagcdn), stadium/venue,
 player clubs / market value, or FIFA ranking. We supply those here.
 
 Keyed by football-data's 3-letter `tla` code.
 
 `fifa_rank`, `squad_value_eur_m`, `players_top5` are approximations used to
-seed the radar ratings and the predictor — they don't need to be exact, just
+seed the radar ratings and the predictor, they don't need to be exact, just
 plausible and consistent. `stars` are the 3 key players per nation; for teams
 without an entry, fetch_match falls back to names pulled from the API squad.
 """
@@ -80,7 +80,7 @@ NATIONS: dict[str, dict] = {
 # to names from the live API squad (club/stat unknown → graceful placeholder).
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
-# Nation editorial profiles — the rich payload behind each nation showcase post.
+# Nation editorial profiles, the rich payload behind each nation showcase post.
 # Source of truth for the 3-slide nation carousel (identity / squad / outlook).
 # Populated progressively, marquee nations first. Missing entries fall back to
 # a placeholder profile so the renderer never crashes on unknown tla.
@@ -88,7 +88,7 @@ NATIONS: dict[str, dict] = {
 NATION_PROFILES: dict[str, dict] = {
     # ----- Top 16 marquees (by FIFA rank). Verified from FIFA / Wikipedia
     # records as of late 2025. Double-check coach names + WC histories before
-    # publishing — manager swaps happen. -----
+    # publishing, manager swaps happen. -----
     "ARG": {
         "nickname": "La Albiceleste",
         "confederation": "CONMEBOL",
@@ -282,7 +282,7 @@ NATION_PROFILES: dict[str, dict] = {
     },
     # ----- Tier 2 stubs (rank 18-49). Nickname + colors + confederation so
     # the renderer paints the right palette. Coach / WC history / honours
-    # to be curated progressively — empty/null fields are dropped gracefully
+    # to be curated progressively, empty/null fields are dropped gracefully
     # by the template. -----
     "SEN": {"nickname": "Lions of Teranga", "confederation": "CAF",  "colors": {"primary": "#00853F", "secondary": "#FDEF42", "accent": "#E31B23"}},
     "KOR": {"nickname": "Taeguk Warriors",  "confederation": "AFC",  "colors": {"primary": "#003478", "secondary": "#FFFFFF", "accent": "#C60C30"}},
@@ -320,7 +320,7 @@ NATION_PROFILES: dict[str, dict] = {
 
 
 # ---------------------------------------------------------------------------
-# Head coaches — single reviewable block for all 48. Hand-maintained (no free
+# Head coaches, single reviewable block for all 48. Hand-maintained (no free
 # live source). nationality_code is the a2 for the inline flag. Verify before
 # the tournament; managers do change. Confidence noted where lower.
 # ---------------------------------------------------------------------------
@@ -402,11 +402,11 @@ CONTINENTAL_HONOURS: dict[str, list[dict]] = {
 
 
 # ---------------------------------------------------------------------------
-# Federation crests — the real association emblems (FFF cockerel, FA three
+# Federation crests, the real association emblems (FFF cockerel, FA three
 # lions, CBF…), NOT flags. Sourced once from TheSportsDB (free, crowd-sourced
 # team badges), all 512×512 PNGs on a stable CDN. 48/48. The nation showcase
 # slide n1 shows this as a small inset beside the big flag hero.
-#   football-data crests were flags, not emblems — that's why they're not used.
+#   football-data crests were flags, not emblems, that's why they're not used.
 #   Refresh by re-running the TheSportsDB searchteams fetch if a logo updates.
 # ---------------------------------------------------------------------------
 NATION_CREST: dict[str, str] = {
@@ -462,7 +462,7 @@ NATION_CREST: dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
-# "Players to watch" — the rising / under-the-radar names worth keeping an eye
+# "Players to watch", the rising / under-the-radar names worth keeping an eye
 # on per nation, distinct from the marquee star in STARS. Used in slide 2 of
 # the nation showcase, names-only (no photo) to stay compact.
 # ---------------------------------------------------------------------------
@@ -697,17 +697,17 @@ CITY_BRANDS: dict[str, dict] = {
         "logo_path": "assets/city_logos/mexico_city.svg",
         "logo_scale": 1.4,
         "motif": "Estadio Azteca becomes the first venue ever to host three World Cup opening matches. CDMX brings 150+ museums and world-renowned cuisine to the world stage.",
-        "caption_hook": "The only stadium in history to host THREE World Cups — 1970, 1986, and now 2026. Maradona's Hand of God, Pelé's third trophy, and on June 11 the opener of WC26. Hyped? 👇",
+        "caption_hook": "The only stadium in history to host THREE World Cups, 1970, 1986, and now 2026. Maradona's Hand of God, Pelé's third trophy, and on June 11 the opener of WC26. Hyped? 👇",
     },
     "Estadio Akron":           {
         "logo_path": "assets/city_logos/guadalajara.webp",
-        "motif": "Capital of tequila and mariachi. Four matches in a city where Pelé once shined — and where the famous stadium 'Wave' was born in 1986.",
-        "caption_hook": "Home of Chivas Guadalajara — the only Liga MX club that fields Mexican-only players. Mariachi country welcomes the world. ¿Listos? 👇",
+        "motif": "Capital of tequila and mariachi. Four matches in a city where Pelé once shined, and where the famous stadium 'Wave' was born in 1986.",
+        "caption_hook": "Home of Chivas Guadalajara, the only Liga MX club that fields Mexican-only players. Mariachi country welcomes the world. ¿Listos? 👇",
     },
     "Estadio BBVA":            {
         "logo_path": "assets/city_logos/monterrey.webp",
         "motif": "Mexico's industrial capital where mountains meet skyscrapers. Four matches at one of Latin America's most modern venues, continuing the 1986 World Cup tradition.",
-        "caption_hook": "Nicknamed \"El Gigante de Acero\" — The Steel Giant — with the iconic Cerro de la Silla mountain framing every match. Most scenic venue of WC26? 👇",
+        "caption_hook": "Nicknamed \"El Gigante de Acero\", The Steel Giant, with the iconic Cerro de la Silla mountain framing every match. Most scenic venue of WC26? 👇",
     },
     "MetLife Stadium":         {
         "logo_path": "assets/city_logos/new_york_nj.svg",
@@ -717,17 +717,17 @@ CITY_BRANDS: dict[str, dict] = {
     "SoFi Stadium":            {
         "logo_path": "assets/city_logos/los_angeles.svg",
         "motif": "Eight matches including the USMNT opener. A global capital for sport and culture, returning to the legacy of the FIFA World Cup USA 1994 Final.",
-        "caption_hook": "Around $5 billion to build — one of the most expensive stadiums ever made. Stage for the USMNT opener vs Paraguay. Tuning in? 👇",
+        "caption_hook": "Around $5 billion to build, one of the most expensive stadiums ever made. Stage for the USMNT opener vs Paraguay. Tuning in? 👇",
     },
     "AT&T Stadium":            {
         "logo_path": "assets/city_logos/dallas.svg",
         "motif": "Nine matches including five group stage games and the July 14 semi-final. Fun fact: the entire Statue of Liberty fits inside Dallas Stadium with the roof closed.",
-        "caption_hook": "Home of one of the largest center-hung HD video boards in sport — and stage for the July 14 semi-final. Texas does it bigger. 👇",
+        "caption_hook": "Home of one of the largest center-hung HD video boards in sport, and stage for the July 14 semi-final. Texas does it bigger. 👇",
     },
     "Mercedes-Benz Stadium":   {
         "logo_path": "assets/city_logos/atlanta.webp",
         "motif": "Eight matches including a semi-final in the 'City in the Forest', where green neighborhoods meet a fast-growing skyline.",
-        "caption_hook": "The eight-petal \"camera-aperture\" roof opens in 8 minutes flat — engineering theatre before kickoff. Hosts a semi-final on July 15. 👇",
+        "caption_hook": "The eight-petal \"camera-aperture\" roof opens in 8 minutes flat, engineering theatre before kickoff. Hosts a semi-final on July 15. 👇",
     },
     "NRG Stadium":             {
         "logo_path": "assets/city_logos/houston.svg",
@@ -737,12 +737,12 @@ CITY_BRANDS: dict[str, dict] = {
     "Arrowhead Stadium":       {
         "logo_path": "assets/city_logos/kansas_city.svg",
         "motif": "The Soccer Capital of America®. Two states united by an unmatched passion for the game, where progress meets promise.",
-        "caption_hook": "Guinness World Record holder for the loudest crowd roar — 142.2 decibels. Bring earplugs. Hyped? 👇",
+        "caption_hook": "Guinness World Record holder for the loudest crowd roar, 142.2 decibels. Bring earplugs. Hyped? 👇",
     },
     "Lincoln Financial Field": {
         "logo_path": "assets/city_logos/philadelphia.svg",
         "motif": "Birthplace of American democracy. Six matches including a historic July 4 showdown, coinciding with the United States' 250th anniversary.",
-        "caption_hook": "A historic July 4 R16 fixture at the birthplace of American independence — on the country's 250th anniversary. Goosebump matchup? 👇",
+        "caption_hook": "A historic July 4 R16 fixture at the birthplace of American independence, on the country's 250th anniversary. Goosebump matchup? 👇",
     },
     "Levi's Stadium":          {
         "logo_path": "assets/city_logos/bay_area.svg",
@@ -752,17 +752,17 @@ CITY_BRANDS: dict[str, dict] = {
     "Lumen Field":             {
         "logo_path": "assets/city_logos/seattle.svg",
         "motif": "Where the Salish Sea meets the Cascades. Seattle Stadium is famous for record-breaking noise and the raucous Sounders atmosphere.",
-        "caption_hook": "Famous for the Sounders crowd — among the loudest open-air venues in North America. Hyped for the noise? 👇",
+        "caption_hook": "Famous for the Sounders crowd, among the loudest open-air venues in North America. Hyped for the noise? 👇",
     },
     "Gillette Stadium":        {
         "logo_path": "assets/city_logos/boston.svg",
         "motif": "Birthplace of the American Revolution, founded in 1630. Seven matches building on Boston's FIFA World Cup USA 1994 legacy.",
-        "caption_hook": "Boston's WC return since 1994 — seven matches in a region that lives and breathes soccer. Heading there? 👇",
+        "caption_hook": "Boston's WC return since 1994, seven matches in a region that lives and breathes soccer. Heading there? 👇",
     },
     "Hard Rock Stadium":       {
         "logo_path": "assets/city_logos/miami.svg",
         "motif": "Where Latin America, the Caribbean and Europe meet between the Atlantic Ocean and Biscayne Bay. Diverse, dynamic, ready for the world.",
-        "caption_hook": "Hosts BOTH a quarter-final AND the third-place playoff — Miami's full WC arc, from the QF run to the bronze medal match. Which fixture grabs you? 👇",
+        "caption_hook": "Hosts BOTH a quarter-final AND the third-place playoff, Miami's full WC arc, from the QF run to the bronze medal match. Which fixture grabs you? 👇",
     },
     "BC Place":                {
         "logo_path": "assets/city_logos/vancouver.webp",
@@ -772,7 +772,7 @@ CITY_BRANDS: dict[str, dict] = {
     "BMO Field":               {
         "logo_path": "assets/city_logos/toronto.svg",
         "motif": "Canada's largest city and home of its first soccer-specific stadium. Six matches across 150+ vibrant neighborhoods.",
-        "caption_hook": "Canada's first soccer-specific stadium — host of Canada's WC return vs Bosnia on June 12. Watching the Maple Leaf rise? 👇",
+        "caption_hook": "Canada's first soccer-specific stadium, host of Canada's WC return vs Bosnia on June 12. Watching the Maple Leaf rise? 👇",
     },
 }
 
@@ -1041,7 +1041,7 @@ def players_to_watch_for(tla: str) -> list[str]:
 def group_for(tla: str) -> tuple[str | None, list[str]]:
     """Return (group_letter, [4 tlas in that group]) for the given nation.
 
-    Derives the group composition by reverse-walking GROUP_VENUES — each tla
+    Derives the group composition by reverse-walking GROUP_VENUES, each tla
     appears in 3 pairs, the union is the group. The letter mapping mirrors the
     GROUP_LETTERS order used in fetch_match's schedule generator (A → L).
     """
@@ -1076,7 +1076,7 @@ def group_for(tla: str) -> tuple[str | None, list[str]]:
 def venue(name: str) -> dict | None:
     return VENUES.get(name)
 
-# ===== AUTO-GENERATED SCHEDULE — DO NOT EDIT BY HAND =====
+# ===== AUTO-GENERATED SCHEDULE, DO NOT EDIT BY HAND =====
 # Source: football-data.org /competitions/WC/matches (104 fixtures).
 # Regenerate via `python _gen_schedule.py` whenever the official schedule changes.
 
