@@ -78,12 +78,13 @@ def for_telegram(post: dict) -> dict:
     hashtags = pack["hashtags"]
     first_comment_raw = pack["first_comment"]
 
-    # TikTok: 5 hashtags. If the builder curated a TikTok-specific set
-    # (3 niche + 2 pillars per nation/stadium), use that — it kills the
-    # bot-signature of identical tags everywhere.
-    tt_tags = pack.get("tiktok_hashtags") or hashtags[:5]
-    tt_tags = tt_tags[:5]
-    tiktok_text = f"{caption}\n\n{' '.join(tt_tags)}"
+    # TikTok: builders now roll their own hashtag COUNT (0..5) for variety.
+    # `tiktok_hashtags` present (even empty []) → use it verbatim; absent →
+    # fall back to 5 from the generic pool.
+    tt_tags = pack.get("tiktok_hashtags")
+    if tt_tags is None:
+        tt_tags = hashtags[:5]
+    tiktok_text = caption + (("\n\n" + " ".join(tt_tags)) if tt_tags else "")
 
     # Instagram: 12 hashtags inline
     ig_tags = hashtags[:12]
@@ -107,6 +108,37 @@ def _pick(pool: list[str], n: int, rng: random.Random) -> list[str]:
     pool = list(pool)
     rng.shuffle(pool)
     return pool[:n]
+
+
+# ---------------------------------------------------------------------------
+# Diversity helpers — make every post vary in length AND hashtag count so the
+# feed never reads as a template. All seeded by post_id (deterministic).
+# ---------------------------------------------------------------------------
+def _elongate(word: str, rng: random.Random) -> str:
+    """BRAZIL -> BRAZILLLLLL. The shout-it caption style."""
+    w = (word or "").strip().upper()
+    if not w or not w[-1].isalpha():
+        return w
+    return w + w[-1] * rng.randint(4, 9)
+
+
+def _roll_tags(rng: random.Random, tags5) -> list[str]:
+    """Seeded variety in hashtag count: sometimes 5, sometimes 1, sometimes
+    none. Returns a sublist of the curated tags (or [])."""
+    tags5 = [t for t in (tags5 or []) if t]
+    if not tags5:
+        return []
+    n = rng.choices([0, 1, 2, 3, 5], weights=[16, 20, 16, 22, 26])[0]
+    return tags5[:n]
+
+
+def _compose(rng: random.Random, oneword, shorts, longs) -> str:
+    """Pick a caption length: one-word shout / short hook / long take. Weighted
+    toward short, but one-word and long both show up often enough to read human."""
+    style = rng.choices(["one", "short", "long"], weights=[22, 46, 32])[0]
+    pool = {"one": oneword, "short": shorts, "long": longs}.get(style)
+    pool = pool or shorts or oneword or longs or [""]
+    return rng.choice(pool)
 
 
 # ===========================================================================
@@ -165,74 +197,74 @@ def _countdown(post: dict) -> dict:
     hook = rng.choice(hook_pool)
     question = rng.choice(_COUNTDOWN_QUESTIONS)
 
-    caption = f"⏳ {days_label}\n\n{hook}\n\n{question} 👇"
+    if days == 0:
+        oneword = ["TODAY.", "IT'S HERE.", "GAME ON."]
+    elif days <= 1:
+        oneword = ["TOMORROW.", "ALMOST.", f"{days}."]
+    else:
+        oneword = [f"{days}.", "SOON.", "ALMOST."]
+    shorts = [
+        f"⏳ {days_label} {hook}",
+        f"{days_label} {question} 👇",
+        f"{hook} {question} 👇",
+    ]
+    longs = [
+        f"⏳ {days_label}\n\n{hook}\n\n{question} 👇",
+        f"{days_label} I can't sit still. {hook} The whole planet is about to stop for this. {question} 👇",
+    ]
+    caption = _compose(rng, oneword, shorts, longs)
 
+    cd_tags = ["#WorldCup2026", "#Countdown", "#WC2026", "#FIFA", "#football"]
     hashtags = _TAGS_CORE + ["#Countdown", "#WC26Countdown"] + _pick(_TAGS_REACH, 3, rng)
-
     first_comment = (
         f"Drop your prediction below 🔥\n\n"
         + " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng))
     )
-
-    return {"caption": caption, "hashtags": hashtags, "first_comment": first_comment}
+    return {"caption": caption, "hashtags": hashtags,
+            "tiktok_hashtags": _roll_tags(rng, cd_tags), "first_comment": first_comment}
 
 
 # ===========================================================================
 # MATCH (J-1 preview)
 # ===========================================================================
-_MATCH_HOOKS = [
-    "It's matchday tomorrow. {h} vs {a}.",
-    "Tomorrow night: {h} take on {a}. Here's everything you need to know.",
-    "{h} vs {a} — full preview inside ⤵️",
-    "All eyes on {h} vs {a}. Here's the breakdown.",
-    "Matchday brief: {h} face {a}. Stats, form, prediction — let's go.",
-]
-
-_MATCH_QUESTIONS = [
-    "Your scoreline? Drop it 👇",
-    "1, X or 2? Drop your call.",
-    "Who takes it? Comment below.",
-    "Pick the winner. Reasoning optional 😏",
-]
-
-
 def _match(post: dict) -> dict:
+    import tiktok_tags
     rng = _rng_for(post)
     h = post["home"]["name"]
     a = post["away"]["name"]
-    hook = rng.choice(_MATCH_HOOKS).format(h=h, a=a)
-    question = rng.choice(_MATCH_QUESTIONS)
+    pred = post.get("prediction", {})
+    ps = f"{pred.get('home_score', '?')}-{pred.get('away_score', '?')}" if pred else ""
 
-    if post.get("stage") == "knockout":
-        round_name = post.get("knockout", {}).get("round", "Knockout stage")
-        context_line = f"🏆 {round_name}"
-    else:
-        context_line = f"📋 Group {post.get('group', '?')} · MD{post.get('match_number_in_group', '?')}"
+    oneword = ["MATCHDAY.", _elongate(h, rng), _elongate(a, rng), "BIG ONE."]
+    shorts = [
+        f"{h} vs {a}. 👀 My call: {ps}. You? 👇" if ps else f"{h} vs {a}. 👀 Your call? 👇",
+        f"It's {h} vs {a} and I CANNOT wait. 🔥 Who takes it?",
+        f"{h.upper()} vs {a.upper()}. Drop your scoreline. 👇",
+    ]
+    longs = [
+        f"Matchday. {h} vs {a}. I've gone through the form, the history, all of it, and I'm calling {h} {ps} {a}. Bold? Maybe. Wrong? We'll find out. What's YOUR scoreline? 👇" if ps
+        else f"Matchday. {h} vs {a}. I've gone through the form and the history and I think this one's got fireworks. What's your scoreline? 👇",
+        f"Everything points to a big one here. {h} vs {a}, two teams with everything to play for. My head says one thing, my gut says another. Give me your prediction before kickoff. 👇",
+    ]
+    caption = _compose(rng, oneword, shorts, longs)
 
-    kickoff = post.get("kickoff_utc_label", post.get("kickoff_local_label", ""))
-    venue = post.get("venue", {}).get("stadium", "")
-    when_where = f"⏰ {kickoff}" + (f"  •  📍 {venue}" if venue else "")
+    # Tags from both nations (curated) + roll the count.
+    ht = tiktok_tags.NATION_TAGS.get(post["home"].get("tla") or "", ())
+    at = tiktok_tags.NATION_TAGS.get(post["away"].get("tla") or "", ())
+    m_tags = [t for t in (ht[:1] + at[:1]) if t] + ["#WorldCup2026", "#FIFA"]
+    while len(m_tags) < 5:
+        m_tags.append("#football")
 
-    caption = f"{hook}\n\n{context_line}\n{when_where}\n\n{question}"
-
-    # Country-specific tags + match-specific
     home_tag = "#" + h.replace(" ", "")
     away_tag = "#" + a.replace(" ", "")
     hashtags = (_TAGS_CORE + [home_tag, away_tag, "#MatchPreview"]
                 + _pick(_TAGS_REACH, 3, rng))
-
-    # Prediction in first comment — short & engagement-driving
-    pred = post.get("prediction", {})
-    pred_line = ""
-    if pred:
-        pred_line = (f"🎯 Our call: {h} {pred.get('home_score', '?')} - "
-                     f"{pred.get('away_score', '?')} {a}\n"
-                     f"{pred.get('reasoning', '')}\n\n")
-    first_comment = (pred_line
-                     + "What's YOUR scoreline? 👇\n\n"
-                     + " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)))
-
-    return {"caption": caption, "hashtags": hashtags, "first_comment": first_comment}
+    return {
+        "caption": caption,
+        "hashtags": hashtags,
+        "tiktok_hashtags": _roll_tags(rng, m_tags[:5]),
+        "first_comment": "",
+    }
 
 
 # ===========================================================================
@@ -252,58 +284,85 @@ def _nation(post: dict) -> dict:
     titles = post.get("wc_titles") or 0
     first_wc = post.get("is_first_wc")
 
-    # VOICE: @thefootballbro — hyped football fan, first person, loud, emotional,
-    # debate-baiting. No data table (the slides carry facts), no "bot" framing,
-    # NO em dashes (AI tell). Caps used sparingly for punch. Always end on a
-    # question that begs a comment. Pool is wide so 48 nations never read alike.
+    # VOICE: @thefootballbro — hyped fan, first person, no em dashes, no "bot".
+    # Three length registers (one-word shout / short hook / long take), bucket
+    # aware. _compose picks the register, _roll_tags picks 0..5 hashtags.
+    nick_word = (nickname or "").split()[-1] if nickname else ""
     if first_wc:
-        hooks = [
-            f"{name.upper()}. FIRST WORLD CUP EVER. 🔥 I am not ready for this story. Who's riding with them? 👇",
-            f"Nobody is talking about {name} and that's criminal. Their FIRST Mondial. 🤯 Dark horse or gone by matchday 3?",
-            f"{star} is dragging {name} to their FIRST World Cup. 🌍 Tell me you're not a little bit hyped. 👇",
-            f"A whole country waiting their WHOLE life for this. {name}, first ever. 🥹 You backing them? 👇",
+        bucket_word = "HISTORY."
+        shorts = [
+            f"{name.upper()}. FIRST WORLD CUP EVER. 🔥 I am not ready for this. Who's riding with them? 👇",
+            f"Nobody is talking about {name} and that's criminal. Their FIRST Mondial. 🤯 Dark horse?",
+            f"{star} is dragging {name} to their FIRST World Cup. 🌍 Tell me you're not hyped. 👇",
+        ]
+        longs = [
+            f"{name}. First World Cup in their entire history. Sit with that. A whole country that has NEVER been on this stage, and here they are. {star} leading the line. I don't care about the odds, I'm watching every single minute. Tell me you're not a little bit excited. 👇",
+            f"Everyone's sleeping on {name} and I get it, it's their debut. But debutants have shocked this tournament before. {star} can cause problems. Write the script for me: how far do these guys go? 👇",
         ]
     elif titles >= 3:
+        bucket_word = "ROYALTY."
         deep = verdict in ("Champions", "Final", "Semi-final")
         if deep:
-            hooks = [
-                f"{titles}x WORLD CHAMPIONS and I've got {name} going ALL the way. 🏆 Too confident? Come at me. 👇",
-                f"{star} leading {titles}-time winners {name}. I'm calling {verdict}. 🤯 With me or against me? 👇",
-                f"{titles} stars on that shirt and I think they add another. 😤 {name} winning it? Tell me. 👇",
-                f"{name} don't rebuild, they RELOAD. {titles} titles deep and I've got them in the {verdict}. 🐐 👇",
+            shorts = [
+                f"{titles}x WORLD CHAMPIONS and I've got {name} going ALL the way. 🏆 Too confident? 👇",
+                f"{star} leading {titles}-time winners {name}. I'm calling {verdict}. 🤯 With me or against me?",
+                f"{name} don't rebuild, they RELOAD. {titles} titles deep. 🐐 Winning it again?",
+            ]
+            longs = [
+                f"{titles} World Cups. {star} in the squad. And people STILL want to bet against {name}? They've done this before and they'll do it again. I've got them in the {verdict} and I'm not moving off it. Come tell me where I'm wrong. 👇",
+                f"Let me be clear about {name}. {titles} stars on the shirt is not luck, it's a standard. {star} carries that weight. I'm calling {verdict}, no hedging. Screenshot it. Who's brave enough to disagree? 👇",
             ]
         else:
-            hooks = [
-                f"{titles}x WORLD CHAMPIONS and I've got {name} OUT by the {verdict}?! 🤯 Come tell me I'm wrong. 👇",
-                f"{star} leading {titles}-time winners {name}, but I'm not sold past the {verdict}. 😬 Defend them. 👇",
-                f"Hot take: {titles}-time champs {name} crash in the {verdict}. 🔥 Too disrespectful? 👇",
-                f"{titles} stars on the shirt but I've got {name} going home in the {verdict}. 🫣 Wrong? 👇",
+            shorts = [
+                f"{titles}x WORLD CHAMPIONS and I've got {name} OUT by the {verdict}?! 🤯 Tell me I'm wrong. 👇",
+                f"Hot take: {titles}-time champs {name} crash in the {verdict}. 🔥 Too disrespectful?",
+                f"{titles} stars on the shirt but I've got {name} going home in the {verdict}. 🫣 Wrong?",
+            ]
+            longs = [
+                f"I'm about to upset some people. {name}, {titles}-time world champions, and I've got them OUT by the {verdict}. The badge is heavy but this squad? Not convinced. {star} can't do it alone. Prove me wrong in the comments, I'm ready. 👇",
+                f"Respect the history, {name} have {titles} World Cups. But history doesn't play the games. I'm calling the {verdict} and no further. That's a hot take and I'll stand on it. Defend them if you can. 👇",
             ]
     elif quali and quali >= 80:
-        hooks = [
-            f"{name} are CRUISING out of this group. 😤 But how far do they actually go? I need your call. 👇",
-            f"{star} plus this {name} squad equals problems for EVERYONE. 🔥 Semis? Final? Tell me. 👇",
-            f"Sleep on {name} if you want. {star} will make you pay. 👀 How deep do they run? 👇",
-            f"Calling it now: {name} are dangerous. ⚡ {verdict} minimum for me. Too bold? 👇",
+        bucket_word = "DANGEROUS."
+        shorts = [
+            f"{name} are CRUISING out of this group. 😤 But how far do they actually go? 👇",
+            f"{star} plus this {name} squad equals problems for EVERYONE. 🔥 Semis? Final?",
+            f"Sleep on {name} if you want. {star} will make you pay. 👀 How deep do they run?",
+        ]
+        longs = [
+            f"{name} are quietly one of the scariest teams here. {star} is in the form of his life and the group? A formality. The real question is the ceiling. I've got them at least the {verdict}. Where do YOU stop them? 👇",
+            f"Everyone's busy talking about the usual names while {name} are sitting there loaded. {star} leads a squad that can hurt anyone on the day. Group {grp} is the warm-up. Tell me how far this team goes. 👇",
         ]
     elif quali and quali >= 40:
-        hooks = [
+        bucket_word = "SLEEPERS."
+        shorts = [
             f"Group {grp} is a WAR and {name} are right in the middle of it. ⚔️ Surviving or going home? 👇",
-            f"Everybody sleeping on {name}. {star} says otherwise. 👀 Upset loading? 👇",
-            f"{name} can SHOCK somebody in Group {grp}. 🔥 Who do they take down? 👇",
-            f"Toss a coin on {name} this summer. 🪙 I think they've got one big night in them. You? 👇",
+            f"Everybody sleeping on {name}. {star} says otherwise. 👀 Upset loading?",
+            f"{name} can SHOCK somebody in Group {grp}. 🔥 Who do they take down?",
+        ]
+        longs = [
+            f"{name} are the team nobody wants to draw. Not flashy, but {star} and a real plan can ruin somebody's tournament. Group {grp} is a coin flip and I kind of love them for it. Are they surviving or going home? 👇",
+            f"Toss a coin on {name}. On their day they beat anyone, on a bad day they're gone in three games. {star} is the difference maker. I think they've got one massive night in them. Do you? 👇",
         ]
     else:
-        hooks = [
+        bucket_word = "UNDERDOGS."
+        shorts = [
             f"Nobody is backing {name}. 💀 Prove me wrong. One game they SHOCK the world? 👇",
-            f"{name} are the underdog of Group {grp}. 🐺 Who do you WANT them to ruin? 👇",
-            f"Real talk, {name} are outsiders. But one magic night? 🌙 Tell me it's possible. 👇",
-            f"Everyone's writing off {name}. 😤 {star} didn't come this far to roll over. Watching them? 👇",
+            f"{name} are the underdog of Group {grp}. 🐺 Who do you WANT them to ruin?",
+            f"Everyone's writing off {name}. 😤 {star} didn't come to roll over. Watching them?",
         ]
-    caption = rng.choice(hooks)
+        longs = [
+            f"Let's be real, nobody's giving {name} a chance. And that's EXACTLY why I love them. {star} carrying the hopes of a whole nation onto the biggest stage. They don't need to win it, they need ONE magic night. Tell me it's possible. 👇",
+            f"{name} are outsiders, sure. But this is the World Cup, the place underdogs become legends. {star} just needs a moment. Give me the one game where they shock the planet. 👇",
+        ]
 
-    # TikTok pulls from the curated map — 3 specific + 2 pillars. Instagram
-    # variant keeps the broader pool (kept for completeness, TikTok-only for now).
+    oneword = [_elongate(name, rng)]
+    if nick_word and nick_word.lower() not in ("la", "les", "the", "el", "los"):
+        oneword.append(_elongate(nick_word, rng))
+    oneword.append(bucket_word)
+
+    caption = _compose(rng, oneword, shorts, longs)
+
     tiktok_5 = tiktok_tags.for_nation(tla)
     name_tag = "#" + name.replace(" ", "").replace(".", "")
     conf_tag = "#" + conf if conf else None
@@ -311,7 +370,7 @@ def _nation(post: dict) -> dict:
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + ig_extra + _pick(_TAGS_REACH, 3, rng),
-        "tiktok_hashtags": tiktok_5,
+        "tiktok_hashtags": _roll_tags(rng, tiktok_5),
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 
@@ -332,35 +391,62 @@ def _reaction(post: dict) -> dict:
     pred_str = f"{ph}-{pa}"
     ft_str = f"{ah}-{aa}"
 
+    is_draw = winner is None
+    win = winner or "them"
     if verdict == "nailed":
-        hooks = [
+        oneword = ["CALLED IT.", "NAILED IT.", _elongate(win, rng) if winner else "SCENES."]
+        shorts = [
             f"I CALLED IT. 🎯 {hn} {ft_str} {an}, EXACTLY what I said. Bow down. 👇",
-            f"Wrote {hn} {pred_str} {an}. Final score? {ft_str}. 🔮 Call me Nostradamus. Who doubted me? 👇",
-            f"{ft_str}. EXACT scoreline I predicted. 😤 Screenshot this. Y'all owe me an apology. 👇",
+            f"Wrote {pred_str}. Final? {ft_str}. 🔮 Call me Nostradamus. Who doubted me?",
+            f"{ft_str}. EXACT scoreline I predicted. 😤 Screenshot this. You owe me an apology.",
+        ]
+        longs = [
+            f"I want everyone to remember this one. I called {hn} {pred_str} {an} before a ball was kicked. Final score? {ft_str}. EXACT. I'm not saying I'm a genius but the receipts are right there. Who had it spot on like me? 👇",
+        ]
+    elif verdict == "called" and is_draw:
+        oneword = ["CALLED IT.", "HONOURS EVEN.", "TOLD YOU."]
+        shorts = [
+            f"I said it'd be tight. ✅ {ft_str}, honours even. Called the draw. Who agreed? 👇",
+            f"Dead even, just like I said. {ft_str}. 🤝 Points shared. Did you see it coming?",
+            f"Told you to expect a tight one. {ft_str}. 🎯 Nobody could split them.",
+        ]
+        longs = [
+            f"Don't say I didn't warn you. I called this one a draw and that's exactly what we got, {ft_str}. Two teams cancelling each other out, points shared. The call was money. Who else had the stalemate? 👇",
         ]
     elif verdict == "called":
-        win = winner or "them"
-        hooks = [
-            f"Told you {win} had this one. ✅ {hn} {ft_str} {an}. Said {pred_str}, close enough. Who listened? 👇",
-            f"Called the result. {win} get it done, {ft_str}. 🎯 I'm cooking this tournament. Agree? 👇",
-            f"{win} win, just like I said. {ft_str}. 💪 Score wasn't spot on but the call was. Respect? 👇",
+        oneword = ["CALLED IT.", _elongate(win, rng), "TOLD YOU."]
+        shorts = [
+            f"Told you {win} had this. ✅ {ft_str}. Said {pred_str}, close enough. Who listened? 👇",
+            f"Called it. {win} get it done, {ft_str}. 🎯 I'm cooking. Agree?",
+            f"{win} win, just like I said. {ft_str}. 💪 Score wasn't spot on but the call was. Respect?",
+        ]
+        longs = [
+            f"Don't act surprised. I told you {win} were winning this one and they did, {ft_str}. Scoreline wasn't perfect, I said {pred_str}, but the call was money. This is what I do. Who actually listened to me? 👇",
         ]
     elif verdict == "upset":
-        hooks = [
-            f"NOBODY saw this coming. 🤯 {hn} {ft_str} {an}. I had {pred_str}. The bracket is COOKED. Did you call it? 👇",
-            f"UPSET ALERT. 🚨 {winner} just shocked the world, {ft_str}. I got it SO wrong. Who actually predicted this?? 👇",
-            f"{winner}?! {ft_str}?! 😱 I said {pred_str} and I've never been more wrong. This tournament is chaos. 👇",
+        oneword = ["UPSET.", "SCENES.", _elongate(winner, rng) if winner else "CHAOS."]
+        shorts = [
+            f"NOBODY saw this. 🤯 {ft_str}. I had {pred_str}. The bracket is COOKED. Did YOU call it? 👇",
+            f"UPSET ALERT. 🚨 {winner} shocked the world, {ft_str}. I got it SO wrong. Who predicted this??",
+            f"{winner}?! {ft_str}?! 😱 I said {pred_str} and I've never been more wrong. Chaos.",
+        ]
+        longs = [
+            f"WHAT did we just watch. {winner} {ft_str}. I had {pred_str}, the whole world had it the other way, and they tore the script up anyway. THIS is why we love the World Cup. Be honest, did a single one of you call this? 👇",
         ]
     else:  # missed
-        hooks = [
-            f"Yeah I got that one WRONG. 😭 {hn} {ft_str} {an}. I said {pred_str}. Roast me in the comments. 👇",
-            f"Delete my account. {ft_str}, I had {pred_str}. 🤡 You saw it coming and I didn't, didn't you? 👇",
-            f"That did NOT go how I called it. {ft_str} vs my {pred_str}. 😬 Tell me you had it. 👇",
+        oneword = ["NOPE.", "WRONG.", "COOKED.", "ROBBED."]
+        shorts = [
+            f"Yeah I got that WRONG. 😭 {ft_str}. I said {pred_str}. Roast me in the comments. 👇",
+            f"Delete my account. {ft_str}, I had {pred_str}. 🤡 You saw it coming and I didn't, right?",
+            f"That did NOT go how I called it. {ft_str} vs my {pred_str}. 😬 Tell me you had it.",
         ]
-    caption = rng.choice(hooks)
+        longs = [
+            f"Hands up, that one's on me. I confidently said {hn} {pred_str} {an} and the actual result was {ft_str}. Completely cooked. Go ahead, the comments are open, roast me. But be honest, did YOU see it coming? 👇",
+        ]
+    caption = _compose(rng, oneword, shorts, longs)
 
     # Tags: both nations + pillars so it surfaces to both fanbases searching
-    # the result right now.
+    # the result right now. Count still rolls 0..5.
     htags = tiktok_tags.NATION_TAGS.get(h.get("tla"), ())
     atags = tiktok_tags.NATION_TAGS.get(a.get("tla"), ())
     specific = [t for t in (htags[:1] + atags[:1]) if t][:2]
@@ -370,7 +456,7 @@ def _reaction(post: dict) -> dict:
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + _pick(_TAGS_REACH, 3, rng),
-        "tiktok_hashtags": tiktok_5,
+        "tiktok_hashtags": _roll_tags(rng, tiktok_5),
         "first_comment": "",
     }
 
@@ -397,20 +483,26 @@ def _stadium(post: dict) -> dict:
         header_lines.append(f"⚽️ {n_matches} {plural} scheduled")
     header = "\n".join(header_lines)
 
-    # Per-venue editorial hook (curated in CITY_BRANDS). Generic fallbacks only
-    # exist as a safety net for unknown venues.
+    # Per-venue editorial hook (curated in CITY_BRANDS). Long register = the
+    # full header + curated story; short = punchy; one-word = city shout.
     brand = wc_data.city_brand(name) or {}
     hook = brand.get("caption_hook") or rng.choice([
         "One of 16 venues hosting WC 2026. Visited? 👇",
         "Where memories will be written this summer. Been here? 👇",
-        "Built for the world's game. Catching a match here? 👇",
         "The road to the trophy runs through here. Which fixture excites you? 👇",
     ])
-    caption = f"{header}\n\n{hook}"
+    oneword = [_elongate(city or name, rng), "ICONIC.", "CATHEDRAL."]
+    shorts = [
+        f"{name}. 🏟 One of the 16. Catching a game here? 👇",
+        f"{(city or name).upper()}. This is where it happens. 🔥 You pulling up?",
+        hook,
+    ]
+    longs = [f"{header}\n\n{hook}"]
+    caption = _compose(rng, oneword, shorts, longs)
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + ["#Stadium", "#WC26Venues"] + _pick(_TAGS_REACH, 3, rng),
-        "tiktok_hashtags": tiktok_tags.for_stadium(name),
+        "tiktok_hashtags": _roll_tags(rng, tiktok_tags.for_stadium(name)),
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 
