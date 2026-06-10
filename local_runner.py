@@ -1,21 +1,20 @@
-"""Local reaction watcher — runs on YOUR PC so we don't burn GitHub Actions
-minutes (the tournament would blow the 2,000/month budget in days).
+"""Local reaction runner — runs on YOUR PC, on demand, so we don't burn
+GitHub Actions minutes (the tournament would blow the 2,000/month budget).
 
-It polls football-data every LOOP_MIN minutes, reacts to freshly-finished
-matches, and sends each reaction to Telegram for you to post on TikTok.
+You do NOT have to leave anything running. Just run it whenever you sit down
+at the PC and want results to post:
 
-  - In-memory dedup: a match is reacted to once per session (no repeats).
-  - Startup catch-up: reacts to anything finished in the last --catchup-hours,
-    so when you boot the PC in the morning the overnight results are waiting.
-  - Runs only while the PC is on (you're around 8h-00h), which covers your
-    active window. Overnight games get picked up by the morning catch-up.
+    python local_runner.py            # react to every NEW finished match, then exit
 
-Usage:
-    python local_runner.py                  # watch loop (Ctrl+C to stop at night)
-    python local_runner.py --catchup-hours 16
-    python local_runner.py --once           # one sweep, then exit
+It remembers what it already reacted to (data/reacted_matches.json), so you
+can run it as many times a day as you like and it only ever sends results you
+haven't seen. Overnight games? It catches them the next time you run it.
 
-You can also still generate the slower content by hand, once a day:
+Optional hands-off mode for a big match day (polls until you Ctrl+C):
+
+    python local_runner.py --watch
+
+Slow content stays on-demand too:
     python main.py --countdown --preview
     python main.py --nation-cron --preview
     python main.py --tomorrow --preview
@@ -23,10 +22,12 @@ You can also still generate the slower content by hand, once a day:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import time
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -37,15 +38,32 @@ import companion
 from render import render_post
 import notify
 
-LOOP_MIN = 15          # poll cadence
-WINDOW_BUFFER_MIN = 6  # overlap so a match never slips between polls
+LOOP_MIN = 15
+STATE_FILE = Path(__file__).resolve().parent / "data" / "reacted_matches.json"
+# How far back to look for finished matches. Persistent dedup means a wide
+# window is safe — it just makes sure nothing is missed between runs.
+LOOKBACK_HOURS = 30.0
 
 
-def _react_settled(start_utc, end_utc, seen: set[str]) -> int:
-    """React to every FINISHED match whose settle time is in (start, end] and
-    that we haven't already handled this session. Returns count reacted."""
+def _load_seen() -> set[str]:
+    try:
+        return set(json.loads(STATE_FILE.read_text(encoding="utf-8")))
+    except Exception:
+        return set()
+
+
+def _save_seen(seen: set[str]) -> None:
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(sorted(seen)), encoding="utf-8")
+
+
+def _react_new(seen: set[str]) -> int:
+    """React to every FINISHED match in the lookback window we haven't already
+    handled. Persists state after each one. Returns count reacted."""
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(hours=LOOKBACK_HOURS)
     n = 0
-    for mid in companion.finished_match_ids(start_utc, end_utc):
+    for mid in companion.finished_match_ids(start, now):
         if mid in seen:
             continue
         try:
@@ -55,42 +73,37 @@ def _react_settled(start_utc, end_utc, seen: set[str]) -> int:
             result = render_post(post)
             notify.send_preview(post, result["upload_paths"])
             seen.add(mid)
+            _save_seen(seen)
             h, a, ac = post["home"], post["away"], post["actual"]
             print(f"  [{datetime.now():%H:%M}] reacted → {h['name']} "
                   f"{ac['home']}-{ac['away']} {a['name']}  ({post['verdict']})")
             n += 1
-        except Exception as exc:  # noqa: BLE001 — one bad match must not stop the watch
+        except Exception as exc:  # noqa: BLE001 — one bad match must not stop the run
             print(f"  [warn] match {mid} failed: {exc!r}")
     return n
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--catchup-hours", type=float, default=16.0,
-                    help="On start, react to matches finished in the last N hours.")
-    ap.add_argument("--once", action="store_true",
-                    help="Do one catch-up sweep and exit (no loop).")
+    ap.add_argument("--watch", action="store_true",
+                    help="Keep polling every 15 min until Ctrl+C (hands-off match day).")
     args = ap.parse_args()
 
-    seen: set[str] = set()
-    now = datetime.now(timezone.utc)
+    seen = _load_seen()
+    got = _react_new(seen)
+    print(f"[done] {got} new reaction(s) sent to Telegram." if got
+          else "[done] no new finished matches since last run.")
 
-    print(f"[start] catch-up sweep: matches finished in the last {args.catchup_hours:g}h…")
-    got = _react_settled(now - timedelta(hours=args.catchup_hours), now, seen)
-    print(f"[start] {got} reaction(s) sent." if got else "[start] nothing finished recently.")
-
-    if args.once:
+    if not args.watch:
         return 0
 
-    print(f"[watch] polling every {LOOP_MIN} min. Leave this open while your PC is on. "
-          f"Ctrl+C to stop (e.g. at bedtime).")
+    print(f"[watch] polling every {LOOP_MIN} min. Ctrl+C to stop.")
     try:
         while True:
             time.sleep(LOOP_MIN * 60)
-            now = datetime.now(timezone.utc)
-            _react_settled(now - timedelta(minutes=LOOP_MIN + WINDOW_BUFFER_MIN), now, seen)
+            _react_new(seen)
     except KeyboardInterrupt:
-        print("\n[stop] watcher stopped. See you tomorrow.")
+        print("\n[stop] watcher stopped.")
     return 0
 
 
