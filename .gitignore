@@ -9,4 +9,4 @@ venv/
 series/output/
 data/tm_squad_values.json
 data/tm_harvest.json
-data/reacted_matches.json
+data/sent_posts.json
