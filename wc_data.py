@@ -1076,6 +1076,25 @@ def group_for(tla: str) -> tuple[str | None, list[str]]:
 def venue(name: str) -> dict | None:
     return VENUES.get(name)
 
+
+# Typical late-June / July afternoon temperature (°C) per host venue. Used as a
+# fallback when Open-Meteo has no forecast — its API only reaches ~16 days out,
+# so knockout-stage fixtures (and any preview built early, or any transient API
+# failure) fall back to these so the slide never shows a blank "-".
+SUMMER_AVG_C: dict[str, int] = {
+    "Estadio Azteca": 23, "Estadio Akron": 25, "Estadio BBVA": 31,
+    "MetLife Stadium": 27, "SoFi Stadium": 24, "AT&T Stadium": 34,
+    "Mercedes-Benz Stadium": 30, "NRG Stadium": 33, "Arrowhead Stadium": 30,
+    "Lincoln Financial Field": 29, "Levi's Stadium": 23, "Lumen Field": 23,
+    "Gillette Stadium": 26, "Hard Rock Stadium": 31, "BC Place": 21,
+    "BMO Field": 26,
+}
+
+
+def summer_temp(name: str) -> int | None:
+    """Fallback afternoon temperature (°C) for a venue when no forecast exists."""
+    return SUMMER_AVG_C.get(name)
+
 # ===== AUTO-GENERATED SCHEDULE, DO NOT EDIT BY HAND =====
 # Source: football-data.org /competitions/WC/matches (104 fixtures).
 # Regenerate via `python _gen_schedule.py` whenever the official schedule changes.

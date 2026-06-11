@@ -177,10 +177,13 @@ def _build_from_raw(raw: dict) -> dict:
         "odds": _odds_block(home["name"], away["name"]),
     }
 
-    # Weather from venue coords, if we know the stadium.
+    # Weather from venue coords, if we know the stadium. Falls back to the
+    # venue's typical summer temp when the forecast is out of range / fails.
     v = wc_data.venue(match["venue"]["stadium"])
     if v:
-        match["weather"] = _weather_block(v["lat"], v["lon"], dt)
+        match["weather"] = _weather_block(
+            v["lat"], v["lon"], dt,
+            fallback_c=wc_data.summer_temp(match["venue"]["stadium"]))
 
     if is_group:
         match["group"] = group_letter
@@ -512,28 +515,46 @@ def _odds_block(home_name: str, away_name: str) -> dict:
     return fallback
 
 
-def _weather_block(lat: float, lon: float, dt: datetime) -> dict | None:
-    try:
-        r = requests.get(METEO_BASE, params={
-            "latitude": lat, "longitude": lon,
-            "hourly": "temperature_2m,wind_speed_10m,weather_code",
-            "start_date": dt.date().isoformat(), "end_date": dt.date().isoformat(),
-        }, timeout=25)
-        if r.status_code != 200:
-            return None
-        h = r.json().get("hourly", {})
-        times = h.get("time", [])
-        target = dt.strftime("%Y-%m-%dT%H:00")
-        i = times.index(target) if target in times else (12 if len(times) > 12 else 0)
-        code = h.get("weather_code", [0])[i]
+def _weather_block(lat: float, lon: float, dt: datetime,
+                   fallback_c: int | None = None) -> dict | None:
+    """Forecast for the kickoff hour. Open-Meteo only forecasts ~16 days out, so
+    for knockout fixtures (and on any transient API failure) we fall back to the
+    venue's typical summer temperature instead of returning None (which renders
+    as a blank "-" on the slide)."""
+    for attempt in range(2):  # one quick retry on a transient hiccup
+        try:
+            r = requests.get(METEO_BASE, params={
+                "latitude": lat, "longitude": lon,
+                "hourly": "temperature_2m,wind_speed_10m,weather_code",
+                "start_date": dt.date().isoformat(), "end_date": dt.date().isoformat(),
+            }, timeout=25)
+            if r.status_code != 200:
+                break  # out-of-range date (400) etc. — go to fallback
+            h = r.json().get("hourly", {})
+            times = h.get("time", [])
+            if not times:
+                break
+            target = dt.strftime("%Y-%m-%dT%H:00")
+            i = times.index(target) if target in times else (12 if len(times) > 12 else 0)
+            code = h.get("weather_code", [0])[i]
+            return {
+                "summary": _wmo(code),
+                "temp_c": round(h.get("temperature_2m", [20])[i]),
+                "wind_kph": round(h.get("wind_speed_10m", [0])[i]),
+                "icon": _wmo_icon(code),
+            }
+        except Exception:
+            continue  # retry once, then fall through
+
+    if fallback_c is not None:
         return {
-            "summary": _wmo(code),
-            "temp_c": round(h.get("temperature_2m", [20])[i]),
-            "wind_kph": round(h.get("wind_speed_10m", [0])[i]),
-            "icon": _wmo_icon(code),
+            "summary": "Summer forecast",
+            "temp_c": fallback_c,
+            "wind_kph": 0,
+            "icon": "sun",
+            "estimated": True,
         }
-    except Exception:
-        return None
+    return None
 
 
 def _wmo(code: int) -> str:
