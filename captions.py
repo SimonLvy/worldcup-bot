@@ -214,7 +214,8 @@ def _countdown(post: dict) -> dict:
     ]
     caption = _compose(rng, oneword, shorts, longs)
 
-    cd_tags = ["#WorldCup2026", "#Countdown", "#WC2026", "#FIFA", "#football"]
+    import tiktok_tags
+    cd_tags = ["#Countdown", "#WC26Countdown"] + tiktok_tags.rotators(rng)
     hashtags = _TAGS_CORE + ["#Countdown", "#WC26Countdown"] + _pick(_TAGS_REACH, 3, rng)
     first_comment = (
         f"Drop your prediction below 🔥\n\n"
@@ -251,9 +252,7 @@ def _match(post: dict) -> dict:
     # Tags from both nations (curated) + roll the count.
     ht = tiktok_tags.NATION_TAGS.get(post["home"].get("tla") or "", ())
     at = tiktok_tags.NATION_TAGS.get(post["away"].get("tla") or "", ())
-    m_tags = [t for t in (ht[:1] + at[:1]) if t] + ["#WorldCup2026", "#FIFA"]
-    while len(m_tags) < 5:
-        m_tags.append("#football")
+    m_tags = [t for t in (ht[:1] + at[:1]) if t] + tiktok_tags.rotators(rng)
 
     home_tag = "#" + h.replace(" ", "")
     away_tag = "#" + a.replace(" ", "")
@@ -262,7 +261,7 @@ def _match(post: dict) -> dict:
     return {
         "caption": caption,
         "hashtags": hashtags,
-        "tiktok_hashtags": _roll_tags(rng, m_tags[:5]),
+        "tiktok_hashtags": _roll_tags(rng, m_tags),
         "first_comment": "",
     }
 
@@ -363,7 +362,7 @@ def _nation(post: dict) -> dict:
 
     caption = _compose(rng, oneword, shorts, longs)
 
-    tiktok_5 = tiktok_tags.for_nation(tla)
+    tiktok_5 = tiktok_tags.for_nation(tla, rng)
     name_tag = "#" + name.replace(" ", "").replace(".", "")
     conf_tag = "#" + conf if conf else None
     ig_extra = [t for t in (name_tag, conf_tag) if t]
@@ -449,10 +448,8 @@ def _reaction(post: dict) -> dict:
     # the result right now. Count still rolls 0..5.
     htags = tiktok_tags.NATION_TAGS.get(h.get("tla"), ())
     atags = tiktok_tags.NATION_TAGS.get(a.get("tla"), ())
-    specific = [t for t in (htags[:1] + atags[:1]) if t][:2]
-    while len(specific) < 3:
-        specific.append("#WC26")
-    tiktok_5 = specific[:3] + list(tiktok_tags.PILLARS)
+    specific = [t for t in (htags[:1] + atags[:1]) if t]
+    tiktok_5 = specific + tiktok_tags.rotators(rng)
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + _pick(_TAGS_REACH, 3, rng),
@@ -502,7 +499,7 @@ def _stadium(post: dict) -> dict:
     return {
         "caption": caption,
         "hashtags": _TAGS_CORE + ["#Stadium", "#WC26Venues"] + _pick(_TAGS_REACH, 3, rng),
-        "tiktok_hashtags": _roll_tags(rng, tiktok_tags.for_stadium(name)),
+        "tiktok_hashtags": _roll_tags(rng, tiktok_tags.for_stadium(name, rng)),
         "first_comment": " ".join(_pick(_TAGS_NICHE + _TAGS_REACH, 8, rng)),
     }
 

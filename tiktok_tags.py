@@ -16,7 +16,31 @@ hispano, luso, anglo audiences pick up posts that target their tags.
 """
 from __future__ import annotations
 
+import random
+
+# Rotating pools so posts don't always end on the same #WorldCup2026 #FIFA.
+# Each post draws ONE canonical tournament tag (discoverability) + ONE reach/
+# trending tag, both picked by the post's seed so the pair varies every time.
+# Trending tags pulled from current WC-2026 TikTok usage (Golazo2026,
+# ModoMundial, etc.) + the evergreen football reach tags.
+CORE_TAGS = (
+    "#WorldCup2026", "#FIFAWorldCup", "#WorldCup", "#Mundial2026",
+    "#WC26", "#FIFA", "#WorldCup26", "#Copa2026",
+)
+REACH_TAGS = (
+    "#fyp", "#foryoupage", "#footballtok", "#Golazo2026", "#ModoMundial",
+    "#SportsTok", "#GameDay", "#FootballVibes", "#ViralSports", "#football",
+    "#soccer", "#futbol", "#footballedit", "#PasionSinFronteras",
+)
+
+# Back-compat: a couple of callers still import PILLARS. Keep a stable default.
 PILLARS = ("#WorldCup2026", "#FIFA")
+
+
+def rotators(rng: random.Random) -> list[str]:
+    """One canonical tournament tag + one reach/trending tag, seeded so the
+    pair is different on each post instead of the fixed #WorldCup2026 #FIFA."""
+    return [rng.choice(CORE_TAGS), rng.choice(REACH_TAGS)]
 
 
 # Per-nation curated tags. 3 specific tags each, pillars added automatically.
@@ -111,20 +135,22 @@ STADIUM_TAGS: dict[str, tuple[str, str, str]] = {
 }
 
 
-def for_nation(tla: str) -> list[str]:
-    """Return the 5 TikTok hashtags for a nation post."""
+def _interleave(specific: list[str], rng: random.Random) -> list[str]:
+    """Order: first specific tag, then a rotating tournament tag (so even a
+    short 2-3 tag post keeps discoverability), then the rest of the specifics,
+    then a rotating reach/trending tag. The two rotators vary every post."""
+    core, reach = rotators(rng)
+    return specific[:1] + [core] + specific[1:3] + [reach]
+
+
+def for_nation(tla: str, rng: random.Random) -> list[str]:
+    """Up to 5 hashtags for a nation post: curated specifics + 2 rotating tags."""
     tla = (tla or "").upper()
-    specific = NATION_TAGS.get(tla)
-    if specific:
-        return list(specific) + list(PILLARS)
-    # Fallback: build from common knowledge so unknown nations don't ship the
-    # generic boilerplate.
-    return ["#" + tla, "#WorldCup", *PILLARS, "#football"][:5]
+    specific = list(NATION_TAGS.get(tla, ())) or ["#" + tla]
+    return _interleave(specific, rng)
 
 
-def for_stadium(name: str) -> list[str]:
-    """Return the 5 TikTok hashtags for a stadium post."""
-    specific = STADIUM_TAGS.get(name)
-    if specific:
-        return list(specific) + list(PILLARS)
-    return ["#Stadium", "#WC26Venues", "#football", *PILLARS][:5]
+def for_stadium(name: str, rng: random.Random) -> list[str]:
+    """Up to 5 hashtags for a stadium post: curated specifics + 2 rotating tags."""
+    specific = list(STADIUM_TAGS.get(name, ())) or ["#Stadium", "#WC26Venues"]
+    return _interleave(specific, rng)
