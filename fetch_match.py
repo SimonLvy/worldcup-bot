@@ -177,13 +177,10 @@ def _build_from_raw(raw: dict) -> dict:
         "odds": _odds_block(home["name"], away["name"]),
     }
 
-    # Weather from venue coords, if we know the stadium. Falls back to the
-    # venue's typical summer temp when the forecast is out of range / fails.
+    # Weather from venue coords, if we know the stadium.
     v = wc_data.venue(match["venue"]["stadium"])
     if v:
-        match["weather"] = _weather_block(
-            v["lat"], v["lon"], dt,
-            fallback_c=wc_data.summer_temp(match["venue"]["stadium"]))
+        match["weather"] = _weather_block(v["lat"], v["lon"], dt)
 
     if is_group:
         match["group"] = group_letter
@@ -515,13 +512,14 @@ def _odds_block(home_name: str, away_name: str) -> dict:
     return fallback
 
 
-def _weather_block(lat: float, lon: float, dt: datetime,
-                   fallback_c: int | None = None) -> dict | None:
-    """Forecast for the kickoff hour. Open-Meteo only forecasts ~16 days out, so
-    for knockout fixtures (and on any transient API failure) we fall back to the
-    venue's typical summer temperature instead of returning None (which renders
-    as a blank "-" on the slide)."""
-    for attempt in range(2):  # one quick retry on a transient hiccup
+def _weather_block(lat: float, lon: float, dt: datetime) -> dict | None:
+    """Live forecast for the kickoff hour. Open-Meteo only forecasts ~16 days
+    out, so this returns None for fixtures further away (a knockout previewed
+    early). That's fine: previews are built J-1, when the real forecast exists,
+    and the slide hides the weather block when there's no data rather than
+    inventing a (possibly very wrong) estimate. One retry covers the transient
+    API hiccup that blanked the odd group-stage preview."""
+    for _ in range(2):
         try:
             r = requests.get(METEO_BASE, params={
                 "latitude": lat, "longitude": lon,
@@ -529,11 +527,11 @@ def _weather_block(lat: float, lon: float, dt: datetime,
                 "start_date": dt.date().isoformat(), "end_date": dt.date().isoformat(),
             }, timeout=25)
             if r.status_code != 200:
-                break  # out-of-range date (400) etc. — go to fallback
+                return None  # out-of-range date etc. — hide the block
             h = r.json().get("hourly", {})
             times = h.get("time", [])
             if not times:
-                break
+                return None
             target = dt.strftime("%Y-%m-%dT%H:00")
             i = times.index(target) if target in times else (12 if len(times) > 12 else 0)
             code = h.get("weather_code", [0])[i]
@@ -544,16 +542,7 @@ def _weather_block(lat: float, lon: float, dt: datetime,
                 "icon": _wmo_icon(code),
             }
         except Exception:
-            continue  # retry once, then fall through
-
-    if fallback_c is not None:
-        return {
-            "summary": "Summer forecast",
-            "temp_c": fallback_c,
-            "wind_kph": 0,
-            "icon": "sun",
-            "estimated": True,
-        }
+            continue  # transient — retry once, then give up (None)
     return None
 
 
