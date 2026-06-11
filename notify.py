@@ -145,8 +145,6 @@ def _caption_reaction(post: dict) -> str:
     parts = [
         f"⚽️ FT: {h.get('name','?')} {ac.get('home')}-{ac.get('away')} {a.get('name','?')}",
         f"🤖 Called: {pr.get('home')}-{pr.get('away')} · verdict: {post.get('verdict','?').upper()}",
-        "",
-        "Validate to publish, or cancel.",
     ]
     return "\n".join(p for p in parts if p)
 
@@ -158,8 +156,6 @@ def _caption_nation(post: dict) -> str:
         f"🌍 {post.get('confederation', '')} · Group {post.get('group_letter', '?')}",
         f"📊 FIFA #{post.get('fifa_rank', '?')}",
         f"🎯 Quali {post.get('quali_pct', '?')}% · {post.get('predicted_round', '?')}",
-        "",
-        "Validate to publish, or cancel.",
     ]
     return "\n".join(p for p in parts if p)
 
@@ -170,8 +166,6 @@ def _caption_stadium(post: dict) -> str:
         f"📍 {post.get('city', '?')}, {post.get('country', '?')}",
         f"👥 Capacity: {post.get('capacity', '?'):,}" if post.get('capacity') else "",
         f"⚽️ {len(post.get('matches') or [])} match(es) scheduled",
-        "",
-        "Validate to publish, or cancel.",
     ]
     return "\n".join(p for p in parts if p)
 
@@ -180,8 +174,6 @@ def _caption_countdown(post: dict) -> str:
     parts = [
         f"⏳ {post.get('days_label', 'COUNTDOWN')}",
         f"🗓 Kickoff: {post.get('kickoff_date_label', '?')}",
-        "",
-        "Validate to publish, or cancel.",
     ]
     return "\n".join(p for p in parts if p)
 
@@ -201,8 +193,6 @@ def _caption_match(match: dict) -> str:
         line2,
         f"⏰ {kickoff_local} ({kickoff_utc})" if kickoff_utc else f"⏰ {kickoff_local}",
         f"📍 {venue}" if venue else "",
-        "",
-        "Validate to publish, or cancel.",
     ]
     return "\n".join(p for p in parts if p)
 
