@@ -28,6 +28,30 @@ FD_BASE = "https://api.football-data.org/v4"
 ODDS_BASE = "https://api.the-odds-api.com/v4"
 METEO_BASE = "https://api.open-meteo.com/v1/forecast"
 
+# Nations whose name differs between football-data and The Odds API. Each entry
+# is the full set of spellings for ONE nation, so matching works whichever API
+# supplies the name (football-data, Odds API, etc.). Verified against both feeds
+# on 2026-06-12; add a group here the moment a new mismatch shows up.
+TEAM_NAME_GROUPS: list[set[str]] = [
+    {"United States", "USA", "US"},
+    {"Bosnia-Herzegovina", "Bosnia & Herzegovina", "Bosnia and Herzegovina"},
+    {"Cape Verde Islands", "Cape Verde", "Cabo Verde"},
+    {"Congo DR", "DR Congo", "Democratic Republic of Congo"},
+    {"Czechia", "Czech Republic"},
+    {"South Korea", "Korea Republic", "Korea"},
+    {"Côte d'Ivoire", "Ivory Coast", "Cote d'Ivoire"},
+    {"Curaçao", "Curacao"},
+]
+
+
+def _name_variants(name: str) -> set[str]:
+    """All known spellings of a nation, given any one of them. Falls back to
+    just the name itself if it isn't in a known mismatch group."""
+    for group in TEAM_NAME_GROUPS:
+        if name in group:
+            return group
+    return {name}
+
 
 # ===========================================================================
 # Public entry point
@@ -482,6 +506,23 @@ def _map_url(stadium: str, v: dict) -> str | None:
     return f"assets/maps/{path.name}"
 
 
+def refresh_odds(match: dict) -> None:
+    """Update match['odds'] with fresh odds from The Odds API.
+
+    Call this just before publishing to ensure odds are current.
+    Modifies match dict in-place; silently skips if API call fails.
+    """
+    if not match or "home" not in match or "away" not in match:
+        return
+    home_name = match["home"].get("name")
+    away_name = match["away"].get("name")
+    if not home_name or not away_name:
+        return
+    fresh_odds = _odds_block(home_name, away_name)
+    if fresh_odds and fresh_odds.get("home_win"):
+        match["odds"] = fresh_odds
+
+
 def _odds_block(home_name: str, away_name: str) -> dict:
     key = os.getenv("THE_ODDS_API_KEY")
     fallback = {"home_win": None, "draw": None, "away_win": None, "source": None}
@@ -493,18 +534,25 @@ def _odds_block(home_name: str, away_name: str) -> dict:
                                  "oddsFormat": "decimal"}, timeout=25)
         if r.status_code != 200:
             return fallback
+
+        # All spellings of each team, so the match works even when the two
+        # APIs name a nation differently (USA vs United States, etc).
+        home_variants = _name_variants(home_name)
+        away_variants = _name_variants(away_name)
+
         for ev in r.json():
-            names = {ev.get("home_team", ""), ev.get("away_team", "")}
-            if home_name in names and away_name in names:
+            api_home = ev.get("home_team", "")
+            api_away = ev.get("away_team", "")
+            if api_home in home_variants and api_away in away_variants:
                 bm = (ev.get("bookmakers") or [None])[0]
                 if not bm:
                     break
                 outcomes = bm["markets"][0]["outcomes"]
                 price = {o["name"]: o["price"] for o in outcomes}
                 return {
-                    "home_win": price.get(ev["home_team"]),
+                    "home_win": price.get(api_home),
                     "draw": price.get("Draw"),
-                    "away_win": price.get(ev["away_team"]),
+                    "away_win": price.get(api_away),
                     "source": bm.get("title", "bookmaker"),
                 }
     except Exception:
