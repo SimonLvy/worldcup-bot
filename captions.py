@@ -36,6 +36,20 @@ _TAGS_NICHE = [
     "#matchday", "#kickoff", "#thefootballbro",
 ]
 
+# Punchy display names for the match-title line (football-data name → short
+# form). Only the awkwardly long names need an entry; every other nation is
+# already short enough and is used verbatim.
+_TITLE_SHORT_NAMES = {
+    "United States": "USA",
+    "Bosnia-Herzegovina": "Bosnia",
+    "Cape Verde Islands": "Cape Verde",
+    "Congo DR": "DR Congo",
+}
+
+
+def _short_name(name: str) -> str:
+    return _TITLE_SHORT_NAMES.get(name, name)
+
 
 # ===========================================================================
 # Public API
@@ -233,21 +247,26 @@ def _match(post: dict) -> dict:
     rng = _rng_for(post)
     h = post["home"]["name"]
     a = post["away"]["name"]
+    th, ta = _short_name(h), _short_name(a)
+    title = f"{th} VS {ta}"
     pred = post.get("prediction", {})
     ps = f"{pred.get('home_score', '?')}-{pred.get('away_score', '?')}" if pred else ""
 
-    oneword = ["MATCHDAY.", _elongate(h, rng), _elongate(a, rng), "BIG ONE."]
+    # The matchup now lives in the title line, so the body is hook-only (no
+    # repeating "X vs Y"). Prediction phrasing may still name the teams.
+    oneword = ["MATCHDAY.", _elongate(th, rng), _elongate(ta, rng), "BIG ONE."]
     shorts = [
-        f"{h} vs {a}. 👀 My call: {ps}. You? 👇" if ps else f"{h} vs {a}. 👀 Your call? 👇",
-        f"It's {h} vs {a} and I CANNOT wait. 🔥 Who takes it?",
-        f"{h.upper()} vs {a.upper()}. Drop your scoreline. 👇",
+        f"👀 My call: {ps}. You? 👇" if ps else "👀 Your call? 👇",
+        "I CANNOT wait for this one. 🔥 Who takes it?",
+        "Drop your scoreline. 👇",
     ]
     longs = [
-        f"Matchday. {h} vs {a}. I've gone through the form, the history, all of it, and I'm calling {h} {ps} {a}. Bold? Maybe. Wrong? We'll find out. What's YOUR scoreline? 👇" if ps
-        else f"Matchday. {h} vs {a}. I've gone through the form and the history and I think this one's got fireworks. What's your scoreline? 👇",
-        f"Everything points to a big one here. {h} vs {a}, two teams with everything to play for. My head says one thing, my gut says another. Give me your prediction before kickoff. 👇",
+        f"I've gone through the form, the history, all of it, and I'm calling {th} {ps} {ta}. Bold? Maybe. Wrong? We'll find out. What's YOUR scoreline? 👇" if ps
+        else "I've gone through the form and the history and I think this one's got fireworks. What's your scoreline? 👇",
+        "Two teams with everything to play for. My head says one thing, my gut says another. Give me your prediction before kickoff. 👇",
     ]
-    caption = _compose(rng, oneword, shorts, longs)
+    body = _compose(rng, oneword, shorts, longs)
+    caption = f"{title}\n\n{body}"
 
     # Tags from both nations (curated) + roll the count.
     ht = tiktok_tags.NATION_TAGS.get(post["home"].get("tla") or "", ())
