@@ -175,6 +175,7 @@ def process_match(match_ref: str | None, *, preview: bool = False) -> int:
         return 0
 
     print("[4/4] Publishing…")
+    fm.refresh_odds(match)
     caption = build_caption(match)
     try:
         results = publish(slides, caption, config.PUBLISH_TARGETS)
