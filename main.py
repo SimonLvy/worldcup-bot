@@ -1,19 +1,18 @@
-"""Orchestrator: fetch → render → approve → publish.
+"""Orchestrator: fetch → render → send to Telegram for manual posting.
 
 Modes:
   python main.py                       # mock match (group)
   python main.py knockout              # mock match (knockout)
   python main.py <fixture_id>          # one specific live match
-  python main.py --tomorrow            # auto-pick every match of tomorrow
+  python main.py --tomorrow            # every match of tomorrow
   python main.py --date 2026-06-12     # all matches on that date
-  python main.py --countdown           # today's J-X countdown post (companion)
+  python main.py --countdown           # today's J-X countdown post
+  python main.py --nation-cron         # next nation in the showcase campaign
+  python main.py --reactions           # post-match reactions for finished games
 
-Designed to run daily via GitHub Actions cron. Handles "no matches today"
-by exiting cleanly.
-
-Approval flow:
-  - If TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID are set → Telegram (mobile).
-  - Otherwise falls back to terminal o/n prompt.
+Designed to run via GitHub Actions cron. Every post is rendered and sent to
+Telegram (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID); the user posts it manually.
+There is no approval or auto-publish step.
 """
 from __future__ import annotations
 
@@ -22,6 +21,7 @@ import json
 import os
 import sys
 from datetime import date, timedelta
+from pathlib import Path
 
 # Windows console is cp1252; our captions/logs contain emoji + accents.
 if hasattr(sys.stdout, "reconfigure"):
@@ -29,35 +29,39 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 import companion
-import config
 import fetch_match as fm
 from render import render_post
-from publish import build_caption, publish
 
 
 # ---------------------------------------------------------------------------
-# Approval — Telegram if configured, terminal otherwise.
+# Telegram delivery — the bot generates content and sends it for the user to
+# post manually. There is no approval or auto-publish step.
 # ---------------------------------------------------------------------------
 def _telegram_available() -> bool:
     return bool(os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID"))
 
 
-def ask_approval(match: dict, slide_paths: list) -> bool:
-    if _telegram_available():
-        try:
-            import notify
-            return notify.send_slides_with_approval(match, slide_paths)
-        except Exception as exc:  # noqa: BLE001 — never block on notif glitch
-            print(f"[warn] Telegram approval failed ({exc!r}), falling back to terminal")
+# ---------------------------------------------------------------------------
+# Nation campaign state — committed back to the repo by the workflow so the
+# showcase drip never re-sends or drops a nation across cron runs.
+# ---------------------------------------------------------------------------
+NATION_STATE_FILE = Path(__file__).resolve().parent / "data" / "nation_campaign.json"
 
-    # If there's no interactive TTY (CI / GitHub Actions / cron), default to
-    # NO so we never silently publish — slides stay in the artifact.
-    if not sys.stdin.isatty():
-        print("[info] no interactive terminal — defaulting to 'do not publish'.")
-        return False
 
-    answer = input("\nPublish these slides? [o/n] ").strip().lower()
-    return answer in ("o", "oui", "y", "yes")
+def _load_nation_state() -> set[str]:
+    """TLAs of nations already sent in the showcase campaign."""
+    try:
+        data = json.loads(NATION_STATE_FILE.read_text(encoding="utf-8"))
+        return set(data.get("sent", []))
+    except Exception:
+        return set()
+
+
+def _save_nation_state(sent: set[str]) -> None:
+    NATION_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    NATION_STATE_FILE.write_text(
+        json.dumps({"sent": sorted(sent)}, ensure_ascii=False, indent=2),
+        encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -122,19 +126,20 @@ def select_match_refs(args: argparse.Namespace) -> list[str | None]:
 
 
 # ---------------------------------------------------------------------------
-# Preview branch — shared by match + countdown
+# Telegram delivery — shared by every post type
 # ---------------------------------------------------------------------------
-def _send_preview_to_telegram(post: dict, slide_paths: list) -> None:
-    """Send post slides as a preview (no buttons). Silent failure on Telegram."""
+def _send_to_telegram(post: dict, slide_paths: list) -> None:
+    """Send slides + paste-ready caption to Telegram for manual posting.
+    Silent failure so a Telegram glitch never crashes the run."""
     if not _telegram_available():
-        print("[preview] no Telegram configured — slides remain in output/.")
+        print("[telegram] not configured — slides remain in output/.")
         return
     try:
         import notify
-        notify.send_preview(post, slide_paths)
-        print("[preview] sent to Telegram.")
+        notify.send_post(post, slide_paths)
+        print("[telegram] sent.")
     except Exception as exc:  # noqa: BLE001
-        print(f"[preview] Telegram send failed: {exc!r}")
+        print(f"[telegram] send failed: {exc!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -161,31 +166,8 @@ def process_match(match_ref: str | None, *, preview: bool = False) -> int:
     match_json = result["source_dir"] / "match.json"
     match_json.write_text(json.dumps(match, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Preview mode: send slides to Telegram, no approval, no publish.
-    if preview:
-        _send_preview_to_telegram(match, slides)
-        return 0
-
-    print("[3/4] Review")
-    for p in slides:
-        print(f"      {p}")
-
-    if config.REQUIRE_APPROVAL and not ask_approval(match, slides):
-        print("Publishing cancelled. PNGs remain in output/.")
-        return 0
-
-    print("[4/4] Publishing…")
-    fm.refresh_odds(match)
-    caption = build_caption(match)
-    try:
-        results = publish(slides, caption, config.PUBLISH_TARGETS)
-    except NotImplementedError as exc:
-        print(f"[info] Publishing not configured: {exc}")
-        print(f"       Slides are ready for manual upload in {result['source_dir']}")
-        return 0
-
-    for target, res in results.items():
-        print(f"      {target}: {res}")
+    print("[3/3] Sending to Telegram…")
+    _send_to_telegram(match, slides)
     return 0
 
 
@@ -212,23 +194,8 @@ def process_countdown(*, preview: bool = False) -> int:
     post_json = result["source_dir"] / "post.json"
     post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Preview mode: send to Telegram, no approval, no publish.
-    if preview:
-        _send_preview_to_telegram(post, slides)
-        return 0
-
-    print("[3/4] Review")
-    for p in slides:
-        print(f"      {p}")
-
-    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
-        print("Publishing cancelled. PNGs remain in output/.")
-        return 0
-
-    print("[4/4] Publishing…")
-    # For companion posts the publish layer is not wired yet — they get manually
-    # posted from the artifact for now. Exit cleanly.
-    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    print("[3/3] Sending to Telegram…")
+    _send_to_telegram(post, slides)
     return 0
 
 
@@ -252,18 +219,8 @@ def process_nation(tla: str, *, preview: bool = False) -> int:
     post_json = result["source_dir"] / "post.json"
     post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    if preview:
-        _send_preview_to_telegram(post, slides)
-        return 0
-
-    print("[3/4] Review")
-    for p in slides:
-        print(f"      {p}")
-    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
-        print("Publishing cancelled. PNGs remain in output/.")
-        return 0
-    print("[4/4] Publishing…")
-    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    print("[3/3] Sending to Telegram…")
+    _send_to_telegram(post, slides)
     return 0
 
 
@@ -287,8 +244,8 @@ def process_reaction(match_id: str, *, preview: bool = True) -> int:
     post_json = result["source_dir"] / "post.json"
     post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print("[3/3] Sending to Telegram (preview)…")
-    _send_preview_to_telegram(post, slides)
+    print("[3/3] Sending to Telegram…")
+    _send_to_telegram(post, slides)
     return 0
 
 
@@ -334,20 +291,8 @@ def process_stadium(name: str, *, preview: bool = False) -> int:
     post_json = result["source_dir"] / "post.json"
     post_json.write_text(json.dumps(post, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    if preview:
-        _send_preview_to_telegram(post, slides)
-        return 0
-
-    print("[3/4] Review")
-    for p in slides:
-        print(f"      {p}")
-
-    if config.REQUIRE_APPROVAL and not ask_approval(post, slides):
-        print("Publishing cancelled. PNGs remain in output/.")
-        return 0
-
-    print("[4/4] Publishing…")
-    print("[info] Companion post publishing not wired yet — PNGs ready for manual upload.")
+    print("[3/3] Sending to Telegram…")
+    _send_to_telegram(post, slides)
     return 0
 
 
@@ -394,42 +339,25 @@ def main() -> int:
         return process_stadium(args.stadium, preview=args.preview)
 
     if args.nation_cron:
-        from datetime import datetime, timezone
         from wc_data import NATION_PUBLISH_ORDER
-        # Volume cut after TikTok throttle analysis: 4/day → 2/day. The cutover
-        # is the first fire of the new (2/day) regime, sized so we don't double-
-        # post or skip nations as long as the merge lands within ~12h.
-        #
-        # Before CUTOVER  : legacy 6h slots (4/day) from 2026-06-06 00:00 UTC.
-        # From CUTOVER    : 12h slots (2/day), continuing where legacy stopped.
-        #
-        # Worst-case timing (merge >12h late) re-publishes one nation — much
-        # better than skipping or dropping content silently. Use workflow_dispatch
-        # to fire a specific nation manually if needed.
-        LEGACY_START = datetime(2026, 6, 6, 0, 0, tzinfo=timezone.utc)
-        LEGACY_SLOT_HOURS = 6
-        CUTOVER = datetime(2026, 6, 10, 6, 37, tzinfo=timezone.utc)
-        NEW_SLOT_HOURS = 12
-
-        now = datetime.now(timezone.utc)
-        if now < LEGACY_START:
-            print(f"[nation-cron] campaign starts {LEGACY_START.isoformat()} — too early.")
+        # Stateful drip: each fire sends the next nation not yet sent, in order.
+        # The sent list is committed back to the repo by the workflow, so a
+        # skipped or delayed cron run only delays the campaign — it never drops
+        # a nation. (The old elapsed-time slot picker silently lost any slot
+        # whose run didn't fire, e.g. Curaçao at the 4/day → 2/day cutover.)
+        total = len(NATION_PUBLISH_ORDER)
+        sent = _load_nation_state()
+        nxt = next((t for t in NATION_PUBLISH_ORDER if t not in sent), None)
+        if nxt is None:
+            print(f"[nation-cron] campaign over — all {total} nations sent.")
             return 0
-        if now < CUTOVER:
-            delta_h = (now - LEGACY_START).total_seconds() / 3600
-            slot = int(delta_h // LEGACY_SLOT_HOURS)
-            regime = "legacy 6h"
-        else:
-            pre = int((CUTOVER - LEGACY_START).total_seconds() / 3600 / LEGACY_SLOT_HOURS)
-            post_delta = (now - CUTOVER).total_seconds() / 3600
-            slot = pre + int(post_delta // NEW_SLOT_HOURS)
-            regime = "new 12h"
-        if slot >= len(NATION_PUBLISH_ORDER):
-            print(f"[nation-cron] campaign over (slot {slot} ≥ {len(NATION_PUBLISH_ORDER)}).")
-            return 0
-        tla = NATION_PUBLISH_ORDER[slot]
-        print(f"[nation-cron] regime={regime} slot {slot+1}/{len(NATION_PUBLISH_ORDER)} — {tla}")
-        return process_nation(tla, preview=args.preview)
+        print(f"[nation-cron] next unsent: {nxt} ({len(sent)}/{total} done)")
+        rc = process_nation(nxt, preview=args.preview)
+        if rc == 0:
+            sent.add(nxt)
+            _save_nation_state(sent)
+            print(f"[nation-cron] state advanced → {len(sent)}/{total} sent.")
+        return rc
 
     if args.nation:
         return process_nation(args.nation, preview=args.preview)

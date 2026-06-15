@@ -68,7 +68,7 @@ def _send(post: dict, state: dict, key: str, label: str) -> bool:
     slides = result.get("upload_paths") or []
     if not slides:
         return False
-    notify.send_preview(post, slides)
+    notify.send_post(post, slides)
     state["sent"].add(key)
     _save_state(state)
     print(f"  [{datetime.now():%H:%M}] sent → {label}")
