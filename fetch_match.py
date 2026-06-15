@@ -133,12 +133,15 @@ def list_matches() -> list[dict]:
 
 
 def find_matches_on(target_date: date) -> list[dict]:
-    """Raw fixtures kicking off on a given date."""
+    """Raw fixtures kicking off on a given date, sorted by kickoff time so the
+    daily batch always sends in chronological order regardless of the order the
+    API returns them in."""
     out = []
     for m in list_matches():
         d = datetime.fromisoformat(m["utcDate"].replace("Z", "+00:00")).date()
         if d == target_date:
             out.append(m)
+    out.sort(key=lambda m: m["utcDate"])
     return out
 
 

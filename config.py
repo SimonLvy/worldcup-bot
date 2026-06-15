@@ -35,8 +35,8 @@ UPLOAD_SIZE = (1080, 1350)
 # ---------------------------------------------------------------------------
 # Publishing behaviour
 # ---------------------------------------------------------------------------
+# The bot delivers each post to Telegram for the user to publish manually —
+# there is no approval gate. PUBLISH_TARGETS / NOTIFY_AFTER_PUBLISH only matter
+# if the auto-publish path in publish.py is ever wired up.
 PUBLISH_TARGETS = ["instagram"]   # add "tiktok" once its API is wired
-REQUIRE_APPROVAL = True           # Phase 1: manual o/n before publishing.
-                                  # Phase 2 (when stable): set False →
-                                  # auto-publish + deferred notification.
-NOTIFY_AFTER_PUBLISH = False      # used in Phase 2; emails a post-publish recap
+NOTIFY_AFTER_PUBLISH = False      # post-publish recap if auto-publish is enabled

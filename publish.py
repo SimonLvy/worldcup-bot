@@ -171,8 +171,7 @@ def publish(slide_paths: list[Path], caption: str, targets: list[str]) -> dict:
 def _notify(results: dict, caption: str) -> None:
     """Phase-2 post-publish notification (email/Telegram/Slack).
 
-    Wire your channel of choice here. Left as a no-op stub so flipping
-    REQUIRE_APPROVAL=False + NOTIFY_AFTER_PUBLISH=True is a config change,
-    not a code change.
+    Wire your channel of choice here. Left as a no-op stub so enabling
+    NOTIFY_AFTER_PUBLISH is a config change, not a code change.
     """
     print(f"[notify] published: {results}")

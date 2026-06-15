@@ -1,16 +1,13 @@
 name: Nation showcase drip
 
-# Pre-tournament campaign: 48 nations, one post every 6h (4/day), starting
-# 2026-06-06 00:00 UTC, finishing ~18 Jun (around the end of matchday 1).
-# The script picks the next nation deterministically from elapsed time since
-# the campaign start, so a missed/delayed fire just skips a slot.
+# Showcase campaign: 48 nations, ~2 posts/day. Each fire sends the NEXT nation
+# not yet sent (state in data/nation_campaign.json, committed back after each
+# run), so a skipped or delayed cron run only delays the campaign — it never
+# drops a nation. Manual override below re-fires a specific TLA.
 on:
   schedule:
-    # 2 fires/day at 06/18 UTC, offset to :37 — cut down from 4/day after
-    # TikTok throttle analysis (over-posting was killing reach). Campaign
-    # spreads to ~30 Jun instead of ~18 Jun; remaining nations still drop
-    # before / during the early matchdays. The deterministic slot picker
-    # works on elapsed time, so spacing slots just dilates the campaign.
+    # 2 fires/day at 06:37 / 18:37 UTC. With the stateful picker the exact
+    # timing no longer matters: each fire just advances the campaign by one.
     - cron: "37 6 * * *"
     - cron: "37 18 * * *"
   workflow_dispatch:
@@ -23,7 +20,9 @@ on:
 jobs:
   nation:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # preview-only, no approval poll
+    permissions:
+      contents: write  # push the advanced campaign state back to main
+    timeout-minutes: 30  # send-only, no approval poll
 
     env:
       DATA_MODE: live
@@ -63,6 +62,19 @@ jobs:
           else
             python main.py --nation-cron --preview
           fi
+
+      - name: Commit campaign state
+        if: success()
+        run: |
+          if git diff --quiet -- data/nation_campaign.json; then
+            echo "[state] no change to commit"
+            exit 0
+          fi
+          git config user.name "worldcup-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/nation_campaign.json
+          git commit -m "chore(nation): advance campaign state [skip ci]"
+          git push origin HEAD:main
 
       - name: Upload generated slides as artifact (debug)
         if: always()
