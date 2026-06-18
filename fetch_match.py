@@ -275,47 +275,46 @@ def _key_players(tla: str, squad_names: list[str]) -> list[dict]:
 
 
 def _form_from_fixtures(team_id: int, team_name: str, kickoff_date: str) -> list[str]:
-    """Last 5 W/D/L combining two sources:
+    """Last 5 W/D/L before kickoff, merged from two DATED sources and deduped by
+    date so a match that appears in both is never counted twice:
 
-    1. Pre-kickoff form from the full international dataset (friendlies included,
-       everything up to the day before the fixture) — gives real pre-tournament
-       form even in matchday 1.
-    2. Once WC matches are in play, finished tournament fixtures are mixed in so
-       form updates match-by-match during the group stage.
+    1. The international dataset (friendlies + WC results once martj42 enters
+       them) — real pre-tournament form even in matchday 1.
+    2. The live football-data fixture list — fresher on the day a result lands,
+       before the dataset catches up; it overrides the dataset for that date.
 
-    The two sources are merged chronologically and we take the latest 5.
+    Keying by real date is what fixes the double-count: the dataset already
+    carries WC results, so blindly appending the live ones inflated the form
+    (e.g. Switzerland's J1 draw showing twice and dropping an older result).
     """
+    by_date: dict[str, str] = {}
+
+    # 1. Dataset (real dates). Pull a few extra so the top-5 is stable after merge.
     try:
         import h2h as h2h_mod
-        pre = [(r, "") for r in h2h_mod.form_before(team_name, before=kickoff_date, last_n=5)]
+        for d, r in h2h_mod.form_before_dated(team_name, before=kickoff_date, last_n=8):
+            by_date[d] = r
     except Exception as exc:
-        print(f"[warn] form_before failed ({exc!r})")
-        pre = []
+        print(f"[warn] form_before_dated failed ({exc!r})")
 
-    # Also pick up any WC results already played (they appear in both sources
-    # once the dataset is refreshed, but the WC fixture list is the freshest).
-    wc_results = []
+    # 2. Live WC results before kickoff — authoritative, override same-date.
     for m in list_matches():
         if m.get("status") != "FINISHED":
             continue
-        if m["utcDate"][:10] >= kickoff_date:
+        date = m["utcDate"][:10]
+        if date >= kickoff_date:
             continue
         if team_id not in (m["homeTeam"]["id"], m["awayTeam"]["id"]):
             continue
         w = m.get("score", {}).get("winner")
-        date = m["utcDate"][:10]
         if w == "DRAW":
-            wc_results.append(("D", date))
+            by_date[date] = "D"
         elif w in ("HOME_TEAM", "AWAY_TEAM"):
             is_home = m["homeTeam"]["id"] == team_id
             won = (w == "HOME_TEAM" and is_home) or (w == "AWAY_TEAM" and not is_home)
-            wc_results.append(("W" if won else "L", date))
+            by_date[date] = "W" if won else "L"
 
-    # Merge: prefer WC fixture data for tournament dates (dedup by date).
-    wc_dates = {d for _, d in wc_results}
-    combined = [(r, d) for r, d in pre if d not in wc_dates] + wc_results
-    combined.sort(key=lambda x: x[1], reverse=True)
-    return [r for r, _ in combined[:5]]
+    return [r for _, r in sorted(by_date.items(), reverse=True)[:5]]
 
 
 def _h2h_block(home_name: str, away_name: str, before: str,
