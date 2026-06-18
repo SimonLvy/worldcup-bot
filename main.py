@@ -65,6 +65,29 @@ def _save_nation_state(sent: set[str]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Reaction state — committed back by the workflow so every finished match gets
+# exactly one reaction, even across skipped runs, late scores or extra time.
+# ---------------------------------------------------------------------------
+REACTED_STATE_FILE = Path(__file__).resolve().parent / "data" / "reacted_matches.json"
+
+
+def _load_reacted_state() -> set[str]:
+    """Fixture ids already reacted to."""
+    try:
+        data = json.loads(REACTED_STATE_FILE.read_text(encoding="utf-8"))
+        return {str(x) for x in data.get("reacted", [])}
+    except Exception:
+        return set()
+
+
+def _save_reacted_state(reacted: set[str]) -> None:
+    REACTED_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    REACTED_STATE_FILE.write_text(
+        json.dumps({"reacted": sorted(reacted)}, ensure_ascii=False, indent=2),
+        encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
 # Match selection
 # ---------------------------------------------------------------------------
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -230,7 +253,7 @@ def process_reaction(match_id: str, *, preview: bool = True) -> int:
     post = companion.build_reaction_post(match_id)
     if post is None:
         print("Match not finished yet (no score). Nothing to do.")
-        return 0
+        return 2  # distinct from a successful send so the cron won't mark it done
     h, a = post["home"], post["away"]
     ac = post["actual"]
     print(f"      → {h['name']} {ac['home']}-{ac['away']} {a['name']} · verdict={post['verdict']}")
@@ -249,25 +272,28 @@ def process_reaction(match_id: str, *, preview: bool = True) -> int:
     return 0
 
 
-def process_reactions_cron(*, lookback_min: int = 35) -> int:
-    """Poll for matches that finished in the last `lookback_min` minutes and
-    react to each. Stateless: a match is only inside the window for ~one cron
-    cycle, and the FINISHED check means we never react before the score exists.
-    Manual posting tolerates the rare boundary double-send."""
-    from datetime import datetime, timezone, timedelta
-    now = datetime.now(timezone.utc)
-    start = now - timedelta(minutes=lookback_min)
-    ids = companion.finished_match_ids(start, now)
-    if not ids:
-        print(f"[reactions] no match settled in the last {lookback_min} min.")
+def process_reactions_cron() -> int:
+    """React to every FINISHED match not yet reacted to. Stateful: the reacted
+    set is committed back by the workflow, so a skipped cron run, a late score,
+    or a knockout that ran to extra time / penalties is still caught on a later
+    run — a finished match is never silently skipped."""
+    reacted = _load_reacted_state()
+    pending = [str(m["id"]) for m in fm.list_matches()
+               if m.get("status") == "FINISHED" and str(m["id"]) not in reacted]
+    if not pending:
+        print("[reactions] nothing new to react to.")
         return 0
-    print(f"[reactions] {len(ids)} freshly-finished match(es): {ids}")
+    print(f"[reactions] {len(pending)} match(es) to react to: {pending}")
     rc = 0
-    for mid in ids:
+    for mid in pending:
         try:
-            rc |= process_reaction(mid, preview=True)
+            if process_reaction(mid, preview=True) == 0:
+                reacted.add(mid)  # only mark what was actually sent
         except Exception as exc:  # noqa: BLE001 — one bad match must not kill the batch
             print(f"[error] reaction {mid} failed: {exc!r}")
+            rc = 1
+    _save_reacted_state(reacted)
+    print(f"[reactions] state now tracks {len(reacted)} reacted match(es).")
     return rc
 
 

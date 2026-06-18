@@ -92,12 +92,10 @@ def head_to_head(home_name: str, away_name: str, before: str | None = None,
     }
 
 
-def form_before(team_name: str, before: str, last_n: int = 5) -> list[str]:
-    """Last N results (W/D/L) for a team from matches before `before` (ISO date).
-
-    Uses the full dataset (friendlies included), so gives real pre-tournament
-    form even before any WC match is played.
-    """
+def _form_rows(team_name: str, before: str) -> list[tuple[str, str]]:
+    """All (date, W/D/L) for a team from matches before `before` (ISO date),
+    latest first. Friendlies + WC results, whatever the dataset has scored.
+    Rows with no score (e.g. future fixtures stored as NA) are skipped."""
     name = _ds_name(team_name)
     results = []
     for m in _load():
@@ -111,14 +109,29 @@ def form_before(team_name: str, before: str, last_n: int = 5) -> list[str]:
         except (ValueError, KeyError):
             continue
         if hs == as_:
-            results.append(("D", m["date"]))
+            r = "D"
         elif (hs > as_ and h == name) or (as_ > hs and aw == name):
-            results.append(("W", m["date"]))
+            r = "W"
         else:
-            results.append(("L", m["date"]))
+            r = "L"
+        results.append((m["date"], r))
 
-    results.sort(key=lambda x: x[1], reverse=True)
-    return [r[0] for r in results[:last_n]]
+    results.sort(key=lambda x: x[0], reverse=True)
+    return results
+
+
+def form_before(team_name: str, before: str, last_n: int = 5) -> list[str]:
+    """Last N results (W/D/L) for a team before `before` (ISO date), latest
+    first. Uses the full dataset (friendlies included) for real pre-tournament
+    form even before any WC match is played."""
+    return [r for _, r in _form_rows(team_name, before)[:last_n]]
+
+
+def form_before_dated(team_name: str, before: str, last_n: int = 8) -> list[tuple[str, str]]:
+    """Last N (date, W/D/L) before `before`, latest first — lets callers merge
+    and dedupe against another dated source (e.g. the live fixture list) by
+    real date instead of double-counting the same match."""
+    return _form_rows(team_name, before)[:last_n]
 
 
 def refresh_dataset(max_age_hours: float = 23) -> bool:
